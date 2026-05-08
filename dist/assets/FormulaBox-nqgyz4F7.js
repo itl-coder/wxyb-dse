@@ -1,0 +1,1 @@
+import{_ as e,o as s,c as r,z as c}from"./index-Bqm65Awm.js";const t={},a={class:"formula-box"};function n(o,_){return s(),r("div",a,[c(o.$slots,"default")])}const f=e(t,[["render",n]]);export{f as F};
