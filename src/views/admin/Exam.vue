@@ -225,15 +225,15 @@
       </div>
       <div class="admin-form-group">
         <label>题目内容 <span style="color:var(--admin-danger)">*</span></label>
-        <MarkdownEditor v-model="errorForm.question" :rows="4" placeholder="错题内容（支持 Markdown）..." />
+        <MdEditor v-model="errorForm.question" :theme="store.theme" language="zh-CN" :toolbars="mdToolbars" :noPrettier="true" :noMermaid="true" />
       </div>
       <div class="admin-form-group">
         <label>正确答案</label>
-        <MarkdownEditor v-model="errorForm.correctAnswer" :rows="3" placeholder="标准答案..." />
+        <MdEditor v-model="errorForm.correctAnswer" :theme="store.theme" language="zh-CN" previewTheme="github" :toolbars="mdToolbars" :noPrettier="true" :noMermaid="true" />
       </div>
       <div class="admin-form-group">
         <label>解析（Markdown）</label>
-        <MarkdownEditor v-model="errorForm.analysis" :rows="4" placeholder="解题分析和思路..." />
+        <MdEditor v-model="errorForm.analysis" :theme="store.theme" language="zh-CN" previewTheme="github" :toolbars="mdToolbars" :noPrettier="true" :noMermaid="true" />
       </div>
       <template #footer>
         <el-button @click="errorDialogVisible = false">取消</el-button>
@@ -309,7 +309,14 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { examService, studentService, courseService, errorBookService, questionBankService } from '@/services/dataService'
 import { getWatermarkHTML, getWatermarkStyle } from '@/utils/watermark'
-import MarkdownEditor from '@/components/MarkdownEditor.vue'
+import { MdEditor } from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
+import { marked } from 'marked'
+import { useAppStore } from '@/stores/app'
+
+const store = useAppStore()
+
+const mdToolbars = ['bold', 'italic', 'underline', 'strikeThrough', 'title', '|', 'quote', 'unorderedList', 'orderedList', 'codeRow', 'code', '|', 'link', 'katex', 'table', '|', 'revoke', 'next', 'save', 'preview']
 
 const exams = ref([])
 const errors = ref([])
@@ -583,16 +590,20 @@ function errorTagClass(t) { return { calc:'warning', concept:'primary', reading:
 // Print
 function printErrors() {
   let html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>错题卷</title><style>
-    body{font-family:'Microsoft YaHei',sans-serif;padding:24px;color:#2c2c2c;max-width:800px;margin:0 auto}
+    body{font-family:'Microsoft YaHei',sans-serif;padding:24px;color:#2c2c2c;max-width:800px;margin:0 auto;line-height:1.8}
     h2{text-align:center;margin-bottom:4px}
     .err-item{margin-bottom:16px;padding:12px;border:1px solid #eee;border-radius:8px;page-break-inside:avoid}
     .err-num{font-weight:700;font-size:14px;margin-bottom:6px}
     .err-meta{font-size:11px;color:#888;margin-bottom:4px}
+    .err-body p{text-indent:2em;margin:6px 0}
+    .err-body ul,.err-body ol{padding-left:2em;margin:6px 0}
+    .err-body blockquote{border-left:3px solid #c4a85c;margin:10px 0;padding:6px 14px;background:#faf7ee;font-style:italic;color:#5c3d1e}
+    .err-body blockquote p{text-indent:0}
     @page{size:A4;margin:15mm}
     ${getWatermarkStyle()}
   </style></head><body><h2>错题汇总卷</h2>`
   filteredErrors.value.forEach((e, i) => {
-    html += `<div class="err-item"><div class="err-num">${i+1}. [${e.subject} · ${e.topic}] <span style="color:#888;font-size:11px">${errorTypeLabel(e.errorType)}</span></div><div>${e.question}</div><div class="err-meta">来源：${e.source} · 关联学生：${e.studentNames}</div></div>`
+    html += `<div class="err-item"><div class="err-num">${i+1}. [${e.subject} · ${e.topic}] <span style="color:#888;font-size:11px">${errorTypeLabel(e.errorType)}</span></div><div class="err-body">${marked.parse(e.question || '')}</div><div class="err-meta">来源：${e.source} · 关联学生：${e.studentNames}</div></div>`
   })
   html += getWatermarkHTML() + '</body></html>'
   const w = window.open('', '_blank', 'width=750,height=600')
@@ -602,16 +613,20 @@ function printErrors() {
 
 function printErrorRedo() {
   let html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>错题重做</title><style>
-    body{font-family:'Microsoft YaHei',sans-serif;padding:20px;color:#333;max-width:700px;margin:0 auto}
+    body{font-family:'Microsoft YaHei',sans-serif;padding:20px;color:#333;max-width:700px;margin:0 auto;line-height:1.8}
     h2{text-align:center;margin-bottom:4px}
     .err-item{margin-bottom:18px;page-break-inside:avoid}
     .err-num{font-weight:700;margin-bottom:4px}
     .answer-space{margin-top:30px;border-bottom:1px dashed #ddd;height:40px}
+    .err-body p{text-indent:2em;margin:6px 0}
+    .err-body ul,.err-body ol{padding-left:2em;margin:6px 0}
+    .err-body blockquote{border-left:3px solid #c4a85c;margin:10px 0;padding:6px 14px;background:#faf7ee;font-style:italic;color:#5c3d1e}
+    .err-body blockquote p{text-indent:0}
     @page{size:A4;margin:15mm}
     ${getWatermarkStyle()}
   </style></head><body><h2>错题重做练习卷</h2>`
   filteredErrors.value.forEach((e, i) => {
-    html += `<div class="err-item"><div class="err-num">${i+1}. <span style="color:#666;font-size:11px">[${e.subject} · ${e.topic}]</span></div><div>${e.question}</div><div class="answer-space"></div></div>`
+    html += `<div class="err-item"><div class="err-num">${i+1}. <span style="color:#666;font-size:11px">[${e.subject} · ${e.topic}]</span></div><div class="err-body">${marked.parse(e.question || '')}</div><div class="answer-space"></div></div>`
   })
   html += getWatermarkHTML() + '</body></html>'
   const w = window.open('', '_blank', 'width=750,height=600')
@@ -649,6 +664,6 @@ onMounted(() => {
 .ex-card-question { font-size:12px; color:var(--admin-text); line-height:1.7; margin-bottom:4px; }
 .ex-card-answer { font-size:11px; color:var(--admin-success); background:rgba(34,197,94,0.06); padding:4px 8px; border-radius:4px; margin-bottom:4px; }
 .ex-card-meta { font-size:10px; color:var(--admin-text-muted); display:flex; gap:10px; }
-.ex-card-actions { display:none; gap:4px; padding-top:6px; border-top:1px solid var(--admin-border); }
-.ex-error-card:hover .ex-card-actions { display:flex; }
+.ex-card-actions { display:flex; gap:4px; padding-top:0; border-top:1px solid transparent; opacity: 0; max-height: 0; overflow: hidden; transition: opacity 0.3s ease, max-height 0.3s ease, padding-top 0.3s ease, border-color 0.3s ease; }
+.ex-error-card .ex-card-actions { opacity: 0; max-height: 0; overflow: hidden; transition: all 0.3s ease; }
 </style>

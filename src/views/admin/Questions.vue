@@ -624,14 +624,30 @@ function addToPaper(q) {
 
 function exportPaper() { paperVisible.value = true }
 function printPaper() {
+  const wmStyle = getWatermarkStyle()
+  if (wmStyle) {
+    const styleEl = document.createElement('style')
+    styleEl.textContent = wmStyle
+    document.head.appendChild(styleEl)
+  }
+  const wmHTML = getWatermarkHTML()
+  if (wmHTML) {
+    const div = document.createElement('div')
+    div.innerHTML = wmHTML
+    document.body.appendChild(div)
+  }
   paperVisible.value = true
-  setTimeout(() => window.print(), 300)
+  setTimeout(() => {
+    window.print()
+    if (wmStyle) styleEl.remove()
+    if (wmHTML) div.remove()
+  }, 300)
 }
 function printPaperArea() {
   const area = document.getElementById('paperPrintArea')
   if (area) {
     const win = window.open('', '_blank', 'width=800,height=600')
-    win.document.write(`<html><head><title>练习卷</title><style>body{font-family:'PingFang SC','Microsoft YaHei',serif;padding:32px 48px;color:#2c2c2c;line-height:1.8}h2{text-align:center}${getWatermarkStyle()}</style></head><body>${area.innerHTML}${getWatermarkHTML()}</body></html>`)
+    win.document.write(`<html><head><title>练习卷</title><style>body{font-family:'PingFang SC','Microsoft YaHei',serif;padding:32px 48px;color:#2c2c2c;line-height:1.8}h2{text-align:center}p{text-indent:2em;margin:6px 0}ul,ol{padding-left:2em;margin:6px 0}blockquote{border-left:3px solid #c4a85c;margin:10px 0;padding:6px 14px;background:#faf7ee;font-style:italic;color:#5c3d1e}blockquote p{text-indent:0}${getWatermarkStyle()}</style></head><body>${area.innerHTML}${getWatermarkHTML()}</body></html>`)
     win.document.close()
     win.print()
   }

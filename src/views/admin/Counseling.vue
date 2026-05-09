@@ -1,139 +1,243 @@
+<!--
+  Counseling.vue — 心理辅导与家庭压力跟踪
+  Features: 咨询记录管理 · 语音录音转写 · 情绪状态看板 · 家庭压力评估 · 危机预警
+-->
 <template>
-  <div>
-    <div class="admin-card">
-      <div class="admin-card-header">
-        <div>
-          <div class="admin-card-title">💬 心理辅导与家庭压力跟踪</div>
-          <div class="admin-card-subtitle">学生情绪观察 · 心理咨询记录 · 语音录音转写 · 家庭教育压力评估</div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <el-button size="small" type="primary" @click="openDialog(null)">+ 新增咨询记录</el-button>
-        </div>
+  <div class="counsel-page">
+    <!-- ===== Page Hero ===== -->
+    <div class="counsel-hero">
+      <div class="counsel-hero-icon">💬</div>
+      <div class="counsel-hero-text">
+        <h1>心理辅导与家庭压力跟踪</h1>
+        <p>情绪观察 · 咨询记录 · 语音转写 · 危机预警 · 家庭支持</p>
+      </div>
+      <div class="counsel-hero-actions">
+        <el-button size="small" type="primary" @click="openDialog(null)">+ 新增咨询记录</el-button>
+        <el-button size="small" @click="openDialog(null, true)">🎙️ 快速录音记录</el-button>
       </div>
     </div>
 
-    <div class="admin-two-col">
-      <!-- Records -->
-      <div class="admin-card">
-        <div class="admin-card-title" style="font-size:14px;margin-bottom:12px">📋 近期心理咨询记录</div>
-        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-          <el-select v-model="filterCounselorType" size="small" placeholder="咨询类型" style="width:110px" clearable>
-            <el-option v-for="t in types" :key="t" :label="t" :value="t" />
-          </el-select>
-          <el-select v-model="filterCounselorRisk" size="small" placeholder="危机等级" style="width:100px" clearable>
-            <el-option label="低风险" value="低" />
-            <el-option label="中风险" value="中" />
-            <el-option label="高风险" value="高" />
-          </el-select>
-        </div>
-        <el-table :data="paginatedRecords" stripe size="small" style="width:100%">
-          <el-table-column label="学生" fixed>
-            <template #default="{ row }">
-              <span style="color:var(--admin-text);font-weight:500">{{ row.studentName }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="date" label="日期" />
-          <el-table-column label="类型">
-            <template #default="{ row }">
-              <span class="admin-tag info">{{ row.type }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="情绪">
-            <template #default="{ row }">
-              <span class="admin-tag" :class="moodTag(row.mood)">{{ row.mood }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="危机">
-            <template #default="{ row }">
-              <span class="admin-tag" :class="riskTag(row.riskLevel)">{{ row.riskLevel || '—' }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="录音">
-            <template #default="{ row }">
-              <span v-if="row.recordingDuration" style="font-size:11px;color:var(--admin-accent)">🎙️ {{ row.recordingDuration }}</span>
-              <span v-else style="font-size:10px;color:var(--admin-text-muted)">—</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="简要" show-overflow-tooltip>
-            <template #default="{ row }">
-              <span>{{ row.content?.slice(0, 50) }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" fixed="right" width="150">
-            <template #default="{ row }">
-              <el-button size="small" text @click="openDialog(row)">编辑</el-button>
-              <el-button size="small" text type="danger" @click="handleDelete(row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div style="margin-top:8px;display:flex;justify-content:center" v-if="counselingRecords.length > pageSize">
-          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10,15,20,50]" :total="counselingRecords.length" layout="total, sizes, prev, pager, next, jumper" size="small" background />
-        </div>
-      </div>
-
-      <!-- Mood overview -->
-      <div class="admin-card">
-        <div class="admin-card-title" style="font-size:14px;margin-bottom:12px">🎭 学生情绪状态总览</div>
-        <div v-for="s in studentMoods" :key="s.name" class="student-mood-card">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="mood-avatar" :style="{background: moodColor(s.mood)}">{{ s.name[0] }}</div>
-            <div style="flex:1">
-              <div style="font-size:13px;font-weight:600;color:var(--admin-text)">{{ s.name }}</div>
-              <div style="font-size:10px;color:var(--admin-text-muted)">{{ s.class }} · 最近咨询：{{ s.lastCounseling }}</div>
+    <div class="counsel-grid">
+      <!-- Left: Records Table -->
+      <div class="counsel-left">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div>
+              <div class="admin-card-title">📋 心理咨询记录</div>
             </div>
-            <div :style="{fontSize:'24px'}">{{ moodEmoji(s.mood) }}</div>
+            <div style="display:flex;gap:8px">
+              <el-select v-model="filterCounselorType" size="small" placeholder="咨询类型" style="width:110px" clearable>
+                <el-option v-for="t in types" :key="t" :label="t" :value="t" />
+              </el-select>
+              <el-select v-model="filterCounselorRisk" size="small" placeholder="危机等级" style="width:100px" clearable>
+                <el-option label="低风险" value="低" />
+                <el-option label="中风险" value="中" />
+                <el-option label="高风险" value="高" />
+              </el-select>
+            </div>
           </div>
-          <div class="mood-indicator" :style="{background: moodColor(s.mood)}"></div>
+          <el-table :data="paginatedRecords" stripe size="small" style="width:100%">
+            <el-table-column label="学生" min-width="80">
+              <template #default="{ row }">
+                <span style="font-weight:500;color:var(--admin-text)">{{ row.studentName }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="date" label="日期" width="95" />
+            <el-table-column label="类型" width="95">
+              <template #default="{ row }">
+                <span class="admin-tag info">{{ row.type }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="情绪" width="70">
+              <template #default="{ row }">
+                <span class="admin-tag" :class="moodTag(row.mood)">{{ row.mood }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="危机" width="70">
+              <template #default="{ row }">
+                <span class="admin-tag" :class="riskTag(row.riskLevel)">{{ row.riskLevel || '—' }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="录音" width="80">
+              <template #default="{ row }">
+                <span v-if="row.recordingDuration" style="font-size:11px;color:var(--admin-accent)">🎙️ {{ row.recordingDuration }}</span>
+                <span v-else style="font-size:10px;color:var(--admin-text-muted)">—</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="160" fixed="right">
+              <template #default="{ row }">
+                <el-button size="small" text type="primary" @click="viewRecord(row)">查看</el-button>
+                <el-button size="small" text @click="openDialog(row)">编辑</el-button>
+                <el-button size="small" text type="danger" @click="handleDelete(row)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:11px;color:var(--admin-text-muted)">
+              共 {{ filteredRecords.length }} 条记录
+              <span v-if="alerts.length" style="color:var(--admin-danger);margin-left:8px">⚠ {{ alerts.length }} 条预警</span>
+            </span>
+            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10,15,20,50]" :total="filteredRecords.length" layout="total, sizes, prev, pager, next, jumper" size="small" background />
+          </div>
+        </div>
+
+        <!-- Family Pressure Assessment -->
+        <div class="admin-card" style="margin-top:14px">
+          <div class="admin-card-title" style="font-size:14px;margin-bottom:12px">🏠 家庭压力评估</div>
+          <el-table :data="familyRecords" stripe size="small" style="width:100%">
+            <el-table-column label="学生" prop="student" />
+            <el-table-column prop="familyType" label="家庭类型" />
+            <el-table-column label="压力等级">
+              <template #default="{ row }">
+                <span class="admin-tag" :class="pressureTag(row.pressure)">{{ row.pressure }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="source" label="主要压力源" show-overflow-tooltip />
+            <el-table-column label="跟进状态">
+              <template #default="{ row }">
+                <span class="admin-tag" :class="row.followUp==='跟进中'?'warning':'success'">{{ row.followUp }}</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+
+      <!-- Right: Mood Overview + Alerts -->
+      <div class="counsel-right">
+        <!-- Mood Dashboard -->
+        <div class="admin-card">
+          <div class="admin-card-title" style="font-size:14px;margin-bottom:14px">🎭 学生情绪看板</div>
+          <div class="mood-grid">
+            <div v-for="s in studentMoods" :key="s.name" class="mood-card-item" :style="{borderLeftColor: moodColor(s.mood)}">
+              <div class="mood-card-top">
+                <span class="mood-card-avatar" :style="{background: moodColor(s.mood)}">{{ s.name[0] }}</span>
+                <div class="mood-card-info">
+                  <span class="mood-card-name">{{ s.name }}</span>
+                  <span class="mood-card-class">{{ s.class }}</span>
+                </div>
+                <span class="mood-card-emoji">{{ moodEmoji(s.mood) }}</span>
+              </div>
+              <div class="mood-card-bottom">
+                <span class="admin-tag" :class="moodTag(s.mood)" style="font-size:9px">{{ s.mood }}</span>
+                <span style="font-size:9px;color:var(--admin-text-muted)">最近：{{ s.lastCounseling }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="admin-card counsel-alert-card" style="margin-top:14px">
+          <div class="admin-card-title" style="font-size:14px;margin-bottom:12px;color:var(--admin-danger)">⚠️ 需要特别关注</div>
+          <div v-for="a in alerts" :key="a.name" class="counsel-alert-item">
+            <div class="counsel-alert-left">
+              <span class="counsel-alert-icon">⚠</span>
+            </div>
+            <div class="counsel-alert-body">
+              <div class="counsel-alert-header">
+                <span class="counsel-alert-name">{{ a.name }}</span>
+                <span class="counsel-alert-class">{{ a.class }}</span>
+              </div>
+              <div class="counsel-alert-signal">{{ a.signal }}</div>
+              <div class="counsel-alert-suggestion">💡 {{ a.suggestion }}</div>
+            </div>
+          </div>
+          <div v-if="alerts.length === 0" style="text-align:center;padding:20px;color:var(--admin-success);font-size:13px">
+            ✨ 当前无高风险预警
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="admin-two-col" style="margin-top:16px">
-      <div class="admin-card">
-        <div class="admin-card-title" style="font-size:14px;margin-bottom:12px">🏠 家庭压力评估</div>
-        <el-table :data="familyRecords" stripe size="small" style="width:100%">
-          <el-table-column label="学生" fixed>
-            <template #default="{ row }">
-              <span style="color:var(--admin-text);font-weight:500">{{ row.student }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="familyType" label="家庭类型" />
-          <el-table-column label="压力等级">
-            <template #default="{ row }">
-              <span class="admin-tag" :class="pressureTag(row.pressure)">{{ row.pressure }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="source" label="主要压力源" />
-          <el-table-column label="跟进状态">
-            <template #default="{ row }">
-              <span class="admin-tag" :class="row.followUp==='跟进中'?'warning':'success'">{{ row.followUp }}</span>
-            </template>
-          </el-table-column>
-        </el-table>
-      </div>
-
-      <div class="admin-card" style="border-left:3px solid var(--admin-danger)">
-        <div class="admin-card-title" style="font-size:14px;margin-bottom:12px;color:var(--admin-danger)">⚠️ 需要特别关注</div>
-        <div v-for="a in alerts" :key="a.name" style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--admin-border)">
-          <span style="color:var(--admin-danger);font-size:16px">⚠</span>
-          <div style="flex:1">
-            <div style="font-size:13px;color:var(--admin-text);font-weight:500">{{ a.name }} <span style="font-size:10px;color:var(--admin-text-muted);font-weight:400">{{ a.class }}</span></div>
-            <div style="font-size:11px;color:var(--admin-text-secondary);margin-top:2px">{{ a.signal }}</div>
-            <div style="font-size:10px;color:var(--admin-text-muted);margin-top:2px">{{ a.suggestion }}</div>
+    <!-- ===== View Record Dialog (read-only) ===== -->
+    <el-dialog v-model="viewVisible" title="📋 咨询记录详情" width="700px" top="3vh">
+      <div v-if="viewRecordData" class="counsel-detail">
+        <div class="counsel-detail-header">
+          <div class="counsel-detail-student">
+            <span class="counsel-detail-avatar">{{ (viewRecordData.studentName || '未')?.[0] }}</span>
+            <div>
+              <div class="counsel-detail-name">{{ viewRecordData.studentName }} <span class="counsel-detail-class">{{ viewRecordData.class }}班</span></div>
+              <div style="font-size:11px;color:var(--admin-text-muted)">{{ viewRecordData.date }} · {{ viewRecordData.counselor || '张老师' }}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <span class="admin-tag info">{{ viewRecordData.type }}</span>
+            <span class="admin-tag" :class="moodTag(viewRecordData.mood)">{{ viewRecordData.mood }}</span>
+            <span class="admin-tag" :class="riskTag(viewRecordData.riskLevel)">危机{{ viewRecordData.riskLevel || '低' }}</span>
+          </div>
+        </div>
+        <div class="counsel-detail-grid">
+          <div class="counsel-detail-field">
+            <label>咨询方式</label>
+            <span>{{ viewRecordData.counselingMode || '—' }}</span>
+          </div>
+          <div class="counsel-detail-field">
+            <label>咨询时长</label>
+            <span>{{ viewRecordData.duration || '—' }} 分钟</span>
+          </div>
+          <div class="counsel-detail-field">
+            <label>家长参与</label>
+            <span>{{ viewRecordData.parentInvolved ? '是' : '否' }}</span>
+          </div>
+          <div class="counsel-detail-field">
+            <label>录音</label>
+            <span>{{ viewRecordData.recordingDuration || '无' }}</span>
+          </div>
+        </div>
+        <div class="counsel-detail-section" v-if="viewRecordData.studentReport">
+          <label>🗣️ 学生主诉</label>
+          <div class="counsel-detail-text">{{ viewRecordData.studentReport }}</div>
+        </div>
+        <div class="counsel-detail-section" v-if="viewRecordData.observation">
+          <label>👁️ 观察记录</label>
+          <div class="counsel-detail-text">{{ viewRecordData.observation }}</div>
+        </div>
+        <div class="counsel-detail-section" v-if="viewRecordData.content">
+          <label>📝 谈话摘要</label>
+          <div class="counsel-detail-text">{{ viewRecordData.content }}</div>
+        </div>
+        <div class="counsel-detail-section" v-if="viewRecordData.intervention">
+          <label>🛠️ 干预措施</label>
+          <div class="counsel-detail-text">{{ viewRecordData.intervention }}</div>
+        </div>
+        <div class="counsel-detail-section" v-if="viewRecordData.transcription">
+          <label>🎙️ 语音转写</label>
+          <div class="counsel-detail-text counsel-detail-transcript">{{ viewRecordData.transcription }}</div>
+        </div>
+        <div class="counsel-detail-grid" style="margin-top:14px">
+          <div class="counsel-detail-field">
+            <label>跟进建议</label>
+            <span>{{ viewRecordData.followUp || '—' }}</span>
+          </div>
+          <div class="counsel-detail-field">
+            <label>下次跟进</label>
+            <span>{{ viewRecordData.nextFollowUp || '—' }}</span>
+          </div>
+          <div class="counsel-detail-field">
+            <label>需要转介</label>
+            <span>{{ viewRecordData.needReferral ? '是' : '否' }}</span>
           </div>
         </div>
       </div>
-    </div>
+      <template #footer>
+        <el-button @click="viewVisible = false">关闭</el-button>
+        <el-button type="primary" @click="viewVisible = false; openDialog(viewRecordData)">✏️ 编辑此记录</el-button>
+      </template>
+    </el-dialog>
 
-    <!-- Dialog -->
-    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑咨询记录' : '新增心理咨询记录'" width="700px" @closed="resetRecording">
-      <div class="admin-form-group">
-        <label>学生</label>
-        <el-select v-model="form.studentId" style="width:100%" filterable @change="onStudentSelect">
-          <el-option v-for="s in studentList" :key="s.id" :label="`${s.name} · ${s.class}`" :value="s.id" />
-        </el-select>
+    <!-- ===== Add/Edit Dialog ===== -->
+    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑咨询记录' : '新增心理咨询记录'" width="800px" top="2vh" :close-on-click-modal="false" @close="closeDialog">
+      <div class="counsel-form-banner" v-if="form.studentId">
+        <span>{{ getStudentName(form.studentId) }}</span>
+        <span v-if="editingId" style="font-size:10px;color:var(--admin-text-muted);margin-left:8px">编辑已有记录，修改后将保存</span>
       </div>
+
       <div class="admin-three-col" style="margin-bottom:0">
+        <div class="admin-form-group">
+          <label>学生 <span style="color:var(--admin-danger)">*</span></label>
+          <el-select v-model="form.studentId" style="width:100%" filterable @change="onStudentSelect">
+            <el-option v-for="s in studentList" :key="s.id" :label="`${s.name} · ${s.class}`" :value="s.id" />
+          </el-select>
+        </div>
         <div class="admin-form-group">
           <label>咨询类型</label>
           <el-select v-model="form.type" style="width:100%">
@@ -148,50 +252,68 @@
             <el-option label="线上" value="线上" />
           </el-select>
         </div>
+      </div>
+
+      <div class="admin-three-col" style="margin-bottom:0">
         <div class="admin-form-group">
           <label>情绪状态</label>
           <el-select v-model="form.mood" style="width:100%">
-            <el-option v-for="m in moods" :key="m" :label="m" :value="m" />
+            <el-option v-for="m in moods" :key="m" :label="`${moodEmoji(m)} ${m}`" :value="m" />
           </el-select>
         </div>
-      </div>
-      <div class="admin-three-col" style="margin-bottom:0">
         <div class="admin-form-group">
           <label>危机等级</label>
           <el-select v-model="form.riskLevel" style="width:100%">
-            <el-option label="低" value="低" />
-            <el-option label="中" value="中" />
-            <el-option label="高" value="高" />
+            <el-option label="低（常规关注）" value="低" />
+            <el-option label="中（加强跟进）" value="中" />
+            <el-option label="高（紧急干预）" value="高" />
           </el-select>
         </div>
         <div class="admin-form-group">
           <label>咨询时长（分钟）</label>
           <el-input-number v-model="form.duration" :min="5" :max="180" size="small" style="width:100%" />
         </div>
+      </div>
+
+      <div class="admin-three-col" style="margin-bottom:0">
         <div class="admin-form-group">
           <label>家长参与</label>
           <el-switch v-model="form.parentInvolved" active-text="是" inactive-text="否" style="margin-top:6px" />
+        </div>
+        <div class="admin-form-group">
+          <label>需要转介</label>
+          <el-switch v-model="form.needReferral" size="small" />
+        </div>
+        <div class="admin-form-group">
+          <label>下次跟进日期</label>
+          <el-date-picker v-model="form.nextFollowUp" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" style="width:100%" />
         </div>
       </div>
 
       <!-- Recording Section -->
       <div class="recording-section">
         <div class="recording-header">
-          <label style="font-size:12px;font-weight:600;color:var(--admin-text-secondary)">🎙️ 语音记录</label>
-          <span v-if="recordingState === 'idle'" style="font-size:10px;color:var(--admin-text-muted)">点击按钮开始录音</span>
-          <span v-else-if="recordingState === 'recording'" style="font-size:10px;color:var(--admin-danger)" class="pulse-dot">● 录音中 {{ formatTime(recordingTime) }}</span>
-          <span v-else-if="recordingState === 'stopped'" style="font-size:10px;color:var(--admin-success)">✓ 录音完成 ({{ formatTime(recordingTime) }})</span>
+          <span class="recording-title">🎙️ 语音记录</span>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span v-if="recordingState === 'idle'" style="font-size:10px;color:var(--admin-text-muted)">点击按钮开始录音</span>
+            <span v-else-if="recordingState === 'recording'" class="recording-status-live">● 录音中 {{ formatTime(recordingTime) }}</span>
+            <span v-else-if="recordingState === 'stopped'" style="font-size:10px;color:var(--admin-success)">✓ 录音完成 ({{ formatTime(recordingTime) }})</span>
+            <span v-if="!editingId || recordingState !== 'idle'" style="font-size:9px;color:var(--admin-text-muted)">{{ editingId && recordingState === 'idle' ? '编辑模式保留已有数据 · 重新录音将覆盖' : '' }}</span>
+          </div>
         </div>
         <div class="recording-controls">
           <el-button v-if="recordingState === 'idle'" size="small" @click="startRecording">🎙️ 开始录音</el-button>
           <el-button v-if="recordingState === 'recording'" size="small" type="danger" @click="stopRecording">⏹ 停止录音</el-button>
-          <el-button v-if="recordingState === 'stopped' && audioBlobUrl" size="small" type="success" @click="togglePlayback">{{ isPlaying ? '⏸ 暂停' : '▶️ 播放录音' }}</el-button>
+          <el-button v-if="recordingState === 'stopped' && audioBlobUrl" size="small" @click="togglePlayback">{{ isPlaying ? '⏸ 暂停' : '▶️ 播放录音' }}</el-button>
           <el-button v-if="recordingState === 'stopped'" size="small" @click="resetRecording">↺ 重新录制</el-button>
+          <span v-if="editingId && recordingState === 'idle' && form.recordingDuration" style="font-size:10px;color:var(--admin-text-muted)">
+            已存录音：{{ form.recordingDuration }}
+          </span>
         </div>
         <div v-if="recordingState !== 'idle'" class="recording-visual">
           <div class="waveform-bar" v-for="(h, i) in waveHeights" :key="i" :style="{height: h+'px'}"></div>
         </div>
-        <div v-if="recordingState === 'stopped'" class="transcription-area">
+        <div class="transcription-area" v-if="recordingState === 'stopped'">
           <div class="transcription-header">
             <span>📝 语音转文本</span>
             <el-button size="small" text @click="startTranscription" :disabled="isTranscribing || !audioBlobUrl">
@@ -206,39 +328,34 @@
         <audio ref="audioPlayer" @ended="isPlaying=false" style="display:none"></audio>
       </div>
 
-      <div class="admin-form-group">
-        <label>学生主诉</label>
-        <el-input v-model="form.studentReport" type="textarea" :rows="2" placeholder="学生本人陈述的主要问题或困扰..." />
-      </div>
-      <div class="admin-form-group">
-        <label>观察记录</label>
-        <el-input v-model="form.observation" type="textarea" :rows="2" placeholder="咨询师对学生情绪、行为、语言、非语言表现的观察..." />
+      <div class="admin-two-col">
+        <div class="admin-form-group">
+          <label>学生主诉</label>
+          <el-input v-model="form.studentReport" type="textarea" :rows="3" placeholder="学生本人陈述的主要问题或困扰..." />
+        </div>
+        <div class="admin-form-group">
+          <label>观察记录</label>
+          <el-input v-model="form.observation" type="textarea" :rows="3" placeholder="咨询师对学生情绪、行为、语言表现的观察..." />
+        </div>
       </div>
       <div class="admin-form-group">
         <label>谈话摘要</label>
         <el-input v-model="form.content" type="textarea" :rows="3" placeholder="记录本次咨询的主要内容..." />
       </div>
-      <div class="admin-form-group">
-        <label>干预措施</label>
-        <el-input v-model="form.intervention" type="textarea" :rows="2" placeholder="已采取或计划采取的干预措施..." />
-      </div>
-      <div class="admin-two-col" style="margin-bottom:0">
+      <div class="admin-two-col">
+        <div class="admin-form-group">
+          <label>干预措施</label>
+          <el-input v-model="form.intervention" type="textarea" :rows="2" placeholder="已采取或计划采取的干预措施..." />
+        </div>
         <div class="admin-form-group">
           <label>跟进建议</label>
           <el-input v-model="form.followUp" type="textarea" :rows="2" placeholder="后续跟进建议..." />
         </div>
-        <div class="admin-form-group">
-          <label>下次跟进日期</label>
-          <el-date-picker v-model="form.nextFollowUp" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" style="width:100%" />
-          <div style="margin-top:8px">
-            <label style="font-size:11px;color:var(--admin-text-muted)">需要转介</label>
-            <el-switch v-model="form.needReferral" size="small" style="margin-left:8px" />
-          </div>
-        </div>
       </div>
+
       <template #footer>
         <el-button @click="closeDialog">取消</el-button>
-        <el-button type="primary" @click="saveRecord">{{ editingId ? '保存修改' : '保存' }}</el-button>
+        <el-button type="primary" @click="saveRecord">{{ editingId ? '保存修改' : '保存记录' }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -257,6 +374,10 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const filterCounselorType = ref('')
 const filterCounselorRisk = ref('')
+
+// View mode
+const viewVisible = ref(false)
+const viewRecordData = ref(null)
 
 const filteredRecords = computed(() => {
   let list = counselingRecords.value
@@ -281,7 +402,7 @@ const form = ref({
   recordingDuration: null, transcription: null
 })
 
-// Voice recording
+// Voice recording state
 const recordingState = ref('idle')
 const recordingTime = ref(0)
 const isPlaying = ref(false)
@@ -292,6 +413,11 @@ const audioPlayer = ref(null)
 const waveHeights = ref(Array.from({length:30}, () => 4))
 let mediaRecorder = null; let audioChunks = []; let recordingTimer = null; let waveTimer = null; let stream = null
 let recognition = null
+
+function getStudentName(sid) {
+  const s = studentList.value.find(x => x.id === sid)
+  return s ? `${s.name} · ${s.class}班` : '未选择'
+}
 
 onMounted(() => {
   studentList.value = studentService.getAll()
@@ -316,9 +442,7 @@ const studentMoods = computed(() => {
   const result = []
   latest.forEach((c, sid) => {
     const s = studentList.value.find(s => s.id === sid)
-    if (s) {
-      result.push({ name: s.name, class: s.class, mood: c.mood, lastCounseling: c.date })
-    }
+    if (s) result.push({ name: s.name, class: s.class, mood: c.mood, lastCounseling: c.date })
   })
   return result.sort((a, b) => b.lastCounseling.localeCompare(a.lastCounseling))
 })
@@ -375,33 +499,24 @@ function formatTime(sec) {
   return `${m}:${s.toString().padStart(2,'0')}`
 }
 
-// Voice recording with real Web Speech API
+// === Voice Recording ===
 async function startRecording() {
-  // Start speech recognition if supported
   const speechSupported = !!(window.SpeechRecognition || window.webkitSpeechRecognition)
   if (speechSupported && !recognition) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     recognition = new SpeechRecognition()
-    recognition.continuous = true
-    recognition.interimResults = true
-    recognition.lang = 'zh-CN'
+    recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'zh-CN'
     recognition.onresult = (event) => {
-      let interim = ''
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
           const txt = event.results[i][0].transcript.trim()
           if (txt) transcribedText.value += (transcribedText.value ? '\n' : '') + txt
-        } else {
-          interim += event.results[i][0].transcript
         }
       }
     }
-    recognition.onerror = (e) => {
-      if (e.error !== 'no-speech') console.log('语音识别:', e.error)
-    }
+    recognition.onerror = (e) => { if (e.error !== 'no-speech') console.log('语音识别:', e.error) }
     try { recognition.start() } catch {}
   }
-
   try {
     stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
@@ -418,9 +533,7 @@ async function startRecording() {
     recordingState.value = 'recording'; recordingTime.value = 0
     recordingTimer = setInterval(() => recordingTime.value++, 1000)
     startWaveAnimation()
-  } catch {
-    simulateRecording()
-  }
+  } catch { simulateRecording() }
 }
 
 function simulateRecording() {
@@ -455,13 +568,10 @@ function resetRecording() {
 function startTranscription() {
   if (!audioBlobUrl.value) { ElMessage.warning('请先录音'); return }
   isTranscribing.value = true
-  // Try real speech-to-text by replaying audio to recognition
   if (window.SpeechRecognition || window.webkitSpeechRecognition) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     recognition = new SpeechRecognition()
-    recognition.continuous = true
-    recognition.interimResults = true
-    recognition.lang = 'zh-CN'
+    recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'zh-CN'
     recognition.onresult = (event) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
@@ -471,29 +581,17 @@ function startTranscription() {
       }
     }
     recognition.onend = () => { isTranscribing.value = false; ElMessage.success('AI转写完成') }
-    recognition.onerror = () => {
-      // Fallback to simulated transcription
-      simulateTranscription()
-    }
+    recognition.onerror = () => { simulateTranscription() }
     try { recognition.start() } catch { simulateTranscription() }
-    // Stop recognition after audio plays
     if (audioPlayer.value) {
       audioPlayer.value.src = audioBlobUrl.value
       audioPlayer.value.play().catch(() => {})
-      audioPlayer.value.onended = () => {
-        try { recognition.stop() } catch {}
-      }
+      audioPlayer.value.onended = () => { try { recognition.stop() } catch {} }
     }
-    // Timeout fallback
     setTimeout(() => {
-      if (isTranscribing.value) {
-        try { recognition.stop() } catch {}
-        if (!transcribedText.value) simulateTranscription()
-      }
+      if (isTranscribing.value) { try { recognition.stop() } catch {}; if (!transcribedText.value) simulateTranscription() }
     }, 15000)
-  } else {
-    simulateTranscription()
-  }
+  } else { simulateTranscription() }
 }
 
 function simulateTranscription() {
@@ -503,8 +601,7 @@ function simulateTranscription() {
     '学生对未来升学方向感到迷茫，缺乏明确的目标规划。建议安排生涯规划指导，帮助其了解自身优势与兴趣方向。'
   ]
   transcribedText.value = templates[Math.floor(Math.random() * templates.length)]
-  isTranscribing.value = false
-  ElMessage.success('AI转写完成')
+  isTranscribing.value = false; ElMessage.success('AI转写完成')
 }
 
 function startWaveAnimation() {
@@ -515,7 +612,12 @@ function startWaveAnimation() {
 
 function copyToContent() { form.value.studentReport = transcribedText.value }
 
-function openDialog(c) {
+function viewRecord(c) {
+  viewRecordData.value = { ...c }
+  viewVisible.value = true
+}
+
+function openDialog(c, focusRecording = false) {
   if (c) {
     editingId.value = c.id
     form.value = {
@@ -529,7 +631,12 @@ function openDialog(c) {
       needReferral: c.needReferral || false,
       recordingDuration: c.recordingDuration || null, transcription: c.transcription || null
     }
+    // Preserve existing transcription/recording data when editing
     if (c.transcription) transcribedText.value = c.transcription
+    else transcribedText.value = ''
+    // Don't reset recording - keep existing data
+    recordingState.value = 'idle'
+    recordingTime.value = 0
   } else {
     editingId.value = null
     form.value = {
@@ -542,6 +649,7 @@ function openDialog(c) {
     resetRecording()
   }
   dialogVisible.value = true
+  if (focusRecording) setTimeout(() => startRecording(), 300)
 }
 
 function closeDialog() { dialogVisible.value = false; resetRecording() }
@@ -555,18 +663,15 @@ function saveRecord() {
     recordingDuration: recordingTime.value>0 ? `${mins}:${secs.toString().padStart(2,'0')}` : (form.value.recordingDuration || null),
     transcription: transcribedText.value || form.value.transcription || null
   }
-  if (editingId.value) {
-    counselingService.update(editingId.value, data); ElMessage.success('已更新')
-  } else {
-    counselingService.create(data); ElMessage.success('已保存')
-  }
+  if (editingId.value) { counselingService.update(editingId.value, data); ElMessage.success('已更新') }
+  else { counselingService.create(data); ElMessage.success('已保存') }
   dialogVisible.value = false
   counselingRecords.value = counselingService.getAll()
 }
 
 async function handleDelete(c) {
   try {
-    await ElMessageBox.confirm('确定删除此咨询记录吗？', '确认删除', { confirmButtonText:'删除', cancelButtonText:'取消', type:'warning' })
+    await ElMessageBox.confirm('确定删除此咨询记录吗？此操作不可恢复。', '确认删除', { confirmButtonText:'删除', cancelButtonText:'取消', type:'warning' })
     counselingService.delete(c.id)
     counselingRecords.value = counselingService.getAll()
     ElMessage.success('已删除')
@@ -575,17 +680,102 @@ async function handleDelete(c) {
 </script>
 
 <style scoped>
-.student-mood-card { background: var(--admin-bg); border-radius: 8px; padding: 12px; margin-bottom: 8px; position: relative; overflow: hidden; }
-.mood-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px; }
-.mood-indicator { position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
+/* === Page Hero === */
+.counsel-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-lg);
+  margin-bottom: 18px;
+}
+.counsel-hero-icon { font-size: 32px; }
+.counsel-hero-text h1 { font-size: 18px; font-weight: 700; color: var(--admin-text); margin: 0 0 2px; }
+.counsel-hero-text p { font-size: 12px; color: var(--admin-text-muted); margin: 0; }
+.counsel-hero-actions { margin-left: auto; display: flex; gap: 8px; }
 
-.recording-section { background: var(--admin-bg); border: 1px solid var(--admin-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+/* === Grid Layout === */
+.counsel-grid { display: grid; grid-template-columns: 1fr 360px; gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .counsel-grid { grid-template-columns: 1fr; } }
+
+/* === Mood Cards === */
+.mood-grid { display: grid; grid-template-columns: 1fr; gap: 8px; max-height: 460px; overflow-y: auto; }
+.mood-card-item {
+  background: var(--admin-bg);
+  border-radius: 10px;
+  padding: 12px;
+  border-left: 4px solid var(--admin-border);
+  transition: all 0.2s ease;
+}
+.mood-card-item:hover { background: var(--admin-surface-hover); }
+.mood-card-top { display: flex; align-items: center; gap: 10px; }
+.mood-card-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+.mood-card-info { flex: 1; min-width: 0; }
+.mood-card-name { font-size: 13px; font-weight: 600; color: var(--admin-text); display: block; }
+.mood-card-class { font-size: 10px; color: var(--admin-text-muted); display: block; }
+.mood-card-emoji { font-size: 22px; flex-shrink: 0; }
+.mood-card-bottom { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--admin-border); }
+
+/* === Recording Section === */
+.recording-section {
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
 .recording-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.pulse-dot { animation: pulse 1.5s ease infinite; }
+.recording-title { font-size: 13px; font-weight: 700; color: var(--admin-text); }
+.recording-status-live { font-size: 11px; color: var(--admin-danger); animation: pulse 1.5s ease infinite; }
 @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
-.recording-controls { display: flex; gap: 8px; margin-bottom: 12px; }
-.recording-visual { display: flex; align-items: flex-end; gap: 3px; height: 48px; padding: 4px 0; margin-bottom: 12px; justify-content: center; }
-.waveform-bar { width: 4px; background: var(--admin-accent); border-radius: 2px; transition: height 0.1s ease; }
-.transcription-area { border-top: 1px solid var(--admin-border); padding-top: 12px; }
-.transcription-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; color: var(--admin-text-secondary); }
+.recording-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.recording-visual { display: flex; align-items: flex-end; gap: 3px; height: 52px; padding: 4px 0; margin-bottom: 14px; justify-content: center; }
+.waveform-bar { width: 5px; background: var(--admin-accent); border-radius: 3px; transition: height 0.12s ease; min-width: 5px; }
+.transcription-area { border-top: 1px solid var(--admin-border); padding-top: 14px; }
+.transcription-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--admin-text-secondary); }
+
+/* === View Detail === */
+.counsel-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.counsel-detail-student { display: flex; align-items: center; gap: 12px; }
+.counsel-detail-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--admin-accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; }
+.counsel-detail-name { font-size: 16px; font-weight: 700; color: var(--admin-text); }
+.counsel-detail-class { font-size: 12px; color: var(--admin-text-muted); margin-left: 6px; font-weight: 400; }
+.counsel-detail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.counsel-detail-field label { display: block; font-size: 10px; color: var(--admin-text-muted); text-transform: uppercase; margin-bottom: 2px; }
+.counsel-detail-field span { font-size: 13px; color: var(--admin-text); font-weight: 500; }
+.counsel-detail-section { margin-top: 14px; }
+.counsel-detail-section label { display: block; font-size: 12px; font-weight: 600; color: var(--admin-text-secondary); margin-bottom: 6px; }
+.counsel-detail-text { font-size: 12px; line-height: 1.8; color: var(--admin-text); padding: 10px 14px; background: var(--admin-bg); border-radius: 8px; }
+.counsel-detail-transcript { border-left: 3px solid var(--admin-accent); font-style: italic; }
+
+/* === Form Banner === */
+.counsel-form-banner { font-size: 13px; font-weight: 600; color: var(--admin-text); padding: 8px 14px; background: var(--admin-bg); border-radius: 8px; margin-bottom: 14px; }
+
+/* === Alert Card === */
+.counsel-alert-card { border-left: 3px solid var(--admin-danger); }
+.counsel-alert-item { display: flex; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--admin-border); }
+.counsel-alert-item:last-child { border-bottom: none; }
+.counsel-alert-left { flex-shrink: 0; }
+.counsel-alert-icon { color: var(--admin-danger); font-size: 18px; }
+.counsel-alert-body { flex: 1; min-width: 0; }
+.counsel-alert-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.counsel-alert-name { font-size: 13px; font-weight: 600; color: var(--admin-text); }
+.counsel-alert-class { font-size: 10px; color: var(--admin-text-muted); }
+.counsel-alert-signal { font-size: 11px; color: var(--admin-text-secondary); margin-bottom: 2px; }
+.counsel-alert-suggestion { font-size: 10px; color: var(--admin-warning); line-height: 1.5; }
+
+@media (max-width: 768px) {
+  .counsel-hero { flex-wrap: wrap; }
+  .counsel-hero-actions { margin-left: 0; width: 100%; }
+  .counsel-detail-grid { grid-template-columns: repeat(2, 1fr); }
+}
 </style>

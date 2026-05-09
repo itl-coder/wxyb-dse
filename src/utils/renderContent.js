@@ -60,7 +60,7 @@ export function renderRichContent(text) {
 
   // Wrap consecutive <li> in <ul>
   html = html.replace(/((?:<li>.*?<\/li><br>)+)/g, (match) => {
-    return '<ul style="padding-left:1.5em;margin:4px 0">' + match.replace(/<br>/g, '') + '</ul>'
+    return '<ul style="padding-left:2em;margin:4px 0">' + match.replace(/<br>/g, '') + '</ul>'
   })
 
   return html

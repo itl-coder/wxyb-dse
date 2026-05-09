@@ -1,11 +1,18 @@
 <template>
   <div class="conference-page">
-    <div class="admin-card">
-      <div class="admin-card-header">
-        <div>
-          <div class="admin-card-title">📋 家长会准备</div>
-          <div class="admin-card-subtitle">按选修科目动态生成 · 多维度数据整合 · 面向家长的专业反馈</div>
+    <!-- Page Header -->
+    <div class="conf-page-hero">
+      <div class="conf-hero-left">
+        <div class="conf-hero-icon">
+          <span>📋</span>
         </div>
+        <div class="conf-hero-text">
+          <h1>家长会准备</h1>
+          <p>按选修科目动态生成 · 多维度数据整合 · 面向家长的专业反馈</p>
+        </div>
+      </div>
+      <div class="conf-hero-right">
+        <div class="conf-hero-accent"></div>
       </div>
     </div>
 
@@ -168,10 +175,36 @@
           </div>
         </div>
 
+        <!-- Template Selector -->
         <div class="admin-card" v-if="studentProfile">
-          <div class="admin-card-title" style="font-size:14px;margin-bottom:12px">📝 文稿模块</div>
+          <div class="admin-card-title" style="font-size:14px;margin-bottom:12px">📋 文稿模板</div>
+          <div class="admin-card-subtitle" style="margin-top:-8px;margin-bottom:10px">选择适合学生当前水平的模板，自动调整文稿语气和内容重点</div>
+          <div class="template-selector">
+            <div v-for="t in templateOptions" :key="t.value" class="template-option" :class="{ active: selectedTemplate === t.value }" @click="applyTemplate(t.value)">
+              <div class="template-option-header">
+                <span class="template-option-icon">{{ t.icon }}</span>
+                <span class="template-option-label">{{ t.label }}</span>
+                <el-icon v-if="selectedTemplate === t.value" class="template-check"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></el-icon>
+              </div>
+              <div class="template-option-desc">{{ t.desc }}</div>
+              <div class="template-option-tone">语气风格：{{ t.tone }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Draggable Module List -->
+        <div class="admin-card" v-if="studentProfile">
+          <div class="admin-card-title" style="font-size:14px;margin-bottom:4px">📝 文稿模块</div>
+          <div class="admin-card-subtitle" style="margin-bottom:10px">拖拽调整模块顺序 · 开关控制显示</div>
           <div class="module-list">
-            <div v-for="mod in contentModules" :key="mod.id" class="module-item" :class="{ active: mod.enabled }">
+            <div v-for="(mod, idx) in contentModules" :key="mod.id" class="module-item" :class="{ active: mod.enabled, dragging: dragSourceIdx === idx }"
+              draggable="true"
+              @dragstart="onDragStart(idx)"
+              @dragover="onDragOver"
+              @drop="onDrop(idx)"
+              @dragend="onDragEnd"
+            >
+              <span class="cm-drag-handle">⋮⋮</span>
               <span class="cm-icon">{{ mod.icon }}</span>
               <span class="cm-name">{{ mod.name }}</span>
               <el-switch v-model="mod.enabled" size="small" @click.stop />
@@ -182,217 +215,171 @@
 
       <!-- Right Panel: Preview -->
       <div class="conf-right">
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <div>
-              <div class="admin-card-title">📄 家长会文稿预览</div>
-              <div class="admin-card-subtitle">基于{{ studentProfile?.name || '学生' }}的实际数据生成</div>
+        <div class="admin-card conf-right-card">
+          <div class="conf-right-header">
+            <div class="conf-right-header-left">
+              <span class="conf-right-header-icon">📄</span>
+              <div>
+                <div class="conf-right-header-title">家长会文稿编辑</div>
+                <div class="conf-right-header-sub" v-if="studentProfile">
+                  {{ studentProfile.name }} · {{ studentProfile.class }} · {{ today }}
+                </div>
+                <div class="conf-right-header-sub" v-else>选择学生后自动生成个性化文稿</div>
+              </div>
             </div>
-            <div style="display:flex;gap:8px">
-              <el-button size="small" :type="editMode ? 'warning' : 'default'" @click="toggleEditMode">
-                {{ editMode ? '👁️ 预览模式' : '✏️ 编辑模式' }}
+            <div class="conf-right-header-actions">
+              <el-button size="small" @click="togglePreviewOnly" class="conf-mode-toggle-btn" :type="previewOnly ? 'warning' : 'default'">
+                {{ previewOnly ? '✏️ 编辑模式' : '👁️ 仅预览' }}
               </el-button>
-              <el-button size="small" @click="toggleFullscreen">{{ isFullScreen ? '退出全屏' : '全屏预览' }}</el-button>
-              <el-button size="small" type="primary" @click="printDocument">🖨️ 打印</el-button>
+              <el-button size="small" text @click="toggleFullscreen" class="conf-action-btn">
+                {{ isFullScreen ? '退出全屏' : '⛶ 全屏' }}
+              </el-button>
+              <el-button size="small" text type="primary" @click="exportDocument" :loading="exporting" class="conf-action-btn">
+                {{ exporting ? '导出中...' : '📸 导出图片' }}
+              </el-button>
+              <el-button size="small" text type="primary" @click="exportPDF" class="conf-action-btn">📑 导出PDF</el-button>
             </div>
           </div>
-          <div v-if="!studentProfile" class="admin-empty" style="padding:60px">
-            <div class="empty-icon">👈</div>
-            <p>请先选择班级和学生</p>
+          <div v-if="!studentProfile" class="conf-empty-state">
+            <div class="conf-empty-icon">👈</div>
+            <div class="conf-empty-title">选择学生开始</div>
+            <div class="conf-empty-desc">在左侧面板中选择班级和学生<br/>系统将自动整合多维数据生成个性化家长会文稿</div>
           </div>
-          <div v-else class="preview-container" :class="{ fullscreen: isFullScreen }" ref="previewRef">
+          <div v-else class="conf-md-editor-wrap" :class="{ fullscreen: isFullScreen }">
             <div v-if="isFullScreen" class="fs-bar">
-              <span>家长会文稿预览</span>
-              <div style="display:flex;gap:8px">
-                <el-button size="small" @click="printDocument">🖨️ 打印</el-button>
+              <span>{{ studentProfile?.name }} · 家长会文稿</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <!-- <el-button size="small" @click="togglePreviewOnly">{{ previewOnly ? '编辑' : '仅预览' }}</el-button> -->
+                <el-button size="small" type="primary" @click="exportDocument" :loading="exporting">📸 导出图片</el-button>
+                <!-- <el-button size="small" @click="printDocument">🖨️ 打印</el-button> -->
+                <el-button size="small" type="primary" @click="exportPDF">📑 导出PDF</el-button>
                 <el-button size="small" @click="toggleFullscreen">退出全屏</el-button>
               </div>
             </div>
-            <div class="preview-paper">
-              <!-- Header -->
-              <div class="pp-header">
-                <h1>{{ schoolName }} · 家长会交流材料</h1>
-                <div class="pp-meta">
-                  <span>学生：{{ studentProfile.name }}</span>
-                  <span>班级：{{ studentProfile.class }}</span>
-                  <span>日期：{{ today }}</span>
-                  <span>班主任：{{ studentProfile.cc || '张老师' }}</span>
-                </div>
+
+            <!-- Editor Mode (Edit + Preview) -->
+            <div v-if="!previewOnly" class="conf-editor-pane">
+              <MdEditor
+                v-model="fullConfDocument"
+                :theme="store.theme"
+                language="zh-CN"
+                :previewTheme="previewTheme"
+                :toolbars="mdToolbarsEx"
+                :noPrettier="true"
+                :noMermaid="true"
+                :footers="mdFooters"
+                placeholder="正在生成家长会文稿..."
+                @onSave="handleEditorSave"
+              />
+            </div>
+
+            <!-- Preview-Only Mode -->
+            <div v-else class="conf-preview-pane">
+              <MdPreview :editorId="previewId" :modelValue="fullConfDocument" :previewTheme="previewTheme" />
+              <div class="conf-catalog-wrap">
+                <MdCatalog :editorId="previewId" :scrollElement="previewScrollEl" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Hidden Export Container for html2canvas / Print -->
+          <div class="hw-export-hidden" aria-hidden="true" v-if="studentProfile">
+            <template v-if="watermarkEnabled">
+              <el-watermark :content="watermarkText" :font="{ fontSize: 16, color: 'rgba(0,0,0,0.06)' }" :rotate="-22" :gap="[120, 80]" :z-index="1">
+                <div id="confExportContainer" class="conf-export-inner">
+              <!-- Document Header -->
+              <table class="pp-doc-head">
+                <tr>
+                  <td class="pp-doc-head-left">
+                    <div class="pp-doc-no">No. {{ today.replace(/-/g, '') }}</div>
+                    <div class="pp-doc-type">家长会交流材料</div>
+                  </td>
+                  <td class="pp-doc-head-center">
+                    <div class="pp-school-name">{{ schoolFullName }}</div>
+                    <div class="pp-school-sub">{{ schoolSubtitle }}</div>
+                  </td>
+                  <td class="pp-doc-head-right">
+                    <div class="pp-doc-stamp">内部资料</div>
+                    <div class="pp-doc-stamp-sub">请妥善保管</div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Header Divider -->
+              <div class="pp-hdiv">
+                <div class="pp-hdiv-line"></div>
+                <div class="pp-hdiv-diamond">◆</div>
+                <div class="pp-hdiv-line"></div>
               </div>
 
-              <!-- Module 1: Praise -->
-              <div v-if="getModule('praise')?.enabled" class="pp-section">
-                <h2><span class="pp-num">一</span>成长亮点与进步肯定</h2>
-                <div class="pp-content">
-                  <div v-if="!editMode" v-html="renderMd(docEdits.praiseMarkdown)" class="pp-md-render"></div>
-                  <textarea v-else class="pp-edit-full" v-model="docEdits.praiseMarkdown" rows="12" placeholder="使用 Markdown 格式编辑此部分内容...&#10;&#10;段落直接书写。&#10;- 列表项用 - 开头&#10;- **粗体**  *斜体*  `代码`&#10;&#10;支持 $LaTeX$ 公式"></textarea>
-                  <div v-if="positiveBehaviors.length" class="pp-behavior-box">
-                    <div class="pp-label-sm">近期积极表现</div>
-                    <div v-for="b in positiveBehaviors" :key="b.id" class="pp-behavior-item">
-                      <span class="pp-date">{{ b.time?.slice(0,10) || b.date }}</span>
-                      <span>{{ b.behavior }} — {{ b.note || '' }}</span>
-                    </div>
-                  </div>
-                </div>
+              <!-- Student Profile Card -->
+              <div class="pp-student-card">
+                <div class="pp-student-card-title">{{ studentProfile.name }} 同学 · 学情档案</div>
+                <table class="pp-info-table">
+                  <tr>
+                    <td class="pp-info-cell"><span class="pp-info-label">所在班级</span><span class="pp-info-text">{{ studentProfile.class }}</span></td>
+                    <td class="pp-info-cell"><span class="pp-info-label">文件日期</span><span class="pp-info-text">{{ today }}</span></td>
+                    <td class="pp-info-cell"><span class="pp-info-label">班主任</span><span class="pp-info-text">{{ studentProfile.cc || homeroomTeacher }}</span></td>
+                  </tr>
+                  <tr>
+                    <td class="pp-info-cell"><span class="pp-info-label">选修科目</span><span class="pp-info-text">{{ [studentProfile.elective1, studentProfile.elective2, studentProfile.elective3].filter(Boolean).join('、') || '暂无' }}</span></td>
+                    <td class="pp-info-cell"><span class="pp-info-label">目标院校</span><span class="pp-info-text">{{ studentProfile.targetUniversity || '暂无' }}</span></td>
+                    <td class="pp-info-cell"><span class="pp-info-label">留学规划</span><span class="pp-info-text">{{ studentProfile.studyAbroadPlanning ? '有计划' : '暂无' }}</span></td>
+                  </tr>
+                  <tr>
+                    <td class="pp-info-cell"><span class="pp-info-label">出勤率</span><span class="pp-info-text">{{ attendanceRate }}%</span></td>
+                    <td class="pp-info-cell"><span class="pp-info-label">作业完成率</span><span class="pp-info-text">{{ homeworkRate }}%</span></td>
+                  </tr>
+                </table>
               </div>
 
-              <!-- Supplements Module -->
-              <div v-if="supplements.length" class="pp-section">
-                <h2><span class="pp-num">★</span>补充材料</h2>
-                <div class="pp-content">
-                  <div v-for="(sup, idx) in supplements" :key="idx" class="pp-supplement-card">
-                    <h3>{{ sup.title }}</h3>
-                    <p class="pp-supplement-text">{{ sup.content }}</p>
-                    <div class="pp-supplement-date">{{ sup.date }}</div>
-                  </div>
-                </div>
+              <!-- Section Separator -->
+              <div class="pp-hdiv">
+                <div class="pp-hdiv-line"></div>
+                <div class="pp-hdiv-star">✦</div>
+                <div class="pp-hdiv-line"></div>
               </div>
 
-              <!-- Module 2: Daily -->
-              <div v-if="getModule('daily')?.enabled" class="pp-section">
-                <h2><span class="pp-num">二</span>日常学习表现</h2>
-                <div class="pp-content">
-                  <div class="pp-data-row">
-                    <div class="ppd-item">
-                      <span class="ppd-label">出勤率</span>
-                      <span class="ppd-val" :class="attendanceRate >= 95 ? 'good' : 'warn'">{{ attendanceRate }}%</span>
-                    </div>
-                    <div class="ppd-item">
-                      <span class="ppd-label">作业完成率</span>
-                      <span class="ppd-val" :class="homeworkRate >= 90 ? 'good' : 'warn'">{{ homeworkRate }}%</span>
-                    </div>
-                    <div class="ppd-item">
-                      <span class="ppd-label">迟到次数</span>
-                      <span class="ppd-val" :class="lateCount === 0 ? 'good' : 'warn'">{{ lateCount }}次</span>
-                    </div>
-                    <div class="ppd-item">
-                      <span class="ppd-label">手机违纪</span>
-                      <span class="ppd-val" :class="phoneViolations === 0 ? 'good' : 'warn'">{{ phoneViolations }}次</span>
-                    </div>
-                  </div>
-                  <div class="pp-data-row" v-if="positiveBehaviors.length || counselingRecords.length">
-                    <div class="ppd-item">
-                      <span class="ppd-label">积极表现</span>
-                      <span class="ppd-val" style="color:#22c55e">{{ positiveBehaviors.length }}次</span>
-                    </div>
-                    <div class="ppd-item">
-                      <span class="ppd-label">心理辅导</span>
-                      <span class="ppd-val" :style="{color: counselingRecords.length > 0 ? '#3b82f6' : '#888'}">{{ counselingRecords.length }}次</span>
-                    </div>
-                  </div>
-                  <div v-if="homeworks.length" class="pp-table-wrap">
-                    <h4>近期作业情况</h4>
-                    <table class="pp-table">
-                      <thead><tr><th>科目</th><th>作业标题</th><th>状态</th><th>评分</th></tr></thead>
-                      <tbody>
-                        <tr v-for="h in homeworks" :key="h.id">
-                          <td>{{ h.subject }}</td>
-                          <td>{{ h.title }}</td>
-                          <td>{{ h.status }}</td>
-                          <td>{{ h.score || '—' }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+              <!-- Body Content -->
+              <div v-html="renderedConfDocument" class="pp-md-body"></div>
+
+              <!-- Footer Separator -->
+              <div class="pp-hdiv" style="margin-top:36px">
+                <div class="pp-hdiv-line"></div>
+                <div class="pp-hdiv-star">❧</div>
+                <div class="pp-hdiv-line"></div>
               </div>
 
-              <!-- Module 3: Subjects (by elective) -->
-              <div v-if="getModule('subjects')?.enabled" class="pp-section">
-                <h2><span class="pp-num">三</span>各科学情分析</h2>
-                <div class="pp-content">
-                  <div v-for="subj in detailedSubjectReports" :key="subj.subject" class="pp-subject-block">
-                    <h3>{{ subj.icon }} {{ subj.subject }}
-                      <span v-if="subj.isElective" class="pp-elective-badge">选修</span>
-                      <span v-else class="pp-core-badge">核心</span>
-                    </h3>
-                    <div v-if="subj.latestExam">
-                      <div class="pp-score-row">
-                        最近考试：<b :style="{color: subj.scoreRate >= 0.9 ? '#22c55e' : subj.scoreRate >= 0.75 ? '#3b82f6' : subj.scoreRate >= 0.6 ? '#e67e22' : '#ef4444'}">{{ subj.latestExam.score }}/{{ subj.latestExam.total }}</b>
-                        ({{ subj.latestExam.examType }} · {{ subj.latestExam.date }})
-                        <span class="pp-rate-pct">得分率 {{ Math.round(subj.scoreRate * 100) }}%</span>
-                      </div>
-                      <!-- Rich Analysis -->
-                      <div v-if="!editMode" v-html="renderMd(docEdits.subjectMarkdown[subj.subject] || docEdits.subjectAnalysis[subj.subject])" class="pp-md-render"></div>
-                      <textarea v-else class="pp-edit-full" v-model="docEdits.subjectMarkdown[subj.subject]" rows="8" :placeholder="'编辑 ' + subj.subject + ' 学情分析（Markdown 格式）...'"></textarea>
-                      <div v-if="subj.latestExam.teacherFeedback" class="pp-feedback">
-                        <div class="pp-label-sm">教师反馈</div>
-                        <p>{{ subj.latestExam.teacherFeedback }}</p>
-                      </div>
-                    </div>
-                    <div v-else class="pp-no-data">暂无该科考试数据，建议关注该科学习进展</div>
-                  </div>
+              <!-- Signature Footer -->
+            
                 </div>
+              </el-watermark>
+            </template>
+            <div v-else id="confExportContainer" class="conf-export-inner">
+              <table class="pp-doc-head">
+                <tr>
+                  <td class="pp-doc-head-left"><div class="pp-doc-no">No. {{ today.replace(/-/g, '') }}</div><div class="pp-doc-type">家长会交流材料</div></td>
+                  <td class="pp-doc-head-center"><div class="pp-school-name">{{ schoolFullName }}</div><div class="pp-school-sub">{{ schoolSubtitle }}</div></td>
+                  <td class="pp-doc-head-right"><div class="pp-doc-stamp">内部资料</div><div class="pp-doc-stamp-sub">请妥善保管</div></td>
+                </tr>
+              </table>
+              <div class="pp-hdiv"><div class="pp-hdiv-line"></div><div class="pp-hdiv-diamond">◆</div><div class="pp-hdiv-line"></div></div>
+              <div class="pp-student-card">
+                <div class="pp-student-card-title">{{ studentProfile.name }} 同学 · 学情档案</div>
+                <table class="pp-info-table">
+                  <tr><td class="pp-info-cell"><span class="pp-info-label">所在班级</span><span class="pp-info-text">{{ studentProfile.class }}</span></td><td class="pp-info-cell"><span class="pp-info-label">文件日期</span><span class="pp-info-text">{{ today }}</span></td><td class="pp-info-cell"><span class="pp-info-label">班主任</span><span class="pp-info-text">{{ studentProfile.cc || homeroomTeacher }}</span></td></tr>
+                  <tr><td class="pp-info-cell"><span class="pp-info-label">选修科目</span><span class="pp-info-text">{{ [studentProfile.elective1, studentProfile.elective2, studentProfile.elective3].filter(Boolean).join('、') || '暂无' }}</span></td><td class="pp-info-cell"><span class="pp-info-label">目标院校</span><span class="pp-info-text">{{ studentProfile.targetUniversity || '暂无' }}</span></td><td class="pp-info-cell"><span class="pp-info-label">留学规划</span><span class="pp-info-text">{{ studentProfile.studyAbroadPlanning ? '有计划' : '暂无' }}</span></td></tr>
+                  <tr><td class="pp-info-cell"><span class="pp-info-label">出勤率</span><span class="pp-info-text">{{ attendanceRate }}%</span></td><td class="pp-info-cell"><span class="pp-info-label">作业完成率</span><span class="pp-info-text">{{ homeworkRate }}%</span></td><td class="pp-info-cell">
+                    <span class="pp-info-label">考试次数</span><span class="pp-info-text">{{ examRecords.length }} 次</span></td></tr>
+                </table>
               </div>
-
-              <!-- Module 4: Exam Analysis -->
-              <div v-if="getModule('examAnalysis')?.enabled" class="pp-section">
-                <h2><span class="pp-num">四</span>考试成绩分析</h2>
-                <div class="pp-content">
-                  <div v-for="subj in subjectAnalyses.filter(s => s.latestExam)" :key="subj.subject" class="pp-exam-block">
-                    <h3>{{ subj.icon }} {{ subj.subject }}</h3>
-                    <div class="pp-exam-bar-row">
-                      <div class="pp-exam-bar-label">得分率</div>
-                      <div class="pp-exam-bar-wrap">
-                        <div class="pp-exam-bar" :style="{width: subj.scoreRate*100+'%', background: subj.scoreRate>=0.9?'#22c55e':subj.scoreRate>=0.75?'#3b82f6':subj.scoreRate>=0.6?'#e67e22':'#ef4444'}"></div>
-                      </div>
-                      <span class="pp-exam-bar-pct">{{ Math.round(subj.scoreRate*100) }}%</span>
-                    </div>
-                    <div class="pp-exam-bar-row">
-                      <div class="pp-exam-bar-label">班级均分</div>
-                      <div class="pp-exam-bar-wrap">
-                        <div class="pp-exam-bar" :style="{width: getClassAvgForSubject(subj.subject)+'%', background:'#888'}"></div>
-                      </div>
-                      <span class="pp-exam-bar-pct">{{ getClassAvgForSubject(subj.subject) }}%</span>
-                    </div>
-                    <div class="pp-exam-delta" :class="subj.scoreRate*100 - getClassAvgForSubject(subj.subject) >= 0 ? 'above' : 'below'">
-                      {{ subj.scoreRate*100 - getClassAvgForSubject(subj.subject) >= 0 ? '↑ 高于' : '↓ 低于' }}班级均分 {{ Math.abs(Math.round(subj.scoreRate*100 - getClassAvgForSubject(subj.subject))) }}%
-                    </div>
-                    <div v-if="subj.prevExam" class="pp-exam-compare">
-                      <div class="pp-exam-compare-title">📈 与上次考试对比</div>
-                      <div class="pp-exam-compare-row">
-                        <span class="pp-exam-compare-label">上次</span>
-                        <span class="pp-exam-compare-val">{{ subj.prevExam.score }}/{{ subj.prevExam.total }} ({{ Math.round(subj.prevScoreRate*100) }}%)</span>
-                        <span style="font-size:10px;color:#888">{{ subj.prevExam.examType }} · {{ subj.prevExam.date }}</span>
-                      </div>
-                      <div class="pp-exam-compare-row">
-                        <span class="pp-exam-compare-label">本次</span>
-                        <span class="pp-exam-compare-val">{{ subj.latestExam.score }}/{{ subj.latestExam.total }} ({{ Math.round(subj.scoreRate*100) }}%)</span>
-                        <span :style="{fontSize:'11px',fontWeight:600,color:subj.scoreChange >= 0 ? '#22c55e' : '#ef4444'}">
-                          {{ subj.scoreChange >= 0 ? '↑' : '↓' }}{{ Math.abs(subj.scoreChange) }}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div v-if="!subjectAnalyses.filter(s => s.latestExam).length" class="pp-no-data">暂无考试对比数据</div>
-                </div>
-              </div>
-
-              <!-- Module 5: Plan -->
-              <div v-if="getModule('plan')?.enabled" class="pp-section">
-                <h2><span class="pp-num">五</span>提升建议与规划</h2>
-                <div class="pp-content">
-                  <div v-if="!editMode" v-html="renderMd(docEdits.planMarkdown)" class="pp-md-render"></div>
-                  <textarea v-else class="pp-edit-full" v-model="docEdits.planMarkdown" rows="20" placeholder="使用 Markdown 格式编辑提升建议与规划...&#10;&#10;## 短期（本周）&#10;- 短期计划项&#10;&#10;### 📐 数学（得分率 85%）&#10;- 学科策略&#10;&#10;## 中长期（本月·学期）&#10;- 长期计划项"></textarea>
-                </div>
-              </div>
-              <div v-if="getModule('summary')?.enabled" class="pp-section">
-                <h2><span class="pp-num">六</span>总结与家校共育</h2>
-                <div class="pp-content">
-                  <div class="pp-summary-box">
-                    <div v-if="!editMode" v-html="renderMd(docEdits.summaryMarkdown)" class="pp-md-render"></div>
-                    <textarea v-else class="pp-edit-full" v-model="docEdits.summaryMarkdown" rows="16" placeholder="使用 Markdown 格式编辑总结与家校共育...&#10;&#10;总结段落直接书写。&#10;&#10;- 关键要点用 - 开头&#10;- **粗体** 强调重点&#10;&#10;支持换行分段。"></textarea>
-                    <div v-if="teacherSupplement" style="margin-top:16px;padding:14px;background:var(--admin-bg);border-left:3px solid var(--admin-warning);border-radius:0 8px 8px 0">
-                      <p style="font-weight:700;font-size:12px;color:var(--admin-accent);margin:0 0 6px">📌 教师补充意见</p>
-                      <p style="margin:0;font-size:12px;color:var(--admin-text-secondary);text-indent:0;white-space:pre-wrap">{{ teacherSupplement }}</p>
-                    </div>
-                  </div>
-                  <div class="pp-footer">
-                    <p class="pp-signature">班主任：{{ studentProfile.cc || '张老师' }}</p>
-                    <p class="pp-signature">{{ today }}</p>
-                  </div>
-                </div>
-              </div>
+              <div class="pp-hdiv"><div class="pp-hdiv-line"></div><div class="pp-hdiv-star">✦</div><div class="pp-hdiv-line"></div></div>
+              <div v-html="renderedConfDocument" class="pp-md-body"></div>
+              <div class="pp-hdiv" style="margin-top:36px"><div class="pp-hdiv-line"></div><div class="pp-hdiv-star">❧</div><div class="pp-hdiv-line"></div></div>
+              <table v-if="showTeacherSign || showParentSign" class="pp-sign-table">
+                <tr v-if="showTeacherSign"><td class="pp-sign-cell">班主任签字：_______________</td><td class="pp-sign-cell" style="text-align:right">日期：{{ today }}</td></tr>
+                <tr v-if="showParentSign"><td class="pp-sign-cell">家长签字：_______________</td><td class="pp-sign-cell" style="text-align:right">{{ schoolName }} · {{ reportFooter }}</td></tr>
+              </table>
             </div>
           </div>
         </div>
@@ -402,25 +389,63 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import html2canvas from 'html2canvas'
+import { MdEditor, MdPreview, MdCatalog } from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
+import 'md-editor-v3/lib/preview.css'
+import { marked } from 'marked'
 import { studentService, examService, attendanceService, homeworkService, behaviorService, phoneRecordService, counselingService, settingsService } from '@/services/dataService'
 import { useAppStore } from '@/stores/app'
-import { renderRichContent } from '@/utils/renderContent'
+import { buildPrintHTML } from '@/utils/printTemplate'
+import { getWatermarkStyle, getWatermarkHTML } from '@/utils/watermark'
 
-function renderMd(text) {
-  if (!text) return ''
-  return renderRichContent(text)
-}
+// Configure marked for document rendering
+marked.setOptions({ breaks: true, gfm: true })
+
+const previewId = 'conf-preview-only'
+const previewScrollEl = computed(() => document.documentElement)
+
+const mdToolbarsEx = [
+  // ✏️ 基础文本
+  'bold', 'italic', 'underline', 'strikeThrough', 'title', 'sub', 'sup', '-',
+
+  // 📚 结构与列表
+  'quote', 'unorderedList', 'orderedList', 'task', 'codeRow', 'code', '-',
+
+  // 🧩 插入能力（增强：补 mermaid）
+  'link', 'image', 'table', 'katex', '-',
+
+  // ↩️ 操作
+  'revoke', 'next', 'save', '-',
+
+  // 👁️ 视图（增强：补 previewOnly）
+  'preview', 'htmlPreview', 'catalog', 'mermaid','previewOnly','-',
+
+  // 🖥️ 全屏
+  'fullscreen', 'pageFullscreen', 'github'
+]
+
+const mdFooters = ['markdownTotal', 'scrollSwitch']
 
 const store = useAppStore()
 const selectedClass = ref('')
 const selectedStudentId = ref(null)
 const studentProfile = ref(null)
 const isFullScreen = ref(false)
-const previewRef = ref(null)
+const previewOnly = ref(false)
 const today = new Date().toISOString().split('T')[0]
 const schoolName = ref('威学一百')
+const schoolFullName = ref('威学一百国际教育')
+const schoolSubtitle = ref('DSE 学习智能分析系统 · 个性化专属学习报告')
+const homeroomTeacher = ref('张老师')
+const reportFooter = ref('用心陪伴每一位学生的成长')
+const watermarkEnabled = ref(true)
+const watermarkText = ref('内部资料·仅供家长会使用')
+const previewTheme = ref('default')
+const showTeacherSign = ref(true)
+const showParentSign = ref(true)
 const examMonthFilter = ref('')
 const examTypeFilter = ref('')
 const hwDateFrom = ref('')
@@ -491,6 +516,110 @@ const contentModules = ref([
   { id: 'plan', icon: '🎯', name: '提升建议与规划', enabled: true },
   { id: 'summary', icon: '💬', name: '总结与家校共育', enabled: true }
 ])
+
+// Template system
+const selectedTemplate = ref('steady') // 'foundation' | 'steady' | 'excellence'
+const templateOptions = [
+  { value: 'foundation', label: '基础巩固型', desc: '适合需要夯实基础、逐步建立信心的学生', tone: '温暖鼓励、小步前进', icon: '🌱' },
+  { value: 'steady', label: '稳步提升型', desc: '适合基础尚可、需要系统提升的学生', tone: '肯定进步、精准突破', icon: '📈' },
+  { value: 'excellence', label: '拔尖突破型', desc: '适合基础扎实、追求更高目标的学生', tone: '挑战激励、拓宽视野', icon: '🏆' }
+]
+
+const templateContent = {
+  foundation: {
+    praiseTone: '每一个微小的进步都值得被看见、被肯定。基础阶段的每一步踏实积累，都是未来飞跃的坚实跳板。',
+    praiseExtra: ['课堂参与度逐步提升，能够主动跟随教学节奏', '作业完成意识不断增强，课后学习习惯正在养成', '面对困难时表现出可贵的坚持精神'],
+    analysisApproach: '当前阶段的首要任务是回归课本、夯实基础。不必焦虑于暂时的不理想——很多学生在打牢基础后，成绩会出现明显的跃升。',
+    planShortTerm: ['整理本周所有作业中的错题，逐题重新独立完成', '每天安排20-30分钟复习当天所学内容', '标记理解困难的知识点，主动寻求老师帮助'],
+    planLongTerm: ['建立个人错题本，每周回顾一次', '针对薄弱科目，每周增加2-3次专项练习', '培养"先复习、再作业"的规范学习流程', '逐步建立自主学习的习惯和信心'],
+    summaryCore: '正处于打基础的关键阶段。现阶段最重要的事情不是追求高难度题目的突破，而是把每一个基础知识点理解透彻、把每一道基础题做对做稳。请家长多关注孩子的学习习惯养成，多给予正面鼓励——在这个阶段，信心比黄金更珍贵。',
+    closingNote: '每一个稳步前进的日子，都在为未来的突破积蓄力量。'
+  },
+  steady: {
+    praiseTone: '整体学习状态良好，具备了进一步突破的基础条件。现在的关键是——从"听懂"走向"独立做对"，从"会做"走向"做得又快又准"。',
+    praiseExtra: ['学习态度端正，能够按时完成各项学习任务', '具备一定的自主学习意识，课堂互动较为积极', '在部分学科上已展现出较好的理解能力'],
+    analysisApproach: '当前处于稳步上升期，需要在巩固优势的同时，精准定位薄弱环节进行针对性突破。建议将精力集中在"跳一跳能够到"的中档题型上。',
+    planShortTerm: ['分析本次考试失分点，区分"粗心丢分"和"不会丢分"', '针对薄弱知识点，每天额外安排15-20分钟专项训练', '建立"看到题型→判断考点→选择解法"的解题流程'],
+    planLongTerm: ['每科建立错题本，标注错因类型和掌握状态', '每周做一次限时训练，提升解题速度和准确度', '适当接触DSE真题，了解命题思路和评分标准', '保持与各科老师的沟通，及时反馈学习困惑'],
+    summaryCore: '正处于稳步提升的关键期。这个阶段最需要的是——精准的努力和持续的习惯。不是刷题越多越好，而是每做一道题都有收获。请家长关注孩子的学习方法和效率，帮助孩子建立合理的时间规划，避免"假努力"陷阱。',
+    closingNote: '精准的努力，比盲目的勤奋更有力量。'
+  },
+  excellence: {
+    praiseTone: '学术表现优秀，展现了出色的学习能力和自律精神。在此基础上，我们更关注——如何从优秀走向卓越，如何培养深层思维和创新能力。',
+    praiseExtra: ['学术成绩稳定在较高水平，具备冲击顶尖高校的潜力', '学习方法较为成熟，具备良好的自我管理能力', '在课堂上能够举一反三，展现出较强的思维能力'],
+    analysisApproach: '当前各科基础扎实，提升空间主要在：压轴题突破、跨知识点综合应用、解题速度和准确度的极致优化。建议将视野放宽，不只盯着分数，更要关注学科思维的深度和广度。',
+    planShortTerm: ['逐题分析失分原因——即使是1分的失分也要深究根源', '每天安排30分钟挑战1-2道DSE压轴题或竞赛题', '建立"最优解法"意识——不只做对，还要思考是否有更优解'],
+    planLongTerm: ['建立学科知识网络图，将零散知识点系统化、结构化', '定期进行全真模拟训练，严格限时、严格评分', '尝试给同学讲解难题——教别人的过程是最好的深度学习', '关注学科前沿和实际应用，将知识从课本延伸到现实'],
+    summaryCore: '已经站在了一个较高的起点上。接下来的挑战不是"和别人比"，而是"和自己的潜力比"。请家长在肯定成绩的同时，引导孩子树立更高的目标——不只是分数，更是思维品质和综合能力的全面提升。避免满足于现状，保持对知识的敬畏和好奇心。',
+    closingNote: '卓越不是一个目标，而是一种习惯。'
+  }
+}
+
+function applyTemplate(type) {
+  selectedTemplate.value = type
+  const t = templateContent[type]
+  if (!t || !studentProfile.value) return
+
+  // Rebuild praise markdown
+  const pLines = [`${studentProfile.value.name}同学在本阶段展现了积极的学习态度，以下方面值得肯定：`, '']
+  docEdits.value.praises.filter(x => x).forEach(p => { pLines.push('- ' + p) })
+  pLines.push('', t.praiseTone, '')
+  t.praiseExtra.forEach(e => { pLines.push('- ' + e) })
+  docEdits.value.praiseMarkdown = pLines.join('\n')
+
+  // Rebuild plan markdown
+  const planLines = ['## 短期（本周）', '']
+  t.planShortTerm.forEach(s => { planLines.push('- ' + s) })
+  planLines.push('')
+  detailedSubjectReports.value.filter(s => s.latestExam).forEach(subj => {
+    planLines.push(`### ${subj.icon} ${subj.subject}（得分率 ${Math.round(subj.scoreRate * 100)}%）`)
+    const strategies = docEdits.value.subjectEdits[subj.subject]?.strategies || subj.strategies || []
+    strategies.filter(x => x).forEach(s => { planLines.push('- ' + s) })
+    planLines.push('')
+  })
+  planLines.push('## 中长期（本月·学期）', '')
+  t.planLongTerm.forEach(s => { planLines.push('- ' + s) })
+  docEdits.value.planMarkdown = planLines.join('\n')
+
+  // Rebuild summary markdown
+  const sumLines = [docEdits.value.summaryP1, '', t.summaryCore, '']
+  docEdits.value.summaryKeyPoints.filter(x => x).forEach(kp => { sumLines.push('- ' + kp) })
+  sumLines.push('', docEdits.value.summaryP2, '', docEdits.value.summaryP3, '', `> *"${t.closingNote}"*`)
+  docEdits.value.summaryMarkdown = sumLines.join('\n')
+
+  // Update subject analysis tone
+  docEdits.value.subjectMarkdown = {}
+  detailedSubjectReports.value.forEach(sa => {
+    const edits = docEdits.value.subjectEdits[sa.subject]
+    const subjLines = [(docEdits.value.subjectAnalysis[sa.subject] || sa.analysisText || ''), '']
+    subjLines.push(t.analysisApproach)
+    subjLines.push('')
+    if (edits) {
+      const strengths = edits.strengths?.filter(x => x) || []
+      if (strengths.length) { subjLines.push('**优势方面：**'); strengths.forEach(s => { subjLines.push('- ' + s) }); subjLines.push('') }
+      const weaknesses = edits.weaknesses?.filter(x => x) || []
+      if (weaknesses.length) { subjLines.push('**需要关注：**'); weaknesses.forEach(w => { subjLines.push('- ' + w) }); subjLines.push('') }
+    }
+    docEdits.value.subjectMarkdown[sa.subject] = subjLines.join('\n')
+  })
+
+  buildFullDocument()
+  ElMessage.success(`已应用「${templateOptions.find(o => o.value === type)?.label}」模板`)
+}
+
+// Drag reorder for content modules
+const dragSourceIdx = ref(null)
+function onDragStart(idx) { dragSourceIdx.value = idx }
+function onDragOver(e) { e.preventDefault() }
+function onDrop(idx) {
+  if (dragSourceIdx.value === null || dragSourceIdx.value === idx) return
+  const items = [...contentModules.value]
+  const [moved] = items.splice(dragSourceIdx.value, 1)
+  items.splice(idx, 0, moved)
+  contentModules.value = items
+  dragSourceIdx.value = null
+}
+function onDragEnd() { dragSourceIdx.value = null }
 
 const classList = computed(() => studentService.getClasses())
 const classStudents = computed(() => selectedClass.value ? studentService.getAll().filter(s => s.class === selectedClass.value) : [])
@@ -662,8 +791,7 @@ function loadStudentData() {
   setTimeout(() => initDocEdits(), 0)
 }
 
-// Edit mode for document content
-const editMode = ref(false)
+// Document content edits
 const docEdits = ref({
   praiseIntro: '',
   praises: [],
@@ -723,6 +851,7 @@ function initDocEdits() {
     }
   })
   composeAllMarkdown()
+  buildFullDocument()
 }
 
 function composeAllMarkdown() {
@@ -760,12 +889,45 @@ function composeAllMarkdown() {
     }
     docEdits.value.subjectMarkdown[sa.subject] = subjLines.join('\n')
   })
+  buildFullDocument()
 }
 
-function toggleEditMode() {
-  if (!editMode.value) { composeAllMarkdown() }
-  editMode.value = !editMode.value
+// Watch module toggles to rebuild editor content
+watch(contentModules, () => { composeAllMarkdown() }, { deep: true })
+
+function handleEditorSave() {
+  ElMessage.success('文稿已保存')
 }
+
+// Full-document markdown ref (mutable, for MdEditor v-model)
+const fullConfDocument = ref('')
+
+function buildFullDocument() {
+  const sections = []
+  const push = (header, md) => { if (md && md.trim()) sections.push(header, '', md, '') }
+
+  if (getModule('praise')?.enabled) push('# 一、成长亮点与进步肯定', docEdits.value.praiseMarkdown)
+  if (getModule('daily')?.enabled) sections.push('# 二、日常学习表现', '', '(数据由系统自动生成)', '')
+  if (getModule('subjects')?.enabled) {
+    sections.push('# 三、各科学情分析', '')
+    detailedSubjectReports.value.forEach(sa => {
+      sections.push(`## ${sa.icon} ${sa.subject}`)
+      const md = docEdits.value.subjectMarkdown[sa.subject] || ''
+      if (md.trim()) sections.push('', md, '')
+      else sections.push('', '(暂无分析)', '')
+    })
+  }
+  if (getModule('examAnalysis')?.enabled) sections.push('# 四、考试成绩分析', '', '(数据由系统自动生成)', '')
+  if (getModule('plan')?.enabled) push('# 五、提升建议与规划', docEdits.value.planMarkdown)
+  if (getModule('summary')?.enabled) push('# 六、总结与家校共育', docEdits.value.summaryMarkdown)
+
+  fullConfDocument.value = sections.join('\n') || '# 请先生成文稿'
+}
+
+const renderedConfDocument = computed(() => {
+  if (!fullConfDocument.value) return '<p style="color:#999;text-align:center">暂无内容</p>'
+  return marked.parse(fullConfDocument.value)
+})
 
 // AI Diagnosis
 const aiDiagnosing = ref(false)
@@ -870,19 +1032,144 @@ async function startAiDiagnosis() {
 }
 
 function toggleFullscreen() { isFullScreen.value = !isFullScreen.value }
+function togglePreviewOnly() { previewOnly.value = !previewOnly.value }
+function exportPDF() {
+  const w = window.open('', '_blank', 'width=900,height=700')
+  if (!w) { ElMessage.warning('请允许弹出窗口以导出PDF'); return }
+  const sp = studentProfile.value
+  const html = buildPrintHTML({
+    title: sp?.name ? sp.name + '_家长会文稿' : '家长会文稿',
+    docNo: 'No. ' + today.replace(/-/g, ''),
+    name: sp?.name || '',
+    cls: sp?.class || '',
+    cc: sp?.cc || homeroomTeacher.value,
+    electives: [sp?.elective1, sp?.elective2, sp?.elective3].filter(Boolean).join('、') || '暂无',
+    targetUni: sp?.targetUniversity || '暂无',
+    abroad: sp?.studyAbroadPlanning ? '有计划' : '暂无',
+    attRate: attendanceRate.value,
+    hwRate: homeworkRate.value,
+    examCount: examRecords.value.length,
+    schName: schoolName.value,
+    schFull: schoolFullName.value,
+    schSub: schoolSubtitle.value,
+    footer: reportFooter.value,
+    today,
+    bodyHTML: renderedConfDocument.value,
+    showTeacherSign: showTeacherSign.value,
+    showParentSign: showParentSign.value,
+    watermarkStyle: getWatermarkStyle(),
+    watermarkHTML: getWatermarkHTML()
+  })
+  w.document.write(html)
+  w.document.close()
+}
 function printDocument() { window.print() }
+
+const exporting = ref(false)
+async function exportDocument() {
+  exporting.value = true
+  try {
+    await new Promise(r => setTimeout(r, 300))
+    const el = document.getElementById('confExportContainer')
+    if (!el) { ElMessage.warning('导出容器未找到'); exporting.value = false; return }
+    const canvas = await html2canvas(el, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      width: el.scrollWidth,
+      height: el.scrollHeight
+    })
+    const link = document.createElement('a')
+    link.download = `${studentProfile.value?.name || '学生'}_家长会文稿_${today}.png`
+    link.href = canvas.toDataURL('image/png')
+    link.click()
+    ElMessage.success('文稿已导出为高清A4图片')
+  } catch (e) {
+    ElMessage.error('导出失败，请重试')
+  }
+  exporting.value = false
+}
 
 onMounted(() => {
   const s = settingsService.get()
   schoolName.value = s.schoolName || store.schoolName
+  schoolFullName.value = s.schoolFullName || store.schoolFullName
+  schoolSubtitle.value = s.schoolSubtitle || store.schoolSubtitle
+  homeroomTeacher.value = s.homeroomTeacher || store.homeroomTeacher
+  reportFooter.value = s.reportFooter || store.reportFooter
+  watermarkEnabled.value = s.watermarkEnabled !== undefined ? s.watermarkEnabled : store.watermarkEnabled
+  watermarkText.value = s.watermarkText || store.watermarkText
+  previewTheme.value = s.previewTheme || 'default'
+  showTeacherSign.value = s.showTeacherSign !== undefined ? s.showTeacherSign : true
+  showParentSign.value = s.showParentSign !== undefined ? s.showParentSign : true
 })
 </script>
 
 <style scoped>
+/* === Page Hero === */
+.conf-page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.conf-page-hero::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--admin-accent), transparent);
+  border-radius: 0 2px 2px 0;
+}
+
+.conf-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.conf-hero-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(212,168,83,0.15), rgba(212,168,83,0.05));
+  border-radius: 12px;
+  font-size: 22px;
+  border: 1px solid rgba(212,168,83,0.2);
+}
+
+.conf-hero-text h1 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--admin-text);
+  letter-spacing: 0.5px;
+}
+
+.conf-hero-text p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--admin-text-muted);
+  letter-spacing: 0.3px;
+}
+
+/* === Layout === */
 .conf-layout { display: grid; grid-template-columns: 340px 1fr; gap: 16px; align-items: start; }
 
 /* Left Panel */
-.conf-left { display: flex; flex-direction: column; gap: 16px; overflow-y: auto; max-height: calc(100vh - 140px); }
+.conf-left { display: flex; flex-direction: column; gap: 16px; overflow-y: auto; max-height: calc(100vh - 200px); }
 .student-card { display: flex; align-items: center; gap: 14px; padding: 14px; background: var(--admin-bg); border-radius: 10px; }
 .sc-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--admin-accent), var(--admin-accent-dark)); display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; font-weight: 700; flex-shrink: 0; }
 .sc-info { flex: 1; }
@@ -902,89 +1189,586 @@ onMounted(() => {
 .cm-icon { font-size: 16px; }
 .cm-name { flex: 1; font-size: 13px; color: var(--admin-text); }
 
-/* Preview */
-.preview-container { background: #f5f0e8; padding: 24px; border-radius: 8px; max-height: 75vh; overflow-y: auto; }
-.preview-container.fullscreen { position: fixed; inset: 0; z-index: 9999; background: #e8e2d8; max-height: none; padding: 0; border-radius: 0; overflow-y: auto; }
-.fs-bar { position: sticky; top: 0; z-index: 10; background: #4a2c17; color: #f5f0e8; padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; }
+/* === Right Panel === */
+.conf-right-card {
+  position: relative;
+}
 
-.preview-paper { max-width: 800px; margin: 0 auto; background: #fff; padding: 48px 56px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); font-family: 'PingFang SC','Microsoft YaHei',serif; color: #2c2c2c; line-height: 1.8; font-size: 14px; }
-.fullscreen .preview-paper { margin: 24px auto 48px; }
+.conf-right-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--admin-border);
+  background: var(--admin-bg-secondary);
+  border-radius: var(--admin-radius) var(--admin-radius) 0 0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 
-.pp-header { text-align: center; border-bottom: 2px solid #8b5e3c; padding-bottom: 20px; margin-bottom: 28px; }
-.pp-header h1 { font-size: 22px; font-weight: 700; margin: 0 0 12px; color: #4a2c17; letter-spacing: 2px; }
-.pp-meta { display: flex; justify-content: center; gap: 24px; font-size: 13px; color: #666; flex-wrap: wrap; }
-.pp-section { margin-bottom: 28px; page-break-inside: avoid; }
-.pp-section h2 { font-size: 18px; font-weight: 700; color: #4a2c17; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 10px; }
-.pp-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #8b5e3c; color: #fff; border-radius: 50%; font-size: 14px; flex-shrink: 0; }
-.pp-content { padding-left: 8px; }
-.pp-content p { margin: 8px 0; text-indent: 2em; }
-.pp-content ul { padding-left: 3em; }
-.pp-content ul li { margin: 4px 0; }
-.pp-data-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 12px 0 16px; }
-.ppd-item { text-align: center; padding: 12px; background: #faf8f5; border-radius: 8px; border: 1px solid #eee; }
-.ppd-label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
-.ppd-val { display: block; font-size: 20px; font-weight: 700; }
-.ppd-val.good { color: #22c55e; } .ppd-val.warn { color: #e67e22; }
+.conf-right-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
-.pp-behavior-box { margin-top: 12px; padding: 10px 14px; background: #faf8f5; border-radius: 6px; }
-.pp-behavior-item { font-size: 12px; padding: 4px 0; display: flex; gap: 12px; border-bottom: 1px solid #eee; }
-.pp-behavior-item:last-child { border-bottom: none; }
-.pp-date { color: #999; white-space: nowrap; font-size: 11px; }
+.conf-right-header-icon {
+  font-size: 22px;
+  line-height: 1;
+}
 
-.pp-table-wrap { margin-top: 14px; }
-.pp-table-wrap h4 { font-size: 13px; color: #4a2c17; margin-bottom: 8px; }
-.pp-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0; }
-.pp-table th { text-align: left; padding: 6px 10px; background: #faf8f5; border-bottom: 2px solid #ddd; font-weight: 600; color: #4a2c17; }
-.pp-table td { padding: 6px 10px; border-bottom: 1px solid #eee; }
+.conf-right-header-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--admin-text);
+  letter-spacing: 0.4px;
+}
 
-.pp-subject-block { margin-bottom: 20px; padding: 14px; border: 1px solid #eee; border-radius: 8px; }
-.pp-subject-block h3 { font-size: 15px; font-weight: 700; color: #4a2c17; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
-.pp-elective-badge { font-size: 10px; background: #fdf6ec; color: #b1740e; padding: 1px 8px; border-radius: 4px; font-weight: 500; }
-.pp-core-badge { font-size: 10px; background: #ecf5ff; color: #3b82f6; padding: 1px 8px; border-radius: 4px; font-weight: 500; }
-.pp-score-row { font-size: 13px; color: #555; margin-bottom: 8px; }
-.pp-feedback { padding: 10px 14px; background: #f3f0fa; border-left: 3px solid #7c3aed; border-radius: 0 6px 6px 0; margin: 10px 0; }
-.pp-feedback p { font-size: 12px; color: #555; text-indent: 0; margin: 4px 0; }
-.pp-no-data { font-size: 12px; color: #999; text-align: center; padding: 10px; }
-.pp-label-sm { font-size: 12px; font-weight: 700; color: #7c3aed; margin-bottom: 4px; }
+.conf-right-header-sub {
+  font-size: 11px;
+  color: var(--admin-text-muted);
+  margin-top: 2px;
+}
 
-.pp-plan-item { padding: 10px 14px; margin-bottom: 10px; background: #faf8f5; border-radius: 0 8px 8px 0; border-left: 3px solid #8b5e3c; }
-.pp-plan-subject { font-size: 13px; font-weight: 600; color: #8b5e3c; margin-bottom: 4px; }
+.conf-right-header-actions {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
 
-.pp-rate-pct { font-size: 11px; color: #888; margin-left: 8px; }
-.pp-analysis-text { padding: 10px 14px; background: #faf8f5; border-radius: 6px; margin: 8px 0; }
-.pp-analysis-text p { font-size: 13px; color: #555; text-indent: 0; margin: 0; line-height: 1.9; }
-.pp-point-box { padding: 10px 14px; border-radius: 6px; margin: 8px 0; }
-.pp-point-box.strengths { background: #f0faf3; border-left: 3px solid #22c55e; }
-.pp-point-box.weaknesses { background: #fef9e7; border-left: 3px solid #e67e22; }
-.pp-point-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
-.pp-point-box.strengths .pp-point-title { color: #22c55e; }
-.pp-point-box.weaknesses .pp-point-title { color: #e67e22; }
-.pp-point-box ul { padding-left: 1.5em; margin: 4px 0; }
-.pp-point-box li { font-size: 12px; color: #555; margin: 3px 0; }
-.pp-plan-item ul { font-size: 12px; padding-left: 2em; }
+.conf-action-btn {
+  font-size: 12px !important;
+  color: var(--admin-text-secondary) !important;
+  padding: 4px 17px !important;
+  border-radius: 6px !important;
+  transition: all 0.2s;
+}
 
-.pp-summary-box { padding: 16px 20px; background: linear-gradient(135deg, #fdf8f3, #faf8f5); border: 1px solid #eee; border-radius: 10px; margin-bottom: 16px; }
-.pp-footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; color: #888; font-size: 13px; }
-.pp-signature { text-align: right; margin-top: 8px; font-size: 13px; color: #555; }
+.conf-action-btn:hover {
+  background: var(--admin-surface-hover) !important;
+  color: var(--admin-text) !important;
+}
 
-/* Exam analysis styles */
-.pp-exam-block { margin-bottom: 14px; padding: 12px; background: #faf8f5; border-radius: 8px; }
-.pp-exam-block h3 { font-size: 13px; font-weight: 600; color: #4a2c17; margin: 0 0 6px; }
-.pp-exam-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 11px; }
-.pp-exam-bar-label { width: 64px; color: #888; flex-shrink: 0; }
-.pp-exam-bar-wrap { flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
-.pp-exam-bar { height: 100%; border-radius: 4px; transition: width 0.5s; }
-.pp-exam-bar-pct { width: 36px; text-align: right; color: #555; font-weight: 500; flex-shrink: 0; }
-.pp-exam-delta { font-size: 10px; margin-top: 2px; padding-left: 72px; }
-.pp-exam-delta.above { color: #22c55e; }
-.pp-exam-delta.below { color: #ef4444; }
-.pp-exam-compare { margin-top: 8px; padding: 8px 10px; background: #f0f9ff; border-radius: 6px; border: 1px solid #e0f0ff; }
-.pp-exam-compare-title { font-size: 11px; font-weight: 600; color: #3b82f6; margin-bottom: 6px; }
-.pp-exam-compare-row { display: flex; align-items: center; gap: 10px; font-size: 11px; margin-bottom: 2px; }
-.pp-exam-compare-label { width: 32px; color: #888; }
-.pp-exam-compare-val { color: #333; font-weight: 500; }
+.conf-mode-toggle-btn {
+  font-size: 12px !important;
+  border-radius: 6px !important;
+  padding: 4px 12px !important;
+  font-weight: 600 !important;
+}
+
+/* === Editor Pane === */
+.conf-editor-pane {
+  height: 100%;
+}
+
+.conf-editor-pane :deep(.md-editor) {
+  height: 100%;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* === Preview-Only Pane === */
+.conf-preview-pane {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  background: #e8e4db;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.conf-preview-pane :deep(.md-editor-preview-wrapper) {
+  padding: 48px 56px;
+  max-width: 794px;
+  margin: 20px auto;
+  overflow-y: auto;
+  height: auto;
+  min-height: 1123px;
+  line-height: 1.9;
+  font-size: 14px;
+  color: #2d2d2d;
+  background: #fffef9;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04);
+  border-radius: 3px;
+}
+
+.conf-preview-pane :deep(.md-editor-preview-wrapper) h1 {
+  font-size: 22px;
+  font-weight: 700;
+  border-bottom: 2px solid var(--admin-accent);
+  padding-bottom: 8px;
+  margin: 20px 0 12px;
+}
+
+.conf-preview-pane :deep(.md-editor-preview-wrapper) h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 16px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.conf-preview-pane :deep(.md-editor-preview-wrapper) h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 12px 0 8px;
+}
+
+.conf-preview-pane :deep(.md-editor-preview-wrapper) table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--admin-border);
+}
+
+.conf-preview-pane :deep(.md-editor-preview-wrapper) th {
+  background: var(--admin-bg-secondary);
+  padding: 8px 12px;
+  border: 1px solid var(--admin-border);
+  font-weight: 600;
+}
+
+.conf-preview-pane :deep(.md-editor-preview-wrapper) td {
+  padding: 6px 12px;
+  border: 1px solid var(--admin-border);
+}
+
+.conf-preview-pane :deep(.md-editor-preview-wrapper) blockquote {
+  border-left: 3px solid var(--admin-accent);
+  padding: 8px 16px;
+  margin: 12px 0;
+  background: var(--admin-bg);
+  font-style: italic;
+}
+
+.conf-preview-pane :deep(.md-editor-preview-wrapper) code {
+  background: var(--admin-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.conf-preview-pane :deep(.md-editor-preview-wrapper) pre {
+  background: var(--admin-bg);
+  padding: 12px 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.conf-catalog-wrap {
+  border-left: 1px solid var(--admin-border);
+  padding: 16px 12px;
+  overflow-y: auto;
+  height: 100%;
+  background: var(--admin-bg);
+}
+
+.conf-catalog-wrap :deep(.md-editor-catalog) {
+  font-size: 12px;
+}
+
+.conf-catalog-wrap :deep(.md-editor-catalog a) {
+  color: var(--admin-text-secondary);
+  text-decoration: none;
+}
+
+.conf-catalog-wrap :deep(.md-editor-catalog a:hover) {
+  color: var(--admin-accent);
+}
+
+/* === Empty State === */
+.conf-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  min-height: 400px;
+}
+
+.conf-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.conf-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--admin-text);
+  margin-bottom: 8px;
+}
+
+.conf-empty-desc {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+  text-align: center;
+  line-height: 1.8;
+}
+
+/* === md-editor-v3 Wrapper === */
+.conf-md-editor-wrap {
+  height: calc(100vh - 220px);
+  min-height: 600px;
+  overflow: hidden;
+  border-radius: 0 0 var(--admin-radius) var(--admin-radius);
+}
+
+.conf-md-editor-wrap.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  height: 100vh;
+  border-radius: 0;
+  border: none;
+}
+
+.conf-md-editor-wrap :deep(.md-editor) {
+  height: 100%;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 65px;
+}
+
+.conf-md-editor-wrap :deep(.md-editor-content) {
+  height: 100%;
+}
+
+.conf-md-editor-wrap :deep(.md-editor-toolbar) {
+  border-top: none !important;
+}
+
+.fs-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(135deg, var(--admin-bg-secondary), var(--admin-surface));
+  color: var(--admin-text);
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--admin-border);
+  letter-spacing: 0.4px;
+}
+
+/* === Hidden Export Container === */
+.hw-export-hidden {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 860px;
+  z-index: -1;
+}
+
+/* Outer container — html2canvas-safe: solid colors, borders, no pseudo-elements for critical visuals */
+.conf-export-inner {
+  position: relative;
+  background: #fffef9;
+  padding: 44px 48px 40px;
+  font-family: 'Noto Serif SC', 'PingFang SC', 'STSong', 'SimSun', 'Microsoft YaHei', serif;
+  color: #2d2d2d;
+  line-height: 1.9;
+  font-size: 14px;
+  border: 3px double #b8943e;
+  margin: 4px;
+  box-shadow: 0 0 0 2px #f5f0e3, 0 0 0 5px #b8943e;
+}
+
+/* === Document Head (3-column table) === */
+.pp-doc-head {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+.pp-doc-head td { vertical-align: middle; padding: 0; }
+.pp-doc-head-left { width: 28%; text-align: left; }
+.pp-doc-head-center { width: 44%; text-align: center; }
+.pp-doc-head-right { width: 28%; text-align: right; }
+
+.pp-doc-no {
+  font-size: 11px;
+  color: #999;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+.pp-doc-type {
+  font-size: 13px;
+  font-weight: 700;
+  color: #b8943e;
+  letter-spacing: 3px;
+  border: 1px solid #b8943e;
+  display: inline-block;
+  padding: 3px 14px;
+}
+.pp-school-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #3d2200;
+  letter-spacing: 5px;
+}
+.pp-school-sub {
+  font-size: 10px;
+  color: #999;
+  letter-spacing: 1.5px;
+  margin-top: 2px;
+}
+.pp-doc-stamp {
+  font-size: 11px;
+  color: #c0392b;
+  font-weight: 700;
+  letter-spacing: 2px;
+  border: 1px solid #c0392b;
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 2px;
+  opacity: 0.75;
+}
+.pp-doc-stamp-sub {
+  font-size: 9px;
+  color: #aaa;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* === Header Divider === */
+.pp-hdiv {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0 20px;
+}
+.pp-hdiv-line {
+  flex: 1;
+  height: 0;
+  border-bottom: 1px dotted #c8a04e;
+}
+.pp-hdiv-diamond {
+  color: #c8a04e;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.pp-hdiv-star {
+  color: #c8a04e;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* === Student Profile Card === */
+.pp-student-card {
+  border: 1px solid #e0d5b8;
+  background: #fdfaf3;
+  padding: 14px 18px 8px;
+  margin-bottom: 4px;
+}
+.pp-student-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #5c3d20;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0d5b8;
+  letter-spacing: 1px;
+}
+.pp-info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.pp-info-table td { padding: 4px 0; }
+.pp-info-cell {
+  font-size: 12px;
+  padding: 3px 8px 3px 0 !important;
+}
+.pp-info-label {
+  color: #8b692e;
+  font-weight: 600;
+  margin-right: 6px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+.pp-info-label::after { content: '：'; }
+.pp-info-text {
+  color: #2d2d2d;
+  font-size: 12px;
+}
+
+/* === Export Body (Rendered Markdown) === */
+.pp-md-body {
+  min-height: 180px;
+}
+.pp-md-body :deep(h1) {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3d2200;
+  margin: 28px 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #b8943e;
+  letter-spacing: 1.5px;
+}
+.pp-md-body :deep(h2) {
+  font-size: 17px;
+  font-weight: 700;
+  color: #4a2c17;
+  margin: 22px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #d5c8a0;
+  letter-spacing: 0.5px;
+}
+.pp-md-body :deep(h3) {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5c3d20;
+  margin: 16px 0 8px;
+}
+.pp-md-body :deep(p) {
+  margin: 10px 0;
+  text-indent: 2em;
+}
+.pp-md-body :deep(ul), .pp-md-body :deep(ol) {
+  padding-left: 2em;
+  margin: 10px 0;
+}
+.pp-md-body :deep(li) { margin: 4px 0; }
+.pp-md-body :deep(strong) { color: #3d2200; }
+.pp-md-body :deep(blockquote) {
+  border-left: 3px solid #b8943e;
+  margin: 14px 0;
+  padding: 10px 18px;
+  background: #fdfaf3;
+  font-style: italic;
+  color: #5c3d20;
+}
+.pp-md-body :deep(blockquote p) { text-indent: 0; }
+.pp-md-body :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 12px;
+}
+.pp-md-body :deep(th) {
+  background: #f7f4ed;
+  padding: 9px 12px;
+  border: 1px solid #ccc;
+  font-weight: 700;
+  color: #111;
+}
+.pp-md-body :deep(td) {
+  padding: 7px 12px;
+  border: 1px solid #ccc;
+  color: #333;
+}
+.pp-md-body :deep(hr) {
+  border: none;
+  border-top: 1px dotted #c8a04e;
+  margin: 24px 0;
+}
+.pp-md-body :deep(code) {
+  background: #f5f2eb;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+.pp-md-body :deep(pre) {
+  background: #f5f2eb;
+  padding: 14px 18px;
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.pp-md-body :deep(pre code) { background: none; padding: 0; }
+
+/* === Signature Footer === */
+.pp-sign-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+}
+.pp-sign-cell {
+  font-size: 13px;
+  color: #555;
+  padding: 6px 0;
+  letter-spacing: 0.5px;
+}
+
+/* === Print styles === */
+@media print {
+  @page { size: A4; margin: 14mm 16mm 16mm; }
+  body { background: #fefcf6 !important; }
+  .conf-left,
+  .conf-right-header,
+  .conf-page-hero,
+  .conf-md-editor-wrap,
+  .conf-preview-pane,
+  .conf-catalog-wrap,
+  .fs-bar {
+    display: none !important;
+  }
+  .hw-export-hidden {
+    position: static !important;
+    left: auto !important;
+    width: 100% !important;
+    z-index: auto !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .conf-export-inner {
+    margin: 0 auto !important;
+    padding: 30px 40px 28px !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #fefcf6 !important;
+    max-width: 760px !important;
+    font-family: 'PingFang SC','Microsoft YaHei',sans-serif !important;
+    color: #2c1810 !important;
+    font-size: 13px !important;
+    line-height: 1.85 !important;
+  }
+  .pp-doc-head { margin-bottom: 14px !important; }
+  .pp-school-name {
+    font-family: 'Noto Serif SC','STSong',serif !important;
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    letter-spacing: 6px !important;
+    color: #3b2314 !important;
+  }
+  .pp-school-sub { color: #8b7355 !important; font-size: 10px !important; letter-spacing: 3px !important; }
+  .pp-doc-no { color: #8b7355 !important; font-size: 10px !important; }
+  .pp-doc-type { color: #8b6914 !important; border-color: #c4a85c !important; font-size: 11px !important; letter-spacing: 4px !important; }
+  .pp-doc-stamp, .pp-doc-stamp-sub { color: #a04030 !important; border-color: #c08070 !important; opacity: 0.8 !important; }
+  .pp-student-card {
+    border-color: #e0d3b4 !important;
+    background: #faf7ee !important;
+  }
+  .pp-student-card-title { color: #5c3d1e !important; border-bottom-color: #e0d3b4 !important; }
+  .pp-info-label { color: #8b6914 !important; }
+  .pp-info-text { color: #2c1810 !important; }
+  .pp-hdiv { color: #c4a85c !important; }
+  .pp-hdiv-line { border-bottom-color: #d9cba8 !important; }
+  .pp-hdiv-star { color: #c4a85c !important; }
+  .pp-hdiv-diamond { color: #8b6914 !important; }
+  .pp-sign-cell { color: #5c4a3a !important; font-size: 12px !important; }
+  .pp-md-body h1 {
+    font-family: 'Noto Serif SC','STSong',serif !important;
+    color: #3b2314 !important;
+    border-bottom-color: #c4a85c !important;
+  }
+  .pp-md-body h2 { color: #4a2c17 !important; border-bottom-color: #d9cba8 !important; }
+  .pp-md-body h3 { color: #5c3d1e !important; }
+  .pp-md-body blockquote { background: #faf7ee !important; border-left-color: #c4a85c !important; color: #5c3d1e !important; }
+  .pp-md-body th { background: #f7f3e8 !important; color: #3b2314 !important; border-color: #d5cbb0 !important; }
+  .pp-md-body td { border-color: #e0d5b8 !important; }
+  .pp-md-body code { background: #f5f0e5 !important; color: #6b5530 !important; }
+  .pp-md-body pre { background: #f5f0e5 !important; border-color: #e0d5b8 !important; }
+  .pp-md-body strong { color: #3b2314 !important; }
+}
 
 /* AI Diagnosis */
+
 /* AI Diagnosis */
 .ai-result-card { margin-top: 12px; }
 .ai-result-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; color: var(--admin-accent); margin-bottom: 8px; }
@@ -999,76 +1783,26 @@ onMounted(() => {
 .json-payload-box { margin-top: 10px; padding: 10px; background: var(--admin-bg); border-radius: 8px; border: 1px solid var(--admin-border); }
 .json-payload-pre { font-size: 10px; color: var(--admin-text-secondary); background: var(--admin-surface); padding: 10px; border-radius: 6px; max-height: 260px; overflow: auto; white-space: pre; font-family: 'Consolas','Courier New',monospace; line-height: 1.5; }
 
+/* Template Selector */
+.template-selector { display: flex; flex-direction: column; gap: 8px; }
+.template-option { padding: 12px; border: 2px solid var(--admin-border); border-radius: 10px; cursor: pointer; transition: all 0.2s; background: var(--admin-surface); }
+.template-option:hover { border-color: var(--admin-accent); background: var(--admin-bg); }
+.template-option.active { border-color: var(--admin-accent); background: rgba(201,160,80,0.06); box-shadow: 0 0 0 3px rgba(201,160,80,0.1); }
+.template-option-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.template-option-icon { font-size: 18px; }
+.template-option-label { font-size: 13px; font-weight: 700; color: var(--admin-text); }
+.template-check { color: var(--admin-accent); margin-left: auto; }
+.template-option-desc { font-size: 11px; color: var(--admin-text-secondary); margin-bottom: 2px; padding-left: 26px; }
+.template-option-tone { font-size: 10px; color: var(--admin-text-muted); padding-left: 26px; }
+
+/* Drag styles */
+.cm-drag-handle { cursor: grab; color: var(--admin-text-muted); font-size: 12px; letter-spacing: 2px; user-select: none; margin-right: 2px; }
+.cm-drag-handle:active { cursor: grabbing; }
+.module-item.dragging { opacity: 0.5; border-color: var(--admin-accent); background: rgba(201,160,80,0.08); }
+
 @media (max-width: 768px) {
   .conf-layout { grid-template-columns: 1fr; }
-  .pp-data-row { grid-template-columns: repeat(2, 1fr); }
-  .preview-paper { padding: 24px; }
-  .pp-meta { flex-direction: column; gap: 4px; align-items: center; }
-}
-
-/* Edit Mode — full-width markdown textarea */
-.pp-edit-full {
-  width: 100%;
-  border: 2px solid var(--admin-accent);
-  border-radius: 8px;
-  padding: 14px 16px;
-  font-size: 14px;
-  line-height: 1.9;
-  font-family: 'PingFang SC', 'Microsoft YaHei', 'Consolas', monospace;
-  background: var(--admin-bg);
-  color: var(--admin-text);
-  resize: vertical;
-  white-space: pre-wrap;
-  tab-size: 2;
-  min-height: 120px;
-}
-.pp-edit-full:focus { outline: none; border-color: var(--admin-primary); box-shadow: 0 0 0 3px rgba(201,160,80,0.15); }
-
-.pp-md-render { line-height: 1.9; }
-.pp-md-render :deep(p) { margin: 8px 0; }
-.pp-md-render :deep(ul) { padding-left: 2em; margin: 8px 0; }
-.pp-md-render :deep(li) { margin: 4px 0; }
-.pp-md-render :deep(strong) { color: var(--admin-accent); }
-.pp-md-render :deep(h2) { font-size: 16px; font-weight: 700; color: #4a2c17; margin: 14px 0 8px; }
-.pp-md-render :deep(h3) { font-size: 14px; font-weight: 600; color: #4a2c17; margin: 10px 0 6px; }
-
-/* Edit Mode */
-.pp-edit-textarea {
-  width: 100%;
-  border: 1px solid var(--admin-accent);
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 13px;
-  line-height: 1.8;
-  font-family: inherit;
-  background: var(--admin-bg);
-  color: var(--admin-text);
-  resize: vertical;
-  margin: 4px 0;
-}
-.pp-edit-list { display: flex; flex-direction: column; gap: 6px; }
-.pp-edit-list-item { display: flex; align-items: flex-start; gap: 6px; }
-.pp-edit-list-textarea {
-  flex: 1;
-  border: 1px solid var(--admin-border);
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 13px;
-  line-height: 1.6;
-  font-family: inherit;
-  background: var(--admin-bg);
-  color: var(--admin-text);
-  resize: vertical;
-}
-.pp-edit-list-textarea:focus { border-color: var(--admin-accent); }
-
-@media print {
-  body * { visibility: hidden; }
-  .preview-container, .preview-container * { visibility: visible; }
-  .preview-container { position: absolute; left: 0; top: 0; width: 100%; background: #fff; padding: 0; max-height: none; overflow: visible; }
-  .fs-bar { display: none; }
-  .preview-paper { box-shadow: none; padding: 20px 32px; max-width: 100%; }
-  .pp-edit-textarea, .pp-edit-list, .pp-edit-list-item .el-button { display: none !important; }
+  .conf-md-editor-wrap { height: 60vh; min-height: 400px; }
 }
 
 /* Supplement / Emoji */
@@ -1087,9 +1821,4 @@ onMounted(() => {
 .supplement-item-text { font-size: 10px; color: var(--admin-text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .supplement-item-actions { display: flex; gap: 2px; flex-shrink: 0; margin-left: 8px; }
 
-/* Preview supplement cards */
-.pp-supplement-card { padding: 14px 18px; margin-bottom: 12px; background: #fef9e7; border-left: 3px solid #e67e22; border-radius: 0 8px 8px 0; }
-.pp-supplement-card h3 { font-size: 14px; font-weight: 700; color: #8b5e3c; margin: 0 0 8px; }
-.pp-supplement-text { font-size: 13px; color: #555; line-height: 1.8; white-space: pre-wrap; text-indent: 0; }
-.pp-supplement-date { font-size: 10px; color: #aaa; text-align: right; margin-top: 8px; }
 </style>

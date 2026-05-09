@@ -176,7 +176,21 @@ const defaultVoiceRecordings = [
   { id: 4, title: '李美玲心理谈话', scene: '学生谈话', duration: '22:40', speakers: '张老师、李美玲', date: '2026-05-05', audioUrl: null, transcript: [] }
 ]
 
-const defaultSchoolSettings = { schoolName: '威学一百', schoolLogo: '', semesterStart: '2025-09-01', semesterEnd: '2026-07-15' }
+const defaultSchoolSettings = {
+  schoolName: '威学一百',
+  schoolFullName: '威学一百国际教育',
+  schoolSubtitle: 'DSE 学习管理系统 · 个性化学习报告',
+  schoolLogo: '',
+  semesterStart: '2025-09-01',
+  semesterEnd: '2026-07-15',
+  homeroomTeacher: '张老师',
+  reportFooter: '用心陪伴每一位学生的成长',
+  watermarkEnabled: true,
+  watermarkText: '内部资料·仅供家长会使用',
+  previewTheme: 'default',
+  showTeacherSign: true,
+  showParentSign: true
+}
 
 const defaultQuickActions = [
   { id: 1, icon: '📝', label: '记录课堂', path: '/admin/behavior' },

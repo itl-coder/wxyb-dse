@@ -24,8 +24,8 @@
         <el-table
           ref="studentTableRef"
           :data="filteredStudents"
-          stripe
           size="small"
+          height="400"
           style="width:100%"
           @selection-change="onSelectionChange"
           @row-click="onRowClick"

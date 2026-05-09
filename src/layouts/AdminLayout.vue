@@ -8,7 +8,7 @@
       <div class="admin-sidebar-logo">
         <div class="logo-icon">学</div>
         <div>
-          <div class="logo-text">DSE 学情问诊</div>
+          <div class="logo-text">DSE AI 学情问诊</div>
           <div class="logo-sub">AI Intelligent System</div>
         </div>
       </div>
@@ -84,7 +84,7 @@
         </div>
 
         <div class="admin-nav-group">
-          <div class="admin-nav-group-title">智能系统</div>
+          <div class="admin-nav-group-title">AI智能系统</div>
           <router-link to="/admin/course-feedback" class="admin-nav-item" :class="{ active: isActive('/admin/course-feedback') }" @click="closeSidebar" title="课堂反馈">
             <span class="nav-icon">📝</span> <span class="nav-label">课堂反馈</span>
           </router-link>

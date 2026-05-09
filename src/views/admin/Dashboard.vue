@@ -189,6 +189,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { quickActionService, studentService, attendanceService, homeworkService, behaviorService, disciplineService } from '@/services/dataService'
+import { injectWatermarkCSS, injectWatermarkHTML } from '@/utils/watermark'
 
 const quickActions = ref([])
 const showAddAction = ref(false)
@@ -309,14 +310,17 @@ function generateDailyReport() {
 function printDailyReport() {
   const el = document.getElementById('dailyReportPrint')
   if (!el) return
-  const w = window.open('', '_blank', 'width=800,height=600')
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>每日成长日报</title>
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>每日成长日报</title>
 <style>
-body { font-family:'PingFang SC','Microsoft YaHei',sans-serif; margin:40px; color:#2c2c2c; line-height:1.8; }
+body { font-family:'PingFang SC','Microsoft YaHei',sans-serif; margin:40px; color:#2c2c2c; line-height:1.8; position:relative; }
 h1 { text-align:center; font-size:20px; color:#4a2c17; }
 .dr-meta { text-align:center; font-size:13px; color:#888; margin-bottom:20px; }
 .dr-section { margin-bottom:20px; }
 .dr-section h3 { font-size:15px; color:#8b5e3c; border-bottom:1px solid #ddd; padding-bottom:6px; }
+.dr-section p { text-indent:2em; margin:6px 0; }
+.dr-section ul, .dr-section ol { padding-left:2em; margin:6px 0; }
+.dr-section blockquote { border-left:3px solid #c4a85c; margin:10px 0; padding:6px 14px; background:#faf7ee; font-style:italic; color:#5c3d1e; }
+.dr-section blockquote p { text-indent:0; }
 .dr-stats-row { display:flex; gap:24px; justify-content:center; }
 .dr-stat { text-align:center; }
 .dr-val { display:block; font-size:28px; font-weight:700; }
@@ -324,7 +328,11 @@ h1 { text-align:center; font-size:20px; color:#4a2c17; }
 .dr-lbl { font-size:12px; color:#888; }
 .dr-footer { text-align:center; font-size:10px; color:#aaa; margin-top:30px; border-top:1px solid #eee; padding-top:12px; }
 @media print { body { margin:20px; } }
-</style></head><body>${el.innerHTML}</body></html>`)
+</style></head><body>${el.innerHTML}</body></html>`
+  html = injectWatermarkCSS(html)
+  html = injectWatermarkHTML(html)
+  const w = window.open('', '_blank', 'width=800,height=600')
+  w.document.write(html)
   w.document.close()
   setTimeout(() => w.print(), 500)
 }

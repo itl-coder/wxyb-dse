@@ -86,6 +86,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { errorBookService } from '@/services/dataService'
 import { ElMessage } from 'element-plus'
+import { getWatermarkStyle, getWatermarkHTML } from '@/utils/watermark'
 
 const store = useAppStore()
 const student = computed(() => store.currentStudent)
@@ -137,7 +138,25 @@ function submitRedoAnswer() {
 }
 
 function printMistakes() {
-  window.print()
+  const wmStyle = getWatermarkStyle()
+  if (wmStyle) {
+    const styleEl = document.createElement('style')
+    styleEl.textContent = wmStyle
+    document.head.appendChild(styleEl)
+    const wmHTML = getWatermarkHTML()
+    if (wmHTML) {
+      const div = document.createElement('div')
+      div.innerHTML = wmHTML
+      document.body.appendChild(div)
+    }
+    setTimeout(() => {
+      window.print()
+      styleEl.remove()
+      if (wmHTML) div.remove()
+    }, 200)
+  } else {
+    window.print()
+  }
 }
 </script>
 

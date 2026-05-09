@@ -25,7 +25,7 @@
               <span style="font-size:11px;color:var(--admin-text-muted)">{{ f.date }}</span>
             </div>
             <div style="font-size:11px;color:var(--admin-text-secondary);margin-bottom:2px">{{ f.class }}班 · {{ f.teacher }} · {{ f.period }}</div>
-            <div style="font-size:11px;color:var(--admin-text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ f.content }}</div>
+            <div style="font-size:11px;color:var(--admin-text-muted);overflow:hidden;text-overflow:ellipsis;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">{{ f.content }}</div>
             <div v-if="f.topics && f.topics.length" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
               <span v-for="t in f.topics" :key="t" class="cf-tag">{{ t }}</span>
             </div>
@@ -116,11 +116,11 @@
             <span class="pq-meta">{{ difficultyLabel(q.difficulty) }} · {{ typeLabel(q.type) }} · {{ q.score }}分</span>
             <el-button size="small" text @click="q.showAnswer = !q.showAnswer">{{ q.showAnswer ? '隐藏答案' : '查看答案' }}</el-button>
           </div>
-          <div class="pq-body" v-html="renderContent(q.text)"></div>
+          <div class="pq-body" v-html="marked.parse(q.text || '')"></div>
           <div v-if="q.options" class="pq-options" v-html="renderContent(q.options)"></div>
           <div v-if="q.showAnswer" class="pq-answer">
             <div class="pq-answer-row"><b>答案：</b>{{ q.answer }}</div>
-            <div class="pq-answer-row" v-html="renderContent(q.steps)"></div>
+            <div class="pq-answer-row" v-html="marked.parse(q.steps || '')"></div>
             <div class="pq-answer-row"><b>考查知识点：</b>{{ q.knowledgePoint }}</div>
             <div class="pq-answer-row" style="color:var(--admin-warning)"><b>常见错误：</b>{{ q.commonMistakes }}</div>
           </div>
@@ -139,6 +139,7 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { courseFeedbackService, questionBankService, studentService, courseService } from '@/services/dataService'
 import { getWatermarkHTML, getWatermarkStyle } from '@/utils/watermark'
+import { marked } from 'marked'
 import { renderRichContent } from '@/utils/renderContent'
 
 const feedbacks = ref([])
@@ -284,7 +285,7 @@ function printStudentVersion() {
   html += `<div style="font-size:10px;color:#888;margin-bottom:10px">班级：_____ 姓名：_____ 日期：_____ 用时：_____</div>`
   questions.forEach((q, i) => {
     html += `<div style="margin-bottom:14px;page-break-inside:avoid">
-      <div style="font-weight:600;margin-bottom:4px">${i + 1}. ${q.text.replace(/\n/g,'<br>')}</div>
+      <div style="font-weight:600;margin-bottom:4px">${i + 1}. ${marked.parse(q.text || '')}</div>
       ${q.options ? `<div style="margin-left:16px">${q.options.replace(/\n/g,'<br>')}</div>` : ''}
       <div style="margin-top:40px;border-bottom:1px dashed #ddd"></div>
     </div>`
@@ -300,11 +301,11 @@ function printTeacherVersion() {
   html += `<div style="font-size:10px;color:#888;margin-bottom:10px">仅供教师使用</div>`
   questions.forEach((q, i) => {
     html += `<div style="margin-bottom:14px;page-break-inside:avoid">
-      <div style="font-weight:600;margin-bottom:4px">${i + 1}. ${q.text.replace(/\n/g,'<br>')}</div>
+      <div style="font-weight:600;margin-bottom:4px">${i + 1}. ${marked.parse(q.text || '')}</div>
       ${q.options ? `<div style="margin-left:16px">${q.options.replace(/\n/g,'<br>')}</div>` : ''}
       <div style="margin-top:8px;padding:8px;background:var(--admin-bg);border-left:3px solid var(--admin-primary)">
-        <div><b>答案：</b>${q.answer}</div>
-        <div style="margin-top:4px"><b>解析：</b>${(q.steps || '').replace(/\n/g,'<br>')}</div>
+        <div><b>答案：</b>${marked.parse(q.answer || '')}</div>
+        <div style="margin-top:4px"><b>解析：</b>${marked.parse(q.steps || '')}</div>
         <div style="margin-top:4px;color:#888"><b>知识点：</b>${q.knowledgePoint || ''}</div>
         <div style="margin-top:2px;color:#c96"><b>常见错误：</b>${q.commonMistakes || ''}</div>
         <div style="margin-top:2px;font-size:10px;color:#aaa">难度：${difficultyLabel(q.difficulty)} | 题型：${typeLabel(q.type)} | 建议用时：${q.suggestedTime || 3}分钟</div>
@@ -319,6 +320,10 @@ function buildPrintHeader(title) {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>课堂练习-${title}</title><style>
     body{font-family:'Microsoft YaHei',sans-serif;padding:20px;color:#333;max-width:700px;margin:0 auto}
     h2{text-align:center;margin-bottom:4px}
+    p{text-indent:2em;margin:6px 0}
+    ul,ol{padding-left:2em;margin:6px 0}
+    blockquote{border-left:3px solid #c4a85c;margin:10px 0;padding:6px 14px;background:#faf7ee;font-style:italic;color:#5c3d1e}
+    blockquote p{text-indent:0}
     @page{size:A4;margin:15mm}
     ${getWatermarkStyle()}
   </style></head><body><h2>课堂练习 ${title}</h2>
@@ -333,7 +338,7 @@ function openPrintWindow(html) {
 }
 
 function renderContent(text) {
-  return renderRichContent(text)
+  return marked.parse(text || '')
 }
 
 function difficultyLabel(d) {

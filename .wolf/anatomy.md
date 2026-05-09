@@ -124,6 +124,7 @@
 
 ## src/utils/
 
+- `printTemplate.js` — Print/PDF HTML document builder — "Scholarly Refinement" aesthetic for parent conference export (~1200 tok)
 - `renderContent.js` — Rich content renderer — Markdown + LaTeX support for question text and answers (~701 tok)
 - `watermark.js` — Watermark utility — tiled scattered pattern for print/export (~805 tok)
 
@@ -138,24 +139,24 @@
 
 - `Attendance.vue` — Vue: setup (~5636 tok)
 - `Behavior.vue` — Vue: 陈小明, setup (~2537 tok)
-- `Conference.vue` — Vue component (~15239 tok)
+- `Conference.vue` — Vue: setup, 家长会文稿+3级模板(基础巩固/稳步提升/拔尖突破)+Markdown编辑+拖拽排序+装饰纹路导出 (~20000 tok)
 - `ConfigCenter.vue` — Vue: setup (~2491 tok)
-- `Counseling.vue` — Vue component (~7202 tok)
+- `Counseling.vue` — Vue: setup, 心理辅导+录音+情绪卡片+查看对话框+两栏布局, 完全重构 (~9000 tok)
 - `CourseFeedback.vue` — Vue: setup (~4684 tok)
 - `CourseManagement.vue` — Vue: setup (~2481 tok)
 - `Dashboard.vue` — Vue: setup (~4933 tok)
 - `Discipline.vue` — Vue: setup (~3756 tok)
 - `Exam.vue` — Vue component (~8483 tok)
-- `Homework.vue` — Vue component (~9598 tok)
+- `Homework.vue` — Vue: setup, 作业追踪表格(核心/选修筛选/合并单元格)+提交统计+未交提醒,已移除日/周/月视图及布置/导出/打印功能 (~7000 tok)
 - `Login.vue` — Vue: 张老师, setup (~1243 tok)
 - `ParentConference.vue` — Vue: setup (~5011 tok)
 - `Phone.vue` — Vue component (~9341 tok)
 - `QuestionBank.vue` — Vue component (~7664 tok)
 - `Questions.vue` — Vue component (~10434 tok)
-- `Reports.vue` — Vue: setup (~4095 tok)
+- `Reports.vue` — Vue: setup, 成长周报(Markdown编辑/分屏预览/html2canvas导出) (~7200 tok)
 - `Settings.vue` — Vue component (~7173 tok)
 - `StudentManagement.vue` — Vue: setup (~4417 tok)
-- `Timetable.vue` — Vue: setup (~7027 tok)
+- `Timetable.vue` — Vue: setup, 周/月课表+图片导入+时间设置+背景填充+模板, ~1200行 (~13500 tok)
 - `Voice.vue` — Vue: setup (~5568 tok)
 
 ## src/views/math/

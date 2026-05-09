@@ -6,7 +6,7 @@
         <div class="sys-entry-icon">🏫</div>
         <div class="sys-entry-info">
           <div class="sys-entry-title">管理后台</div>
-          <div class="sys-entry-desc">学情问诊 · 班级管理 · 智能分析</div>
+          <div class="sys-entry-desc">学情问诊 · 班级管理 · AI智能分析</div>
         </div>
         <span class="sys-entry-arrow">→</span>
       </router-link>

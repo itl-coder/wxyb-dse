@@ -1,4 +1,71 @@
 {
   "version": 1,
-  "bugs": []
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-05-09T05:07:00+08:00",
+      "error_message": "Build error: Invalid end tag at line 1425 in Conference.vue",
+      "file": "src/views/admin/Conference.vue",
+      "root_cause": "Unescaped </script> tag inside template literal in exportPDF() function. Vue SFC compiler interprets </script> inside <script setup> as the end of the script block, regardless of template literal context.",
+      "fix": "Escape as <\\/script> in the template literal string.",
+      "tags": [
+        "vue-sfc",
+        "build-error",
+        "template-literal",
+        "script-tag"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-09"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-05-09T04:30:00+08:00",
+      "error_message": "TypeError: Cannot read properties of undefined (reading 'value') at chunk-FSE3T7JS.js:27464 — ExportPDF component crash",
+      "file": "src/views/admin/Conference.vue",
+      "root_cause": "@vavt/v3-extension ExportPDF component tries to access undefined ModalToolbar ref in onMounted. Fundamentally incompatible with md-editor-v3 v6.5.0.",
+      "fix": "Removed ExportPDF entirely. Replaced with custom exportPDF() using window.open() + document.write() + window.print().",
+      "tags": [
+        "export-pdf",
+        "v3-extension",
+        "md-editor-v3",
+        "compatibility"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-09"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-05-09T04:00:00+08:00",
+      "error_message": "Markdown rendering showing raw source code instead of rendered content in exports",
+      "file": "src/views/admin/Conference.vue",
+      "root_cause": "renderRichContent() from @/utils/renderContent only handles bold/italic/code/LaTeX. Does NOT support headings, tables, blockquotes, ordered lists, links, images, horizontal rules.",
+      "fix": "Installed marked (npm) and replaced renderRichContent() with marked.parse() for renderedConfDocument computed.",
+      "tags": [
+        "markdown",
+        "rendering",
+        "export"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-09"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-05-09T02:08:17.200Z",
+      "error_message": "Duplicate const store = useAppStore() after replacing MarkdownEditor imports in QuestionBank.vue",
+      "file": "src/views/admin/QuestionBank.vue",
+      "root_cause": "Edit tool replaced import line, but new_string included store/useAppStore imports that already existed, creating duplicate store declaration",
+      "fix": "Removed duplicate const store = useAppStore() via Edit tool",
+      "tags": [
+        "import",
+        "duplicate",
+        "QuestionBank"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-09T02:08:17.200Z"
+    }
+  ]
 }

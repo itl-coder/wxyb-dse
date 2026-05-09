@@ -983,31 +983,31 @@
   background: var(--admin-surface-hover);
 }
 
-/* Fixed column backgrounds — white opaque to prevent scroll-through transparency */
+/* Fixed column backgrounds — theme-aware to prevent scroll-through transparency */
 .admin-layout .el-table__fixed,
 .admin-layout .el-table__fixed-right {
-  --el-table-bg-color: #fff;
-  --el-table-tr-bg-color: #fff;
-  --el-table-header-bg-color: #f7f8fa;
-  background-color: #fff !important;
+  --el-table-bg-color: var(--admin-surface);
+  --el-table-tr-bg-color: var(--admin-surface);
+  --el-table-header-bg-color: var(--admin-bg);
+  background-color: var(--admin-surface) !important;
 }
 .admin-layout .el-table__fixed .el-table__fixed-header-wrapper,
 .admin-layout .el-table__fixed-right .el-table__fixed-header-wrapper,
 .admin-layout .el-table__fixed .el-table__fixed-body-wrapper,
 .admin-layout .el-table__fixed-right .el-table__fixed-body-wrapper {
-  background-color: #fff;
+  background-color: var(--admin-surface);
 }
 .admin-layout .el-table__fixed th.el-table__cell,
 .admin-layout .el-table__fixed-right th.el-table__cell {
-  background-color: #f7f8fa;
+  background-color: var(--admin-bg);
 }
 .admin-layout .el-table__fixed td.el-table__cell,
 .admin-layout .el-table__fixed-right td.el-table__cell {
-  background-color: #fff;
+  background-color: var(--admin-surface);
 }
 .admin-layout .el-table__fixed .el-table__row--striped td.el-table__cell,
 .admin-layout .el-table__fixed-right .el-table__row--striped td.el-table__cell {
-  background-color: #fafafa;
+  background-color: var(--admin-bg);
 }
 
 .admin-layout .el-pagination {
@@ -1235,3 +1235,8 @@
 [data-theme="light"] .login-card {
   box-shadow: 0 20px 60px rgba(0,0,0,0.1);
 }
+
+/* === Text Display Improvements === */
+.admin-card .el-table__cell { word-break: break-word; }
+.el-table .cell { white-space: normal !important; word-break: break-word; line-height: 1.5; }
+.admin-tag { white-space: nowrap; display: inline-flex; align-items: center; }

@@ -155,7 +155,7 @@
       </div>
       <div class="admin-form-group">
         <label>题干 <span style="color:var(--admin-danger)">*</span></label>
-        <MarkdownEditor v-model="form.text" :rows="5" placeholder="题目内容（支持 Markdown）..." />
+        <MdEditor v-model="form.text" :theme="store.theme" language="zh-CN" previewTheme="github" :toolbars="mdToolbars" :noPrettier="true" :noMermaid="true" />
       </div>
       <div class="admin-form-group" v-if="form.type === 'mc'">
         <label>选项（每行一个，格式如 A. 选项内容）</label>
@@ -167,7 +167,7 @@
       </div>
       <div class="admin-form-group">
         <label>解题步骤</label>
-        <MarkdownEditor v-model="form.steps" :rows="4" placeholder="解题步骤（支持 Markdown）..." />
+        <MdEditor v-model="form.steps" :theme="store.theme" language="zh-CN" previewTheme="github" :toolbars="mdToolbars" :noPrettier="true" :noMermaid="true" />
       </div>
       <div class="admin-form-group">
         <label>知识点说明</label>
@@ -222,7 +222,7 @@
               <span style="font-size:11px;color:var(--admin-text-muted)">{{ q.topic }}</span>
               <span style="font-size:10px;color:var(--admin-text-muted);margin-left:auto">（{{ q.score }}分）</span>
             </div>
-            <div class="pq-text">{{ q.text }}</div>
+            <div class="pq-text" v-html="marked.parse(q.text || '')"></div>
             <div v-if="q.image" class="pq-image"><img :src="q.image" style="max-width:100%;border-radius:6px" /></div>
             <div v-if="q.options" class="pq-options">
               <div v-for="(opt, oi) in q.options.split('\n')" :key="oi" class="pq-opt">{{ opt }}</div>
@@ -256,9 +256,14 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { questionBankService, settingsService, courseService } from '@/services/dataService'
 import { useAppStore } from '@/stores/app'
 import { getWatermarkHTML, getWatermarkStyle } from '@/utils/watermark'
-import MarkdownEditor from '@/components/MarkdownEditor.vue'
+import { MdEditor } from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
+import { marked } from 'marked'
 
 const store = useAppStore()
+
+const mdToolbars = ['bold', 'italic', 'underline', 'strikeThrough', 'title', '|', 'quote', 'unorderedList', 'orderedList', 'codeRow', 'code', '|', 'link', 'katex', 'table', '|', 'revoke', 'next', 'save', 'preview']
+
 const questions = ref([])
 const filterSubject = ref('')
 const filterDifficulties = ref([])
@@ -508,13 +513,21 @@ function printPaper() {
     .paper-question{margin-bottom:16px;padding:12px;border:1px solid #eee;border-radius:8px;page-break-inside:avoid}
     .pq-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
     .pq-num{font-weight:700;font-size:15px;color:#2c2c2c}
-    .pq-text{font-size:13px;white-space:pre-wrap;margin:8px 0;color:#2c2c2c}
+    .pq-text{font-size:13px;margin:8px 0;color:#2c2c2c}
+    .pq-text p{text-indent:2em;margin:6px 0}
+    .pq-text ul,.pq-text ol{padding-left:2em;margin:6px 0}
+    .pq-text blockquote{border-left:3px solid #c4a85c;margin:10px 0;padding:6px 14px;background:#faf7ee;font-style:italic;color:#5c3d1e}
+    .pq-text blockquote p{text-indent:0}
     .pq-image{margin:8px 0;text-align:center}
-    .pq-options{margin:8px 0;padding-left:16px}
+    .pq-options{margin:8px 0;padding-left:2em}
     .pq-opt{font-size:13px;padding:2px 0;color:#2c2c2c}
     .pq-answer{margin-top:8px;font-size:12px}
     .pq-answer summary{cursor:pointer;color:#3b82f6;font-weight:500}
     .pq-answer-content{padding:8px;background:#f9f9f9;border-radius:6px;margin-top:4px;color:#2c2c2c}
+    .pq-answer-content p{text-indent:2em;margin:6px 0}
+    .pq-answer-content ul,.pq-answer-content ol{padding-left:2em;margin:6px 0}
+    .pq-answer-content blockquote{border-left:3px solid #c4a85c;margin:10px 0;padding:6px 14px;background:#faf7ee;font-style:italic;color:#5c3d1e}
+    .pq-answer-content blockquote p{text-indent:0}
     .paper-footer{text-align:center;font-size:11px;color:#aaa;margin-top:24px;border-top:1px solid #eee;padding-top:12px}
     @media print{body{margin:16px}}
     ${getWatermarkStyle()}
@@ -549,8 +562,8 @@ onMounted(() => {
 .qb-topic-tag { font-size: 10px; color: var(--admin-accent); background: rgba(201,160,80,0.1); padding: 1px 6px; border-radius: 4px; }
 .qb-text { font-size: 12px; color: var(--admin-text); line-height: 1.7; white-space: pre-wrap; }
 .qb-meta { font-size: 10px; color: var(--admin-text-muted); margin-top: 6px; }
-.qb-actions { display: none; margin-top: 6px; gap: 4px; }
-.qb-item:hover .qb-actions { display: flex; }
+.qb-actions { display: flex; margin-top: 6px; gap: 4px; opacity: 0; max-height: 0; overflow: hidden; transition: opacity 0.3s ease, max-height 0.3s ease; }
+.qb-item:hover .qb-actions { opacity: 1; max-height: 40px; }
 
 /* Image upload */
 .qb-image-upload {
@@ -574,7 +587,11 @@ onMounted(() => {
 .paper-question { padding: 14px; border: 1px solid var(--admin-border); border-radius: 8px; margin-bottom: 12px; page-break-inside: avoid; background: var(--admin-surface); }
 .pq-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
 .pq-num { font-weight: 700; font-size: 15px; color: var(--admin-accent); }
-.pq-text { font-size: 13px; white-space: pre-wrap; margin: 8px 0; color: var(--admin-text); }
+.pq-text { font-size: 13px; margin: 8px 0; color: var(--admin-text); }
+.pq-text :deep(p) { text-indent: 2em; margin: 6px 0; }
+.pq-text :deep(ul), .pq-text :deep(ol) { padding-left: 2em; margin: 6px 0; }
+.pq-text :deep(blockquote) { border-left: 3px solid var(--admin-accent); margin: 10px 0; padding: 6px 14px; background: var(--admin-bg); font-style: italic; }
+.pq-text :deep(blockquote p) { text-indent: 0; }
 .pq-image { margin: 8px 0; text-align: center; }
 .pq-options { margin: 8px 0; padding-left: 16px; }
 .pq-opt { font-size: 13px; padding: 2px 0; color: var(--admin-text-secondary); }

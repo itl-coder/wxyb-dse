@@ -12,11 +12,20 @@
 
     <!-- Tab 1: 基础设置 -->
     <div v-show="activeSettingTab === 'basic'" class="admin-two-col">
+      <!-- 学校信息 -->
       <div class="admin-card">
         <div class="admin-card-title" style="font-size:14px;margin-bottom:14px">🏫 学校信息</div>
         <div class="admin-form-group">
-          <label>学校名称</label>
+          <label>学校简称</label>
           <el-input v-model="schoolSettings.schoolName" placeholder="如：威学一百" />
+        </div>
+        <div class="admin-form-group">
+          <label>学校全称</label>
+          <el-input v-model="schoolSettings.schoolFullName" placeholder="如：威学一百国际教育" />
+        </div>
+        <div class="admin-form-group">
+          <label>副标题</label>
+          <el-input v-model="schoolSettings.schoolSubtitle" placeholder="如：DSE 学习管理系统 · 个性化学习报告" />
         </div>
         <div class="admin-two-col" style="margin-bottom:0">
           <div class="admin-form-group">
@@ -30,6 +39,44 @@
         </div>
         <el-button type="primary" size="small" @click="saveSchoolSettings">保存学校信息</el-button>
       </div>
+
+      <!-- 班主任 & 文档 -->
+      <div class="admin-card">
+        <div class="admin-card-title" style="font-size:14px;margin-bottom:14px">📋 班主任 & 文档配置</div>
+        <div class="admin-form-group">
+          <label>班主任</label>
+          <el-input v-model="schoolSettings.homeroomTeacher" placeholder="如：张老师" />
+        </div>
+        <div class="admin-form-group">
+          <label>报告脚注</label>
+          <el-input v-model="schoolSettings.reportFooter" placeholder="如：用心陪伴每一位学生的成长" />
+        </div>
+        <div class="admin-two-col" style="margin-bottom:0">
+          <div class="admin-form-group">
+            <label>显示班主任签字</label>
+            <el-switch v-model="schoolSettings.showTeacherSign" size="small" />
+          </div>
+          <div class="admin-form-group">
+            <label>显示家长签字</label>
+            <el-switch v-model="schoolSettings.showParentSign" size="small" />
+          </div>
+        </div>
+        <el-button type="primary" size="small" @click="saveSchoolSettings">保存配置</el-button>
+      </div>
+
+      <!-- 显示偏好 -->
+      <div class="admin-card">
+        <div class="admin-card-title" style="font-size:14px;margin-bottom:14px">🎨 显示偏好</div>
+        <div class="admin-form-group">
+          <label>Markdown 预览主题</label>
+          <el-select v-model="schoolSettings.previewTheme" style="width:100%">
+            <el-option v-for="t in previewThemeOptions" :key="t.value" :label="t.label" :value="t.value" />
+          </el-select>
+        </div>
+        <el-button type="primary" size="small" @click="saveSchoolSettings">保存偏好</el-button>
+      </div>
+
+      <!-- 个人资料 -->
       <div class="admin-card">
         <div class="admin-card-title" style="font-size:14px;margin-bottom:14px">👤 个人资料</div>
         <div class="admin-two-col" style="margin-bottom:0">
@@ -145,18 +192,54 @@
         </div>
       </div>
       <div class="admin-card">
-        <div class="admin-card-title" style="font-size:14px;margin-bottom:14px">🖨️ 导出水印</div>
+        <div class="admin-card-title" style="font-size:14px;margin-bottom:14px">🖨️ 全局水印配置</div>
+        <div class="admin-card-subtitle" style="margin-top:-8px;margin-bottom:10px">所有导出/打印功能统一使用此配置</div>
         <div class="admin-form-group">
           <label>启用水印</label>
           <el-switch v-model="watermarkSettings.enabled" size="small" @change="saveWatermarkSettings" />
         </div>
         <div class="admin-form-group">
           <label>水印文字</label>
-          <div style="display:flex;gap:8px">
-            <el-input v-model="watermarkSettings.text" placeholder="默认：仅供参考!!!" style="flex:1" />
-            <el-button size="small" type="primary" @click="saveWatermarkSettings">保存</el-button>
+          <el-input v-model="watermarkSettings.text" placeholder="内部资料·仅供家长会使用" />
+        </div>
+        <div class="admin-two-col" style="margin-bottom:0">
+          <div class="admin-form-group">
+            <label>旋转角度</label>
+            <el-slider v-model="watermarkSettings.rotation" :min="-45" :max="45" :step="1" show-input size="small" @change="saveWatermarkSettings" />
+          </div>
+          <div class="admin-form-group">
+            <label>不透明度</label>
+            <el-slider v-model="watermarkSettings.opacity" :min="0.01" :max="0.2" :step="0.01" show-input size="small" @change="saveWatermarkSettings" />
           </div>
         </div>
+        <div class="admin-two-col" style="margin-bottom:0">
+          <div class="admin-form-group">
+            <label>字号</label>
+            <el-slider v-model="watermarkSettings.fontSize" :min="12" :max="48" :step="1" show-input size="small" @change="saveWatermarkSettings" />
+          </div>
+          <div class="admin-form-group">
+            <label>颜色</label>
+            <div style="display:flex;align-items:center;gap:8px">
+              <el-color-picker v-model="watermarkSettings.color" size="small" @change="saveWatermarkSettings" />
+              <span style="font-size:10px;color:var(--admin-text-muted)">{{ watermarkSettings.color }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="admin-two-col" style="margin-bottom:0">
+          <div class="admin-form-group">
+            <label>水平间距</label>
+            <el-slider v-model="watermarkSettings.gapX" :min="60" :max="300" :step="10" show-input size="small" @change="saveWatermarkSettings" />
+          </div>
+          <div class="admin-form-group">
+            <label>垂直间距</label>
+            <el-slider v-model="watermarkSettings.gapY" :min="40" :max="200" :step="10" show-input size="small" @change="saveWatermarkSettings" />
+          </div>
+        </div>
+        <div class="admin-form-group">
+          <label>显示时间戳</label>
+          <el-switch v-model="watermarkSettings.showTimestamp" size="small" @change="saveWatermarkSettings" />
+        </div>
+        <el-button size="small" type="primary" @click="saveWatermarkSettings">💾 保存水印配置</el-button>
       </div>
       <div class="admin-card">
         <div class="admin-card-title" style="font-size:14px;margin-bottom:14px">🔔 通知设置</div>
@@ -301,7 +384,14 @@ const settingTabs = [
 ]
 
 // School Settings
-const schoolSettings = reactive({ schoolName: '威学一百', schoolLogo: '', semesterStart: '2025-09-01', semesterEnd: '2026-07-15' })
+const schoolSettings = reactive({
+  schoolName: '威学一百', schoolFullName: '威学一百国际教育',
+  schoolSubtitle: 'DSE 学习管理系统 · 个性化学习报告',
+  schoolLogo: '', semesterStart: '2025-09-01', semesterEnd: '2026-07-15',
+  homeroomTeacher: '张老师', reportFooter: '用心陪伴每一位学生的成长',
+  watermarkEnabled: true, watermarkText: '内部资料·仅供家长会使用',
+  previewTheme: 'default'
+})
 
 // Profile
 const profile = reactive({
@@ -333,6 +423,15 @@ function triggerRestoreFile() {
 }
 
 const allSubjects = ['数学', '中文', '英文', '物理', '化学', '生物', '经济', '历史', '地理', '资讯及通讯科技']
+const previewThemeOptions = [
+  { label: 'Default 默认', value: 'default' },
+  { label: 'GitHub', value: 'github' },
+  { label: 'VuePress', value: 'vuepress' },
+  { label: 'Mk-Cute 可爱', value: 'mk-cute' },
+  { label: 'Smart Blue 科技蓝', value: 'smart-blue' },
+  { label: 'Cyanosis 青蓝', value: 'cyanosis' },
+  { label: 'Arknights 明日方舟', value: 'arknights' }
+]
 const classList = ref([])
 const campusList = ref([])
 const watermarkSettings = ref(getWatermarkConfig())
@@ -385,6 +484,13 @@ onMounted(() => {
   theme.value = store.theme
   sidebarCollapsed.value = store.sidebarCollapsed
 
+  // Sync watermark config from dedicated store
+  const wm = getWatermarkConfig()
+  watermarkSettings.value = wm
+  // Also sync to schoolSettings so Conference.vue el-watermark reads correctly
+  schoolSettings.watermarkEnabled = wm.enabled
+  schoolSettings.watermarkText = wm.text
+
   classrooms.value = classroomService.getAll()
   campuses.value = campusService.getAll()
   classList.value = studentService.getClasses()
@@ -408,8 +514,13 @@ function saveNotifications() {
 }
 
 function saveWatermarkSettings() {
-  saveWatermarkConfig({ ...watermarkSettings.value })
-  ElMessage.success('水印设置已保存')
+  const cfg = { ...watermarkSettings.value }
+  saveWatermarkConfig(cfg)
+  // Sync to schoolSettings so Conference.vue and other components read correctly
+  schoolSettings.watermarkEnabled = cfg.enabled
+  schoolSettings.watermarkText = cfg.text
+  settingsService.save({ ...schoolSettings })
+  ElMessage.success('水印配置已保存')
 }
 
 function setTheme(t) {
