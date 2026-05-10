@@ -496,10 +496,10 @@ function randomPrompt() {
   padding: 16px 12px;
   border: 1.5px solid transparent;
   border-radius: 12px;
-  background: var(--card-bg);
+  background: #fefcf9;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: var(--font-body);
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
   box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
@@ -524,12 +524,12 @@ function randomPrompt() {
 .tab-label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #1c1c1c;
 }
 
 .tab-desc {
   font-size: 11px;
-  color: var(--text-muted);
+  color: #b0a8a0;
 }
 
 .chinese-tab.active .tab-label {
@@ -564,8 +564,8 @@ function randomPrompt() {
 
 /* Sidebar */
 .wenyan-sidebar {
-  background: var(--card-bg);
-  border: 1px solid var(--border-lighter);
+  background: #fefcf9;
+  border: 1px solid #f0ece5;
   border-radius: 14px;
   overflow: hidden;
   position: sticky;
@@ -575,7 +575,7 @@ function randomPrompt() {
 
 .sidebar-header {
   padding: 20px 18px 14px;
-  border-bottom: 1px solid var(--border-lighter);
+  border-bottom: 1px solid #f0ece5;
   text-align: center;
 }
 
@@ -587,13 +587,13 @@ function randomPrompt() {
 .sidebar-title {
   font-size: 15px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1c1c1c;
   font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
 }
 
 .sidebar-subtitle {
   font-size: 11px;
-  color: var(--text-muted);
+  color: #b0a8a0;
   margin-top: 2px;
 }
 
@@ -613,7 +613,7 @@ function randomPrompt() {
   cursor: pointer;
   text-align: left;
   transition: all 0.2s;
-  font-family: var(--font-body);
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
   margin-bottom: 2px;
 }
 
@@ -629,13 +629,13 @@ function randomPrompt() {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--bg-warm);
+  background: #f0ece5;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 700;
-  color: var(--text-secondary);
+  color: #8a8a8a;
   flex-shrink: 0;
   transition: all 0.2s;
 }
@@ -653,19 +653,19 @@ function randomPrompt() {
 .wn-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #1c1c1c;
   line-height: 1.3;
 }
 
 .wn-meta {
   font-size: 10px;
-  color: var(--text-muted);
+  color: #b0a8a0;
   margin-top: 2px;
 }
 
 .wn-arrow {
   font-size: 12px;
-  color: var(--text-muted);
+  color: #b0a8a0;
   opacity: 0;
   transition: all 0.2s;
 }
@@ -678,8 +678,8 @@ function randomPrompt() {
 
 /* Wenyan Main Content */
 .wenyan-main {
-  background: var(--card-bg);
-  border: 1px solid var(--border-lighter);
+  background: #fefcf9;
+  border: 1px solid #f0ece5;
   border-radius: 14px;
   padding: 28px 32px;
   max-height: 78vh;
@@ -694,7 +694,7 @@ function randomPrompt() {
   align-items: flex-start;
   margin-bottom: 20px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--border-lighter);
+  border-bottom: 1px solid #f0ece5;
 }
 
 .article-num {
@@ -719,7 +719,7 @@ function randomPrompt() {
 .article-name {
   font-size: 20px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1c1c1c;
   margin: 0 0 6px;
   font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
   line-height: 1.4;
@@ -742,7 +742,7 @@ function randomPrompt() {
 
 .am-source {
   font-size: 12px;
-  color: var(--text-muted);
+  color: #b0a8a0;
 }
 
 /* Core Idea */
@@ -767,7 +767,7 @@ function randomPrompt() {
 
 .cib-text {
   font-size: 13px;
-  color: var(--text-regular);
+  color: #4a4a4a;
   line-height: 1.8;
 }
 
@@ -784,15 +784,15 @@ function randomPrompt() {
   align-items: center;
   gap: 4px;
   padding: 7px 16px;
-  border: 1px solid var(--border-base);
+  border: 1px solid #e0d8d0;
   border-radius: 8px;
-  background: var(--card-bg);
+  background: #fefcf9;
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-regular);
+  color: #4a4a4a;
   transition: all 0.2s;
-  font-family: var(--font-body);
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
 }
 
 .at-btn:hover {
@@ -858,7 +858,7 @@ function randomPrompt() {
   padding: 10px 14px;
   margin: 8px 0 14px;
   background: rgba(107,142,100,0.05);
-  border-left: 3px solid var(--success);
+  border-left: 3px solid #6b9e7a;
   border-radius: 0 6px 6px 0;
   color: #5a7a55;
   display: none;
@@ -872,7 +872,7 @@ function randomPrompt() {
   display: inline-block;
   font-size: 10px;
   padding: 0 6px;
-  background: var(--success);
+  background: #6b9e7a;
   color: #fff;
   border-radius: 3px;
   margin-right: 8px;
@@ -893,7 +893,7 @@ function randomPrompt() {
 
 .classical-para :deep(.blank-field.revealed) {
   background: #e8f5e9;
-  border-color: var(--success);
+  border-color: #6b9e7a;
   color: #2e7d32;
 }
 
@@ -901,18 +901,18 @@ function randomPrompt() {
 .keywords-panel {
   margin: 24px 0;
   padding: 20px;
-  background: var(--card-bg-warm);
-  border: 1px solid var(--border-lighter);
+  background: #fcf9f5;
+  border: 1px solid #f0ece5;
   border-radius: 12px;
 }
 
 .kp-title {
   font-size: 14px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1c1c1c;
   margin: 0 0 14px;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--border-lighter);
+  border-bottom: 1px solid #f0ece5;
   font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
 }
 
@@ -938,12 +938,12 @@ function randomPrompt() {
 }
 
 .kp-dot {
-  color: var(--text-muted);
+  color: #b0a8a0;
   font-size: 10px;
 }
 
 .kp-meaning {
-  color: var(--text-regular);
+  color: #4a4a4a;
 }
 
 /* Exam Focus */
@@ -972,7 +972,7 @@ function randomPrompt() {
 .efp-body {
   font-size: 12px;
   line-height: 1.9;
-  color: var(--text-regular);
+  color: #4a4a4a;
   margin: 0;
 }
 
@@ -988,7 +988,7 @@ function randomPrompt() {
 .qt-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: #8a8a8a;
 }
 
 .qt-tag {
@@ -1011,8 +1011,8 @@ function randomPrompt() {
 
 /* Prompt Hero */
 .prompt-hero {
-  background: var(--card-bg);
-  border: 1px solid var(--border-lighter);
+  background: #fefcf9;
+  border: 1px solid #f0ece5;
   border-radius: 14px;
   padding: 24px 28px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.03);
@@ -1024,13 +1024,13 @@ function randomPrompt() {
   align-items: center;
   margin-bottom: 16px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--border-lighter);
+  border-bottom: 1px solid #f0ece5;
 }
 
 .prompt-hero-header h3 {
   font-size: 15px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1c1c1c;
   margin: 0;
   font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
 }
@@ -1048,7 +1048,7 @@ function randomPrompt() {
   font-size: 12px;
   font-weight: 600;
   transition: all 0.2s;
-  font-family: var(--font-body);
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
 }
 
 .random-btn:hover {
@@ -1069,9 +1069,9 @@ function randomPrompt() {
 .phb-year {
   font-size: 11px;
   padding: 2px 10px;
-  background: var(--bg-warm);
+  background: #f0ece5;
   border-radius: 4px;
-  color: var(--text-secondary);
+  color: #8a8a8a;
   font-weight: 600;
 }
 
@@ -1090,10 +1090,10 @@ function randomPrompt() {
   font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
   font-size: 16px;
   line-height: 2.2;
-  color: var(--text-primary);
+  color: #1c1c1c;
   margin: 0 0 12px;
   padding: 12px 18px;
-  background: var(--card-bg-warm);
+  background: #fcf9f5;
   border-radius: 8px;
   border-left: 3px solid #b4783c;
 }
@@ -1105,11 +1105,11 @@ function randomPrompt() {
   padding: 5px 12px;
   border: none;
   background: transparent;
-  color: var(--text-secondary);
+  color: #8a8a8a;
   cursor: pointer;
   font-size: 12px;
   transition: color 0.2s;
-  font-family: var(--font-body);
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
 }
 
 .hint-toggle:hover {
@@ -1130,7 +1130,7 @@ function randomPrompt() {
 .prompt-empty-state {
   text-align: center;
   padding: 40px 20px;
-  color: var(--text-muted);
+  color: #b0a8a0;
 }
 
 .empty-icon {
@@ -1141,8 +1141,8 @@ function randomPrompt() {
 
 /* Format Panel */
 .format-panel {
-  background: var(--card-bg);
-  border: 1px solid var(--border-lighter);
+  background: #fefcf9;
+  border: 1px solid #f0ece5;
   border-radius: 14px;
   padding: 20px 24px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.03);
@@ -1151,7 +1151,7 @@ function randomPrompt() {
 .format-panel-title {
   font-size: 15px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1c1c1c;
   margin: 0 0 14px;
   font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
 }
@@ -1163,7 +1163,7 @@ function randomPrompt() {
 }
 
 .format-item {
-  border: 1px solid var(--border-lighter);
+  border: 1px solid #f0ece5;
   border-radius: 10px;
   overflow: hidden;
   transition: border-color 0.2s;
@@ -1178,20 +1178,20 @@ function randomPrompt() {
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #1c1c1c;
   user-select: none;
   transition: background 0.2s;
 }
 
 .format-summary:hover {
-  background: var(--card-bg-warm);
+  background: #fcf9f5;
 }
 
 .format-body {
   padding: 4px 16px 16px;
   font-size: 12px;
   line-height: 2;
-  color: var(--text-regular);
+  color: #4a4a4a;
 }
 
 .format-row {
@@ -1199,7 +1199,7 @@ function randomPrompt() {
 }
 
 .format-row b {
-  color: var(--text-primary);
+  color: #1c1c1c;
 }
 
 .format-example-box {
@@ -1209,13 +1209,13 @@ function randomPrompt() {
 .feb-label {
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #b0a8a0;
   margin-bottom: 6px;
 }
 
 .feb-code {
-  background: var(--card-bg-warm);
-  border: 1px solid var(--border-lighter);
+  background: #fcf9f5;
+  border: 1px solid #f0ece5;
   border-radius: 8px;
   padding: 14px 18px;
   font-size: 12px;
@@ -1223,13 +1223,13 @@ function randomPrompt() {
   overflow-x: auto;
   white-space: pre-wrap;
   font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
-  color: var(--text-primary);
+  color: #1c1c1c;
 }
 
 /* All Prompts Panel */
 .all-prompts-panel {
-  background: var(--card-bg);
-  border: 1px solid var(--border-lighter);
+  background: #fefcf9;
+  border: 1px solid #f0ece5;
   border-radius: 14px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.03);
   position: sticky;
@@ -1242,14 +1242,14 @@ function randomPrompt() {
 .app-title {
   font-size: 14px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1c1c1c;
   margin: 0;
   padding: 18px 20px 14px;
-  border-bottom: 1px solid var(--border-lighter);
+  border-bottom: 1px solid #f0ece5;
   font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
   position: sticky;
   top: 0;
-  background: var(--card-bg);
+  background: #fefcf9;
   border-radius: 14px 14px 0 0;
 }
 
@@ -1260,7 +1260,7 @@ function randomPrompt() {
 
 .app-item {
   padding: 14px 14px;
-  border-bottom: 1px solid var(--border-lighter);
+  border-bottom: 1px solid #f0ece5;
   cursor: pointer;
   transition: all 0.2s;
   border-radius: 8px;
@@ -1268,7 +1268,7 @@ function randomPrompt() {
 }
 
 .app-item:hover {
-  background: var(--card-bg-warm);
+  background: #fcf9f5;
 }
 
 .app-item:last-child {
@@ -1285,9 +1285,9 @@ function randomPrompt() {
 .appi-year {
   font-size: 10px;
   padding: 1px 8px;
-  background: var(--bg-warm);
+  background: #f0ece5;
   border-radius: 3px;
-  color: var(--text-secondary);
+  color: #8a8a8a;
   font-weight: 600;
 }
 
@@ -1305,7 +1305,7 @@ function randomPrompt() {
 .appi-text {
   font-size: 11px;
   line-height: 1.7;
-  color: var(--text-regular);
+  color: #4a4a4a;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1321,8 +1321,8 @@ function randomPrompt() {
 }
 
 .reading-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-lighter);
+  background: #fefcf9;
+  border: 1px solid #f0ece5;
   border-radius: 14px;
   padding: 24px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.03);
@@ -1340,7 +1340,7 @@ function randomPrompt() {
   gap: 12px;
   margin-bottom: 16px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--border-lighter);
+  border-bottom: 1px solid #f0ece5;
 }
 
 .rc-num {
@@ -1360,7 +1360,7 @@ function randomPrompt() {
 .rc-title {
   font-size: 15px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1c1c1c;
   margin: 0;
   font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
 }
@@ -1374,7 +1374,7 @@ function randomPrompt() {
 .rc-list li {
   font-size: 13px;
   line-height: 2;
-  color: var(--text-regular);
+  color: #4a4a4a;
   padding: 3px 0 3px 20px;
   position: relative;
 }
@@ -1395,8 +1395,8 @@ function randomPrompt() {
 }
 
 .culture-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-lighter);
+  background: #fefcf9;
+  border: 1px solid #f0ece5;
   border-radius: 14px;
   padding: 24px 28px;
   display: flex;
@@ -1415,12 +1415,12 @@ function randomPrompt() {
   width: 56px;
   height: 56px;
   border-radius: 14px;
-  background: var(--card-bg-warm);
+  background: #fcf9f5;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid var(--border-lighter);
+  border: 1px solid #f0ece5;
 }
 
 .cc-body {
@@ -1431,7 +1431,7 @@ function randomPrompt() {
 .cc-title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1c1c1c;
   margin: 0 0 6px;
   font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
 }
@@ -1439,7 +1439,7 @@ function randomPrompt() {
 .cc-desc {
   font-size: 12px;
   line-height: 1.8;
-  color: var(--text-regular);
+  color: #4a4a4a;
   margin: 0 0 12px;
 }
 

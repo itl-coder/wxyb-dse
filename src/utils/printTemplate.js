@@ -1,3 +1,157 @@
+import { settingsService } from '@/services/dataService'
+
+// === Watermark helpers — config read from settingsService ===
+
+const WM_FALLBACK = {
+  enabled: true,
+  text: '内部资料·仅供家长会使用',
+  rotation: -22,
+  opacity: 0.06,
+  fontSize: 16,
+  gapX: 120,
+  gapY: 80,
+  color: 'rgba(0,0,0,0.06)',
+  showTimestamp: true
+}
+
+function getWmConfig() {
+  const s = settingsService.get()
+  return {
+    enabled: s.watermarkEnabled !== undefined ? s.watermarkEnabled : WM_FALLBACK.enabled,
+    text: s.watermarkText || WM_FALLBACK.text,
+    rotation: s.watermarkRotation ?? WM_FALLBACK.rotation,
+    opacity: s.watermarkOpacity ?? WM_FALLBACK.opacity,
+    fontSize: s.watermarkFontSize ?? WM_FALLBACK.fontSize,
+    gapX: s.watermarkGapX ?? WM_FALLBACK.gapX,
+    gapY: s.watermarkGapY ?? WM_FALLBACK.gapY,
+    color: s.watermarkColor || WM_FALLBACK.color,
+    showTimestamp: s.watermarkShowTimestamp !== undefined ? s.watermarkShowTimestamp : WM_FALLBACK.showTimestamp
+  }
+}
+
+/** Returns CSS for a fixed-position print watermark overlay. Empty string if disabled. */
+export function getPrintWatermarkStyle() {
+  const c = getWmConfig()
+  if (!c.enabled) return ''
+  return `
+    .wm-container {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 9999; overflow: hidden;
+      opacity: ${c.opacity};
+    }
+    .wm-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      width: 120%; height: 120%; margin: -5% 0 0 -5%;
+      transform: rotate(${c.rotation}deg);
+    }
+    .wm-cell {
+      display: flex; align-items: center; justify-content: center;
+    }
+    .wm-cell span {
+      font-size: ${c.fontSize}px; color: ${c.color}; font-weight: 500;
+      white-space: nowrap; user-select: none;
+    }
+    .wm-meta {
+      position: fixed; bottom: 12px; right: 16px;
+      font-size: 10px; color: #999; z-index: 10000;
+      pointer-events: none; font-family: monospace;
+    }
+    @media print {
+      .wm-container { position: fixed; }
+    }
+  `
+}
+
+/** Returns HTML overlay for print watermarks (4x4 grid). Empty string if disabled. */
+export function getPrintWatermarkHTML() {
+  const c = getWmConfig()
+  if (!c.enabled) return ''
+  const now = new Date().toLocaleString('zh-CN')
+  const username = localStorage.getItem('dse_username') || '管理员'
+  const cells = Array.from({ length: 16 }, () => `<div class="wm-cell"><span>${c.text}</span></div>`).join('')
+  const meta = c.showTimestamp ? `<div class="wm-meta">${username} · ${now}</div>` : ''
+  return `<div class="wm-container"><div class="wm-grid">${cells}</div></div>${meta}`
+}
+
+/**
+ * Returns DOM overlay HTML for html2canvas export containers.
+ * Uses absolutely-positioned spans (6x5 grid) so they are descendants of the container.
+ * Empty string if disabled.
+ */
+export function getOverlayWatermarkHTML() {
+  const c = getWmConfig()
+  if (!c.enabled) return ''
+  const rows = 6
+  const cols = 5
+  const spans = []
+  for (let r = 0; r < rows; r++) {
+    for (let i = 0; i < cols; i++) {
+      const top = (r / rows) * 100
+      const left = (i / cols) * 100
+      spans.push(
+        `<span style="position:absolute;top:${top}%;left:${left}%;` +
+        `transform:rotate(${c.rotation}deg);font-size:${c.fontSize}px;` +
+        `color:${c.color};` +
+        `pointer-events:none;user-select:none;white-space:nowrap;font-weight:500;">` +
+        `${c.text}</span>`
+      )
+    }
+  }
+  const meta = c.showTimestamp
+    ? `<span style="position:absolute;bottom:8px;right:12px;font-size:10px;color:#999;pointer-events:none;font-family:monospace;">${new Date().toLocaleString('zh-CN')}</span>`
+    : ''
+  return `<div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:10;opacity:${c.opacity};">${spans.join('')}${meta}</div>`
+}
+
+/**
+ * Build props for Element Plus <el-watermark> component.
+ * Returns null if watermark is disabled.
+ */
+export function getElWatermarkProps() {
+  const c = getWmConfig()
+  if (!c.enabled) return null
+  return {
+    content: c.text,
+    font: { fontSize: c.fontSize, color: c.color },
+    gap: [c.gapX, c.gapY],
+    rotate: c.rotation,
+    zIndex: 1
+  }
+}
+
+/** Builds a complete HTML document (style + body) with embedded watermark, for print popup windows. */
+export function buildExportHTML(title, bodyContent, extraCSS = '') {
+  const wmStyle = getPrintWatermarkStyle()
+  const wmHTML = getPrintWatermarkHTML()
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title><style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: 'PingFang SC','Microsoft YaHei',sans-serif; color: #333; padding: 20px; position: relative; }
+    ${wmStyle}
+    ${extraCSS}
+  </style></head><body>
+    ${bodyContent}
+    ${wmHTML}
+  </body></html>`
+}
+
+/** Injects watermark CSS into an existing HTML string before the first </style> tag. */
+export function injectPrintWatermarkCSS(html) {
+  const style = getPrintWatermarkStyle()
+  if (!style) return html
+  return html.replace('</style>', `\n${style}\n</style>`)
+}
+
+/** Injects watermark HTML into an existing HTML string before the first </body> tag. */
+export function injectPrintWatermarkHTML(html) {
+  const wmHTML = getPrintWatermarkHTML()
+  if (!wmHTML) return html
+  return html.replace('</body>', `${wmHTML}\n</body>`)
+}
+
+// === Parent conference print template ===
+
 /**
  * Build a full HTML document string for print/PDF export of the parent conference document.
  * "Scholarly Refinement" aesthetic — warm ivory paper, burnished gold accents, editorial typography.

@@ -13,10 +13,10 @@
           <el-select v-model="filterCampus" size="small" placeholder="校区筛选" style="width:120px" clearable>
             <el-option v-for="c in campusList" :key="c" :label="c" :value="c" />
           </el-select>
-          <el-button size="small" type="primary" @click="openDialog(null)">+ 添加学生</el-button>
+          <el-button v-if="store.hasPermission('student.create')" size="small" type="primary" @click="openDialog(null)">+ 添加学生</el-button>
           <el-button size="small" @click="printPreview">🖨️ 打印预览</el-button>
           <el-button size="small" type="success" @click="batchExport" :disabled="selectedIds.length===0">📥 批量导出</el-button>
-          <el-button size="small" type="danger" @click="batchDelete" :disabled="selectedIds.length===0">🗑 批量删除</el-button>
+          <el-button v-if="store.hasPermission('student.delete')" size="small" type="danger" @click="batchDelete" :disabled="selectedIds.length===0">🗑 批量删除</el-button>
         </div>
       </div>
 
@@ -62,8 +62,8 @@
         <el-table-column prop="elective3" label="选修3" width="90" />
         <el-table-column label="操作" fixed="right" width="140">
           <template #default="{ row }">
-            <el-button size="small" text @click="openDialog(row)">编辑</el-button>
-            <el-button size="small" text type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button v-if="store.hasPermission('student.edit')" size="small" text @click="openDialog(row)">编辑</el-button>
+            <el-button v-if="store.hasPermission('student.delete')" size="small" text type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -179,7 +179,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { studentService, courseService } from '@/services/dataService'
-import { getWatermarkConfig, buildExportHTML } from '@/utils/watermark'
+import { settingsService } from '@/services/dataService'
+import { useAppStore } from '@/stores/app'
+import { useScopedData } from '@/composables/useScopedData'
+
+const store = useAppStore()
+const { filterByScope } = useScopedData()
 
 const students = ref([])
 const dialogVisible = ref(false)
@@ -231,7 +236,10 @@ function getDefaultForm() {
 
 onMounted(() => { loadStudents() })
 
-function loadStudents() { students.value = studentService.getAll() }
+function loadStudents() {
+  const raw = studentService.getAll()
+  students.value = filterByScope(raw, store.currentRole?.dataScope)
+}
 
 function openDialog(student) {
   if (student) {
@@ -294,8 +302,8 @@ function printPreview() {
   html += `</tbody></table><div class="footer">威学一百 DSE 学情管理系统 · 仅供内部使用</div></body></html>`
 
   // Inject watermark
-  const wmConfig = getWatermarkConfig()
-  if (wmConfig.enabled) {
+  const wmConfig = settingsService.get()
+  if (wmConfig.watermarkEnabled) {
     const now = new Date().toLocaleString('zh-CN')
     const username = localStorage.getItem('dse_username') || '管理员'
     html = html.replace('</style>', `
@@ -304,7 +312,7 @@ function printPreview() {
       .watermark-overlay .wm-meta { font-size: 10px; color: #ff0000; margin-top: 8px; }
     </style>`)
     html = html.replace('</body>', `<div class="watermark-overlay">
-      ${Array(8).fill(`<div class="wm-text">${wmConfig.text}</div>`).join('')}
+      ${Array(8).fill(`<div class="wm-text">${wmConfig.watermarkText}</div>`).join('')}
       <div class="wm-meta">导出人：${username} · 导出时间：${now}</div>
     </div></body>`)
   }

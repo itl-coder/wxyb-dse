@@ -12,7 +12,7 @@
     <router-link to="/composite">复合函数</router-link>
     <router-link to="/locus">轨迹</router-link>
     <router-link to="/triangle-center">四心</router-link>
-    <router-link to="/moving-point">动点</router-link>
+
     <router-link to="/quadratic">二次函数</router-link>
     <router-link to="/sequence">数列</router-link>
     <router-link to="/probability">概率</router-link>
@@ -37,7 +37,7 @@ defineProps({
 const pageNames = {
   Home: '总览', Geometry3D: '立体几何', Trigonometry: '三角函数',
   LogExp: '对数指数', CircleLine: '圆与直线', Composite: '复合函数',
-  Locus: '轨迹', TriangleCenter: '四心', MovingPoint: '动点',
+  Locus: '轨迹', TriangleCenter: '四心',
   Quadratic: '二次函数', Sequence: '数列', Probability: '概率',
   Statistics: '统计', Polynomial: '多项式', Inequality: '不等式',
   Numbers: '数与式', Practice: '练习', Mistakes: '错题', Knowledge: '总结',

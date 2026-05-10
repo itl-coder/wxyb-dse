@@ -15,15 +15,20 @@
     "element-plus": "^2.6.1",
     "html2canvas": "^1.4.1",
     "katex": "^0.16.11",
+    "markdown-it": "^14.1.0",
+    "markdown-it-katex": "^1.0.0",
     "marked": "^18.0.3",
+    "mathjax": "^3.2.2",
     "md-editor-v3": "^6.5.0",
     "p5": "^1.9.0",
     "pinia": "^3.0.4",
     "tesseract.js": "^5.1.1",
+    "three": "^0.170.0",
     "vue": "^3.4.21",
     "vue-echarts": "^6.7.2",
     "vue-router": "^4.3.0",
-    "wavesurfer.js": "^7.12.6"
+    "wavesurfer.js": "^7.12.6",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

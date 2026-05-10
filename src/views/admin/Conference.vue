@@ -257,36 +257,57 @@
               </div>
             </div>
 
-            <!-- Editor Mode (Edit + Preview) -->
-            <div v-if="!previewOnly" class="conf-editor-pane">
-              <MdEditor
-                v-model="fullConfDocument"
-                :theme="store.theme"
-                language="zh-CN"
-                :previewTheme="previewTheme"
-                :toolbars="mdToolbarsEx"
-                :noPrettier="true"
-                :noMermaid="true"
-                :footers="mdFooters"
-                placeholder="正在生成家长会文稿..."
-                @onSave="handleEditorSave"
-              />
-            </div>
-
-            <!-- Preview-Only Mode -->
-            <div v-else class="conf-preview-pane">
-              <MdPreview :editorId="previewId" :modelValue="fullConfDocument" :previewTheme="previewTheme" />
-              <div class="conf-catalog-wrap">
-                <MdCatalog :editorId="previewId" :scrollElement="previewScrollEl" />
+            <!-- Watermark overlay for on-screen editing -->
+            <el-watermark v-if="elWmProps" v-bind="elWmProps" style="width:100%;height:100%;flex:1">
+              <div v-if="!previewOnly" class="conf-editor-pane">
+                <MdEditor
+                  v-model="fullConfDocument"
+                  :theme="store.theme"
+                  language="zh-CN"
+                  :previewTheme="previewTheme"
+                  :toolbars="mdToolbarsEx"
+                  :noPrettier="true"
+                  :noMermaid="true"
+                  :footers="mdFooters"
+                  placeholder="正在生成家长会文稿..."
+                  @onSave="handleEditorSave"
+                />
               </div>
-            </div>
+              <div v-else class="conf-preview-pane">
+                <MdPreview :editorId="previewId" :modelValue="fullConfDocument" :previewTheme="previewTheme" />
+                <div class="conf-catalog-wrap">
+                  <MdCatalog :editorId="previewId" :scrollElement="previewScrollEl" />
+                </div>
+              </div>
+            </el-watermark>
+            <template v-else>
+              <div v-if="!previewOnly" class="conf-editor-pane">
+                <MdEditor
+                  v-model="fullConfDocument"
+                  :theme="store.theme"
+                  language="zh-CN"
+                  :previewTheme="previewTheme"
+                  :toolbars="mdToolbarsEx"
+                  :noPrettier="true"
+                  :noMermaid="true"
+                  :footers="mdFooters"
+                  placeholder="正在生成家长会文稿..."
+                  @onSave="handleEditorSave"
+                />
+              </div>
+              <div v-else class="conf-preview-pane">
+                <MdPreview :editorId="previewId" :modelValue="fullConfDocument" :previewTheme="previewTheme" />
+                <div class="conf-catalog-wrap">
+                  <MdCatalog :editorId="previewId" :scrollElement="previewScrollEl" />
+                </div>
+              </div>
+            </template>
           </div>
 
           <!-- Hidden Export Container for html2canvas / Print -->
           <div class="hw-export-hidden" aria-hidden="true" v-if="studentProfile">
-            <template v-if="watermarkEnabled">
-              <el-watermark :content="watermarkText" :font="{ fontSize: 16, color: 'rgba(0,0,0,0.06)' }" :rotate="-22" :gap="[120, 80]" :z-index="1">
-                <div id="confExportContainer" class="conf-export-inner">
+            <div id="confExportContainer" class="conf-export-inner">
+              <div v-html="watermarkOverlayHTML"></div>
               <!-- Document Header -->
               <table class="pp-doc-head">
                 <tr>
@@ -329,6 +350,8 @@
                   <tr>
                     <td class="pp-info-cell"><span class="pp-info-label">出勤率</span><span class="pp-info-text">{{ attendanceRate }}%</span></td>
                     <td class="pp-info-cell"><span class="pp-info-label">作业完成率</span><span class="pp-info-text">{{ homeworkRate }}%</span></td>
+                    <td class="pp-info-cell">
+                      <span class="pp-info-label">考试次数</span><span class="pp-info-text">{{ examRecords.length }} 次</span></td>
                   </tr>
                 </table>
               </div>
@@ -351,31 +374,6 @@
               </div>
 
               <!-- Signature Footer -->
-            
-                </div>
-              </el-watermark>
-            </template>
-            <div v-else id="confExportContainer" class="conf-export-inner">
-              <table class="pp-doc-head">
-                <tr>
-                  <td class="pp-doc-head-left"><div class="pp-doc-no">No. {{ today.replace(/-/g, '') }}</div><div class="pp-doc-type">家长会交流材料</div></td>
-                  <td class="pp-doc-head-center"><div class="pp-school-name">{{ schoolFullName }}</div><div class="pp-school-sub">{{ schoolSubtitle }}</div></td>
-                  <td class="pp-doc-head-right"><div class="pp-doc-stamp">内部资料</div><div class="pp-doc-stamp-sub">请妥善保管</div></td>
-                </tr>
-              </table>
-              <div class="pp-hdiv"><div class="pp-hdiv-line"></div><div class="pp-hdiv-diamond">◆</div><div class="pp-hdiv-line"></div></div>
-              <div class="pp-student-card">
-                <div class="pp-student-card-title">{{ studentProfile.name }} 同学 · 学情档案</div>
-                <table class="pp-info-table">
-                  <tr><td class="pp-info-cell"><span class="pp-info-label">所在班级</span><span class="pp-info-text">{{ studentProfile.class }}</span></td><td class="pp-info-cell"><span class="pp-info-label">文件日期</span><span class="pp-info-text">{{ today }}</span></td><td class="pp-info-cell"><span class="pp-info-label">班主任</span><span class="pp-info-text">{{ studentProfile.cc || homeroomTeacher }}</span></td></tr>
-                  <tr><td class="pp-info-cell"><span class="pp-info-label">选修科目</span><span class="pp-info-text">{{ [studentProfile.elective1, studentProfile.elective2, studentProfile.elective3].filter(Boolean).join('、') || '暂无' }}</span></td><td class="pp-info-cell"><span class="pp-info-label">目标院校</span><span class="pp-info-text">{{ studentProfile.targetUniversity || '暂无' }}</span></td><td class="pp-info-cell"><span class="pp-info-label">留学规划</span><span class="pp-info-text">{{ studentProfile.studyAbroadPlanning ? '有计划' : '暂无' }}</span></td></tr>
-                  <tr><td class="pp-info-cell"><span class="pp-info-label">出勤率</span><span class="pp-info-text">{{ attendanceRate }}%</span></td><td class="pp-info-cell"><span class="pp-info-label">作业完成率</span><span class="pp-info-text">{{ homeworkRate }}%</span></td><td class="pp-info-cell">
-                    <span class="pp-info-label">考试次数</span><span class="pp-info-text">{{ examRecords.length }} 次</span></td></tr>
-                </table>
-              </div>
-              <div class="pp-hdiv"><div class="pp-hdiv-line"></div><div class="pp-hdiv-star">✦</div><div class="pp-hdiv-line"></div></div>
-              <div v-html="renderedConfDocument" class="pp-md-body"></div>
-              <div class="pp-hdiv" style="margin-top:36px"><div class="pp-hdiv-line"></div><div class="pp-hdiv-star">❧</div><div class="pp-hdiv-line"></div></div>
               <table v-if="showTeacherSign || showParentSign" class="pp-sign-table">
                 <tr v-if="showTeacherSign"><td class="pp-sign-cell">班主任签字：_______________</td><td class="pp-sign-cell" style="text-align:right">日期：{{ today }}</td></tr>
                 <tr v-if="showParentSign"><td class="pp-sign-cell">家长签字：_______________</td><td class="pp-sign-cell" style="text-align:right">{{ schoolName }} · {{ reportFooter }}</td></tr>
@@ -398,8 +396,7 @@ import 'md-editor-v3/lib/preview.css'
 import { marked } from 'marked'
 import { studentService, examService, attendanceService, homeworkService, behaviorService, phoneRecordService, counselingService, settingsService } from '@/services/dataService'
 import { useAppStore } from '@/stores/app'
-import { buildPrintHTML } from '@/utils/printTemplate'
-import { getWatermarkStyle, getWatermarkHTML } from '@/utils/watermark'
+import { buildPrintHTML, getPrintWatermarkStyle, getPrintWatermarkHTML, getOverlayWatermarkHTML, getElWatermarkProps } from '@/utils/printTemplate'
 
 // Configure marked for document rendering
 marked.setOptions({ breaks: true, gfm: true })
@@ -443,6 +440,8 @@ const homeroomTeacher = ref('张老师')
 const reportFooter = ref('用心陪伴每一位学生的成长')
 const watermarkEnabled = ref(true)
 const watermarkText = ref('内部资料·仅供家长会使用')
+const watermarkOverlayHTML = computed(() => getOverlayWatermarkHTML())
+const elWmProps = computed(() => getElWatermarkProps())
 const previewTheme = ref('default')
 const showTeacherSign = ref(true)
 const showParentSign = ref(true)
@@ -1057,8 +1056,8 @@ function exportPDF() {
     bodyHTML: renderedConfDocument.value,
     showTeacherSign: showTeacherSign.value,
     showParentSign: showParentSign.value,
-    watermarkStyle: getWatermarkStyle(),
-    watermarkHTML: getWatermarkHTML()
+    watermarkStyle: getPrintWatermarkStyle(),
+    watermarkHTML: getPrintWatermarkHTML()
   })
   w.document.write(html)
   w.document.close()

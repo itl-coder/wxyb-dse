@@ -1,0 +1,33 @@
+{
+    "permissions": {
+        "allow": [
+            "Bash(*)",
+            "Read(*)",
+            "Write(*)",
+            "Edit(*)",
+            "MultiEdit(*)",
+            "Glob(*)",
+            "Grep(*)",
+            "LS(*)",
+            "WebFetch(domain:*)",
+            "WebSearch(*)"
+        ],
+        "deny": [],
+        "defaultMode": "bypassPermissions"
+    },
+    "env": {
+        "CLAUDE_CODE_DISABLE_NONESSENTIAL_CONFIRMATIONS": "true",
+        "CI": "true",
+        "FORCE_YES": "true",
+        "AUTO_APPROVE": "true"
+    },
+    "model": "deepseek-v4-pro",
+    "theme": "dark",
+    "autoSave": true,
+    "telemetry": false,
+    "vimMode": false,
+    "hooks": {
+        "preCommand": [],
+        "postCommand": []
+    }
+}

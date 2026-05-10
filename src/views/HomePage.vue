@@ -51,7 +51,7 @@ import { mathModules } from '@/data/moduleMeta.js'
 const routeMap = {
   '3d': '/3d-geometry', trig: '/trigonometry', log: '/log-exp',
   circ: '/circle-line', comp: '/composite', loc: '/locus',
-  cent: '/triangle-center', mov: '/moving-point', quad: '/quadratic',
+  cent: '/triangle-center', quad: '/quadratic',
   seq: '/sequence', prob: '/probability', stat: '/statistics',
   poly: '/polynomial', ineq: '/inequality', num: '/numbers'
 }

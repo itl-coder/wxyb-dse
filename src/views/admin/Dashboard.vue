@@ -189,7 +189,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { quickActionService, studentService, attendanceService, homeworkService, behaviorService, disciplineService } from '@/services/dataService'
-import { injectWatermarkCSS, injectWatermarkHTML } from '@/utils/watermark'
+import { injectPrintWatermarkCSS, injectPrintWatermarkHTML } from '@/utils/printTemplate'
 
 const quickActions = ref([])
 const showAddAction = ref(false)
@@ -329,8 +329,8 @@ h1 { text-align:center; font-size:20px; color:#4a2c17; }
 .dr-footer { text-align:center; font-size:10px; color:#aaa; margin-top:30px; border-top:1px solid #eee; padding-top:12px; }
 @media print { body { margin:20px; } }
 </style></head><body>${el.innerHTML}</body></html>`
-  html = injectWatermarkCSS(html)
-  html = injectWatermarkHTML(html)
+  html = injectPrintWatermarkCSS(html)
+  html = injectPrintWatermarkHTML(html)
   const w = window.open('', '_blank', 'width=800,height=600')
   w.document.write(html)
   w.document.close()

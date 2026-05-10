@@ -1,129 +1,132 @@
-// Watermark utility — tiled scattered pattern for print/export
-// Unified config stored in localStorage.dse_watermark
+/**
+ * Unified Watermark Utility
+ * Provides tiled watermark patterns for:
+ *  - Screen display (CSS overlay)
+ *  - Canvas export (html2canvas)
+ *  - Print/CSS @media print
+ *  - PDF/window.print() export
+ *
+ * Content: school name, username, timestamp, anti-leak tag
+ */
+
+import { useAppStore } from '@/stores/app'
 
 const DEFAULT_CONFIG = {
   enabled: true,
-  text: '内部资料·仅供家长会使用',
-  rotation: -22,
+  text: '内部资料·仅供教学使用',
+  fontSize: 14,
   opacity: 0.06,
-  fontSize: 16,
-  gapX: 120,
-  gapY: 80,
-  color: 'rgba(0,0,0,0.06)',
-  showTimestamp: true
+  color: '#000000',
+  rotate: -25,
+  gapX: 240,
+  gapY: 140,
+  antiLeak: true
 }
 
-export function getWatermarkConfig() {
-  const saved = localStorage.getItem('dse_watermark')
-  if (saved) {
-    try {
-      return { ...DEFAULT_CONFIG, ...JSON.parse(saved) }
-    } catch { /* fall through */ }
-  }
-  return { ...DEFAULT_CONFIG }
+export function createWatermarkCanvas(config = {}) {
+  const cfg = { ...DEFAULT_CONFIG, ...config }
+  if (!cfg.enabled) return null
+
+  const store = useAppStore()
+  const schoolName = store.schoolName || '威学一百'
+  const userName = store.currentUser?.displayName || ''
+  const timestamp = new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+
+  // Measure text
+  const fontSize = cfg.fontSize
+  ctx.font = `${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`
+
+  const lines = [schoolName]
+  if (userName) lines.push(userName)
+  lines.push(timestamp)
+  if (cfg.antiLeak) lines.push('禁止外传 · CONFIDENTIAL')
+
+  const maxWidth = Math.max(...lines.map(l => ctx.measureText(l).width))
+  const lineHeight = fontSize * 1.4
+  const totalHeight = lines.length * lineHeight
+
+  canvas.width = cfg.gapX
+  canvas.height = cfg.gapY
+
+  // Center the text block
+  const startX = (cfg.gapX - maxWidth) / 2
+  const startY = (cfg.gapY - totalHeight) / 2
+
+  ctx.save()
+  ctx.globalAlpha = cfg.opacity
+  ctx.fillStyle = cfg.color
+
+  // Main diagonal text
+  ctx.translate(cfg.gapX / 2, cfg.gapY / 2)
+  ctx.rotate((cfg.rotate * Math.PI) / 180)
+
+  lines.forEach((line, i) => {
+    const x = -maxWidth / 2
+    const y = -totalHeight / 2 + (i + 1) * lineHeight
+    ctx.fillText(line, x, y)
+  })
+
+  // Additional offset copies for density
+  ctx.translate(40, 0)
+  ctx.globalAlpha = cfg.opacity * 0.5
+  lines.forEach((line, i) => {
+    const x = -maxWidth / 2
+    const y = -totalHeight / 2 + (i + 1) * lineHeight
+    ctx.fillText(line, x, y)
+  })
+
+  ctx.restore()
+  return canvas
 }
 
-export function saveWatermarkConfig(config) {
-  localStorage.setItem('dse_watermark', JSON.stringify(config))
+export function applyWatermarkToStyle(container, config = {}) {
+  const canvas = createWatermarkCanvas(config)
+  if (!canvas) return
+
+  const url = canvas.toDataURL('image/png')
+  container.style.backgroundImage = `url(${url})`
+  container.style.backgroundRepeat = 'repeat'
+  container.style.backgroundPosition = 'center'
 }
 
-export function getWatermarkStyle() {
-  const config = getWatermarkConfig()
-  if (!config.enabled) return ''
-  return `
-    .wm-container {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none; z-index: 9999; overflow: hidden;
-    }
-    .wm-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(4, 1fr);
-      width: 120%; height: 120%; margin: -5% 0 0 -5%;
-      transform: rotate(${config.rotation}deg);
-    }
-    .wm-cell {
-      display: flex; align-items: center; justify-content: center;
-      opacity: ${config.opacity};
-    }
-    .wm-cell span {
-      font-size: ${config.fontSize}px; color: ${config.color}; font-weight: 500;
-      white-space: nowrap; user-select: none;
-    }
-    .wm-meta {
-      position: fixed; bottom: 12px; right: 16px;
-      font-size: 10px; color: #999; z-index: 10000;
-      pointer-events: none; font-family: monospace;
-    }
+export function getWatermarkStyle(config = {}) {
+  const canvas = createWatermarkCanvas(config)
+  if (!canvas) return ''
+  const url = canvas.toDataURL('image/png')
+  return `background-image:url(${url});background-repeat:repeat;background-position:center;`
+}
+
+export function injectPrintWatermark(config = {}) {
+  const styleId = 'dse-watermark-print-style'
+  if (document.getElementById(styleId)) return
+
+  const canvas = createWatermarkCanvas({ ...config, opacity: 0.04, color: '#333333' })
+  if (!canvas) return
+
+  const url = canvas.toDataURL('image/png')
+  const style = document.createElement('style')
+  style.id = styleId
+  style.textContent = `
     @media print {
-      .wm-container { position: fixed; }
+      body::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image: url(${url});
+        background-repeat: repeat;
+        background-position: center;
+        pointer-events: none;
+        z-index: 9999;
+      }
     }
   `
+  document.head.appendChild(style)
 }
 
-export function getWatermarkHTML() {
-  const config = getWatermarkConfig()
-  if (!config.enabled) return ''
-  const now = new Date().toLocaleString('zh-CN')
-  const username = localStorage.getItem('dse_username') || '管理员'
-  const cells = Array.from({ length: 16 }, () => `<div class="wm-cell"><span>${config.text}</span></div>`).join('')
-  const meta = config.showTimestamp ? `<div class="wm-meta">${username} · ${now}</div>` : ''
-  return `<div class="wm-container"><div class="wm-grid">${cells}</div></div>${meta}`
-}
-
-/**
- * Generate watermark overlay HTML for html2canvas export containers.
- * Uses absolutely positioned spans tiled across the container.
- */
-export function getWatermarkOverlayHTML() {
-  const config = getWatermarkConfig()
-  if (!config.enabled) return ''
-  const rows = 6
-  const cols = 5
-  const spans = []
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const top = (r / rows) * 100
-      const left = (c / cols) * 100
-      spans.push(
-        `<span style="position:absolute;top:${top}%;left:${left}%;` +
-        `transform:rotate(${config.rotation}deg);font-size:${config.fontSize}px;` +
-        `color:${config.color};opacity:${config.opacity * 100 / 0.06 * 0.06};` +
-        `pointer-events:none;user-select:none;white-space:nowrap;font-weight:500;">` +
-        `${config.text}</span>`
-      )
-    }
-  }
-  const meta = config.showTimestamp
-    ? `<span style="position:absolute;bottom:8px;right:12px;font-size:10px;color:#999;pointer-events:none;font-family:monospace;">${new Date().toLocaleString('zh-CN')}</span>`
-    : ''
-  return `<div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:10;">${spans.join('')}${meta}</div>`
-}
-
-export function injectWatermarkCSS(html) {
-  const style = getWatermarkStyle()
-  if (!style) return html
-  return html.replace('</style>', `\n${style}\n</style>`)
-}
-
-export function injectWatermarkHTML(html) {
-  const wmHtml = getWatermarkHTML()
-  if (!wmHtml) return html
-  return html.replace('</body>', `${wmHtml}\n</body>`)
-}
-
-export function buildExportHTML(title, bodyContent, extraCSS = '') {
-  const config = getWatermarkConfig()
-  const watermarkStyle = config.enabled ? getWatermarkStyle() : ''
-  const watermarkHTML = config.enabled ? getWatermarkHTML() : ''
-
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title><style>
-    @page { size: A4; margin: 15mm; }
-    body { font-family: 'PingFang SC','Microsoft YaHei',sans-serif; color: #333; padding: 20px; position: relative; }
-    ${watermarkStyle}
-    ${extraCSS}
-  </style></head><body>
-    ${bodyContent}
-    ${watermarkHTML}
-  </body></html>`
+export function removePrintWatermark() {
+  const style = document.getElementById('dse-watermark-print-style')
+  if (style) style.remove()
 }

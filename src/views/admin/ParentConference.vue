@@ -159,7 +159,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { parentConferenceService, studentService } from '@/services/dataService'
-import { getWatermarkHTML, getWatermarkStyle } from '@/utils/watermark'
+import { getPrintWatermarkHTML, getPrintWatermarkStyle } from '@/utils/printTemplate'
 
 const bookings = ref([])
 const studentList = ref([])
@@ -289,7 +289,7 @@ function exportBookingImage(conf) {
     .card .info { text-align: left; font-size: 14px; line-height: 2.4; }
     .card .info b { color: #4a2c17; }
     .card .footer { margin-top: 24px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 12px; }
-    ${getWatermarkStyle()}
+    ${getPrintWatermarkStyle()}
   </style></head><body>
   <div class="card">
     <h2>📋 威学一百 · 家长会预约凭证</h2>
@@ -305,7 +305,7 @@ function exportBookingImage(conf) {
     </div>
     <div class="footer">威学一百 DSE 教务管理系统 · ${new Date().toISOString().split('T')[0]}</div>
   </div>
-  ${getWatermarkHTML()}
+  ${getPrintWatermarkHTML()}
   </body></html>`
   const w = window.open('', '_blank', 'width=500,height=700')
   w.document.write(html)

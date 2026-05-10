@@ -8,26 +8,29 @@
     </div>
 
     <div class="log-controls">
-      <div class="control-row">
-        <span class="param-item">
+      <div class="log-row">
+        <span class="log-param">
           <label>底数 a</label>
-          <el-slider v-model="logA" :min="0.2" :max="5" :step="0.05" style="width:160px" @input="updateDisplay" show-input size="small" />
+          <input type="range" v-model.number="logA" :min="0.2" :max="5" :step="0.05" class="log-range" @input="updateDisplay" />
+          <span class="log-val">{{ logA.toFixed(2) }}</span>
         </span>
-        <el-button-group size="small">
-          <el-button v-for="p in presets" :key="p" :type="Math.abs(logA-p)<0.01?'primary':''" @click="setA(p)">a={{ p }}</el-button>
-        </el-button-group>
-        <span class="param-item">
+        <div class="log-presets">
+          <button v-for="p in presets" :key="p" class="log-preset-btn" :class="{ active: Math.abs(logA-p)<0.01 }" @click="setA(p)">a={{ p }}</button>
+        </div>
+        <span class="log-param">
           <label>范围</label>
-          <el-slider v-model="logZoom" :min="2" :max="10" :step="0.5" style="width:120px" show-input size="small" />
+          <input type="range" v-model.number="logZoom" :min="2" :max="10" :step="0.5" class="log-range" />
+          <span class="log-val">{{ logZoom.toFixed(1) }}</span>
         </span>
       </div>
-      <div class="control-row">
-        <el-checkbox v-model="showIntersect" size="small">交点</el-checkbox>
-        <el-checkbox v-model="showDomain" size="small">定义域/值域</el-checkbox>
-        <el-checkbox v-model="compareMode" size="small">a=2对比</el-checkbox>
-        <el-select v-model="logProblem" size="small" placeholder="DSE例题" clearable style="width:180px" @change="onProblem">
-          <el-option v-for="p in dseProblems" :key="p.key" :label="p.label" :value="p.key" />
-        </el-select>
+      <div class="log-row">
+        <label class="log-check"><input type="checkbox" v-model="showIntersect" /> 交点</label>
+        <label class="log-check"><input type="checkbox" v-model="showDomain" /> 定义域/值域</label>
+        <label class="log-check"><input type="checkbox" v-model="compareMode" /> a=2对比</label>
+        <select v-model="logProblem" class="log-select" @change="onProblem($event.target.value)">
+          <option value="">DSE例题</option>
+          <option v-for="p in dseProblems" :key="p.key" :value="p.key">{{ p.label }}</option>
+        </select>
       </div>
     </div>
 
@@ -152,7 +155,7 @@ const sketchFn = (p, container) => {
   p.draw = () => {
     const sz = Math.min(container.clientWidth - 20, 680, 680)
     if (p.width !== sz) p.resizeCanvas(sz, sz)
-    p.background('#fafbfc')
+    p.background('#f8f7fc')
     drawLog(p)
   }
 }
@@ -165,7 +168,7 @@ function drawLog(p) {
   const toS = (x, y) => [ox + x * gs, oy - y * gs]
 
   // 网格
-  p.stroke(220, 225, 235); p.strokeWeight(0.5)
+  p.stroke(228, 230, 240); p.strokeWeight(0.5)
   const step = zoom <= 3 ? 0.5 : 1
   for (let x = -Math.ceil(zoom); x <= Math.ceil(zoom); x += step) {
     const [sx] = toS(x, 0); if (sx >= m && sx <= W - m) p.line(sx, m, sx, H - m)
@@ -175,11 +178,11 @@ function drawLog(p) {
   }
 
   // 坐标轴
-  p.stroke('#94a3b8'); p.strokeWeight(1.5)
+  p.stroke('#7c7c9e'); p.strokeWeight(1.5)
   p.line(ox, m, ox, H - m); p.line(m, oy, W - m, oy)
 
   // 渐近线
-  p.stroke(200, 80, 80, 120); p.strokeWeight(1.5); p.drawingContext.setLineDash([5, 3])
+  p.stroke(200, 80, 80, 100); p.strokeWeight(1.2); p.drawingContext.setLineDash([5, 3])
   p.line(m, oy, W - m, oy); p.line(ox, m, ox, H - m)
   p.drawingContext.setLineDash([])
   p.fill(200, 80, 80); p.textSize(8); p.textAlign(p.RIGHT, p.BOTTOM)
@@ -212,7 +215,7 @@ function drawLog(p) {
   }
 
   // 指数曲线
-  p.stroke('#c0392b'); p.strokeWeight(2.5)
+  p.stroke('#ef4444'); p.strokeWeight(2.5)
   p.beginShape()
   for (let x = -zoom; x <= zoom; x += 0.03) {
     const y = Math.pow(a, x)
@@ -222,7 +225,7 @@ function drawLog(p) {
   p.endShape()
 
   // 对数曲线
-  p.stroke('#1a4a7a'); p.strokeWeight(2.5)
+  p.stroke('#4f46e5'); p.strokeWeight(2.5)
   p.beginShape()
   for (let x = 0.01; x <= zoom; x += 0.03) {
     const y = Math.log(x) / Math.log(a)
@@ -232,16 +235,16 @@ function drawLog(p) {
   p.endShape()
 
   // 图例
-  p.fill(255, 255, 255, 210); p.noStroke(); p.rect(m+4, m+4, 95, 36, 3)
-  p.fill('#c0392b'); p.textSize(9); p.textAlign(p.LEFT, p.TOP)
+  p.fill(255, 255, 255, 200); p.noStroke(); p.rect(m+4, m+4, 100, 36, 4)
+  p.fill('#ef4444'); p.textSize(9); p.textAlign(p.LEFT, p.TOP)
   p.text(`y=${a.toFixed(2)}ˣ`, m+8, m+8)
-  p.fill('#1a4a7a'); p.text(`y=logₐx`, m+8, m+22)
+  p.fill('#4f46e5'); p.text(`y=logₐx`, m+8, m+22)
 
   // 特殊点
   const [epx, epy] = toS(0, 1)
-  p.fill('#c0392b'); p.noStroke(); p.circle(epx, epy, 4); p.text('(0,1)', epx+6, epy-4)
+  p.fill('#ef4444'); p.noStroke(); p.circle(epx, epy, 4); p.text('(0,1)', epx+6, epy-4)
   const [lpx, lpy] = toS(1, 0)
-  p.fill('#1a4a7a'); p.noStroke(); p.circle(lpx, lpy, 4); p.text('(1,0)', lpx+6, lpy-4)
+  p.fill('#4f46e5'); p.noStroke(); p.circle(lpx, lpy, 4); p.text('(1,0)', lpx+6, lpy-4)
 
   // aˣ = x 交点
   if (showIntersect.value && a > 1) {
@@ -269,10 +272,20 @@ onMounted(() => updateDisplay())
 </script>
 
 <style scoped>
-.log-controls { display:flex;flex-direction:column;gap:8px;padding:10px 16px;background:var(--card-bg);border:1px solid var(--border-lighter);border-radius:var(--radius-lg);margin-bottom:10px }
-.control-row { display:flex;flex-wrap:wrap;align-items:center;gap:12px }
-.param-item { display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary) }
-.param-item label { font-weight:600;min-width:28px }
+.log-controls { display:flex;flex-direction:column;gap:8px;padding:10px 14px;background:var(--card-bg);border:1px solid var(--border-lighter);border-radius:var(--radius-lg);margin-bottom:10px;box-shadow:var(--shadow-light) }
+.log-row { display:flex;flex-wrap:wrap;align-items:center;gap:10px }
+.log-param { display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary) }
+.log-param label { font-weight:600;min-width:40px }
+.log-range { width:100px;accent-color:var(--accent);height:4px }
+.log-val { font-size:10px;color:var(--text-muted);min-width:28px;font-family:var(--font-mono) }
+.log-presets { display:flex;gap:2px }
+.log-preset-btn { padding:3px 8px;border:1px solid var(--border-light);border-radius:4px;background:var(--card-bg);color:var(--text-secondary);font-size:10px;font-family:var(--font-mono);cursor:pointer;transition:all 0.2s }
+.log-preset-btn:hover { border-color:var(--accent);color:var(--accent) }
+.log-preset-btn.active { background:var(--accent);color:#fff;border-color:var(--accent) }
+.log-check { display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary);cursor:pointer }
+.log-check input { accent-color:var(--accent) }
+.log-select { padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:11px;font-family:inherit;color:var(--text-primary);background:var(--card-bg);outline:none }
+.log-select:focus { border-color:var(--accent) }
 .log-info { padding:6px 14px;font-size:11px;color:var(--text-regular);background:var(--card-bg-warm);border-top:1px solid var(--border-lighter);line-height:1.8 }
-.canvas-card { background:var(--card-bg);border-radius:var(--radius-lg);border:1px solid var(--border-lighter);box-shadow:0 2px 12px rgba(26,46,60,0.06);overflow:hidden;margin-bottom:14px }
+.canvas-card { background:var(--card-bg);border-radius:var(--radius-lg);border:1px solid var(--border-lighter);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px }
 </style>

@@ -138,7 +138,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { courseFeedbackService, questionBankService, studentService, courseService } from '@/services/dataService'
-import { getWatermarkHTML, getWatermarkStyle } from '@/utils/watermark'
+import { getPrintWatermarkHTML, getPrintWatermarkStyle } from '@/utils/printTemplate'
 import { marked } from 'marked'
 import { renderRichContent } from '@/utils/renderContent'
 
@@ -290,7 +290,7 @@ function printStudentVersion() {
       <div style="margin-top:40px;border-bottom:1px dashed #ddd"></div>
     </div>`
   })
-  html += `</div>${getWatermarkHTML()}</body></html>`
+  html += `</div>${getPrintWatermarkHTML()}</body></html>`
   openPrintWindow(html)
 }
 
@@ -312,7 +312,7 @@ function printTeacherVersion() {
       </div>
     </div>`
   })
-  html += `</div>${getWatermarkHTML()}</body></html>`
+  html += `</div>${getPrintWatermarkHTML()}</body></html>`
   openPrintWindow(html)
 }
 
@@ -325,7 +325,7 @@ function buildPrintHeader(title) {
     blockquote{border-left:3px solid #c4a85c;margin:10px 0;padding:6px 14px;background:#faf7ee;font-style:italic;color:#5c3d1e}
     blockquote p{text-indent:0}
     @page{size:A4;margin:15mm}
-    ${getWatermarkStyle()}
+    ${getPrintWatermarkStyle()}
   </style></head><body><h2>课堂练习 ${title}</h2>
   <div style="text-align:center;font-size:11px;color:#888;margin-bottom:12px">${form.value.subject} · ${form.value.class}班 · ${form.value.date}</div>`
 }

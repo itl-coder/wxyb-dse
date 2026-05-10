@@ -66,6 +66,35 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-09T02:08:17.200Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-05-10T08:00:00+08:00",
+      "error_message": "IDE diagnostic: Element is missing end tag at Homework.vue:47 — <el-watermark> wrapper around tracking table never closed",
+      "file": "src/views/admin/Homework.vue",
+      "root_cause": "When adding <el-watermark v-if=\"elWmProps\" v-bind=\"elWmProps\"> wrapper to the visible tracking <el-table>, the closing </el-watermark> tag and <template v-else> fallback were never added to the edit. This left an unclosed tag, breaking the Vue SFC template.",
+      "fix": "Added </el-watermark> after </el-table>, then added <template v-else> with a duplicate <el-table> (same columns/behavior) for the watermark-disabled fallback.",
+      "tags": [
+        "template",
+        "unclosed-tag",
+        "el-watermark",
+        "Homework"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-10"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-05-10T18:00:00+08:00",
+      "error_message": "管理后台/学生门户页面切换卡住，网页崩溃 — 无限重定向循环",
+      "file": "src/stores/app.js, src/router/index.js, src/views/admin/Login.vue",
+      "root_cause": "RBAC改造后 loadUserFromStorage() 读取新键 dse_admin_user，但旧登录系统存储的是 admin_user 键。router guard 检查到 admin_token 存在但 currentUser 为 null → 重定向到 /login → Login.vue onMounted 检测到 admin_token 存在 → 重定向回 /admin → 无限循环直至浏览器崩溃。",
+      "fix": "1) loadUserFromStorage() 增加旧键 admin_user 回退并自动迁移到新键 2) Login.vue onMounted 增加 store.isAuthenticated 验证 3) router guard 中 admin→login 重定向也验证 isAuthenticated 4) guard 中清理无用户数据的过期 token",
+      "tags": ["rbac", "infinite-loop", "redirect", "auth", "localStorage"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-10"
     }
   ]
 }

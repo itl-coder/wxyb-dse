@@ -177,6 +177,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { disciplineService, studentService } from '@/services/dataService'
+import { useAppStore } from '@/stores/app'
+import { useScopedData } from '@/composables/useScopedData'
+const store = useAppStore()
+const { filterByScope } = useScopedData()
 
 const discipline = ref([])
 const studentList = ref([])
@@ -202,8 +206,8 @@ const form = ref({
 })
 
 onMounted(() => {
-  studentList.value = studentService.getAll()
-  discipline.value = disciplineService.getAll()
+  studentList.value = filterByScope(studentService.getAll(), store.currentRole?.dataScope)
+  discipline.value = filterByScope(disciplineService.getAll(), store.currentRole?.dataScope)
 })
 
 const filteredDiscipline = computed(() => {

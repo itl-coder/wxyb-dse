@@ -1,42 +1,83 @@
 /* === DSE 智能学习系统 — Vue3 全局样式 === */
 /* 使用系统本机字体，避免 Google Fonts 被墙导致白屏 */
 :root {
-  --primary: #1a2e3c;
-  --primary-l: #2c4a5e;
-  --primary-d: #0e1c26;
-  --accent: #c47a5a;
-  --accent-l: #d49a7a;
-  --accent-d: #a86040;
-  --success: #6b9e7a;
-  --danger: #c45a5a;
-  --warning: #c49a5a;
+  /* Brand (Indigo/Violet — Light Mode) */
+  --primary: #312e81;
+  --primary-l: #4338ca;
+  --primary-d: #1e1b4b;
+  --accent: #6366f1;
+  --accent-l: #818cf8;
+  --accent-d: #4f46e5;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
 
-  --bg: #f6f3ee;
-  --bg-warm: #f0ece5;
-  --card-bg: #fefcf9;
-  --card-bg-warm: #fcf9f5;
+  /* Surfaces (Light Mode) */
+  --bg: #f8f7fc;
+  --bg-warm: #f1eff6;
+  --card-bg: #ffffff;
+  --card-bg-warm: #faf9fd;
 
-  --text-primary: #1c1c1c;
-  --text-regular: #4a4a4a;
-  --text-secondary: #8a8a8a;
-  --text-muted: #b0a8a0;
+  /* Text (Light Mode) */
+  --text-primary: #1a1a2e;
+  --text-regular: #4a4a6a;
+  --text-secondary: #7c7c9e;
+  --text-muted: #a0a0b8;
 
-  --border-base: #e0d8d0;
-  --border-light: #e8e2da;
-  --border-lighter: #f0ece5;
+  /* Borders (Light Mode) */
+  --border-base: #d4d4e8;
+  --border-light: #e4e4f4;
+  --border-lighter: #f0eff8;
 
-  --shadow: 0 4px 20px rgba(26, 46, 60, 0.08);
-  --shadow-light: 0 2px 8px rgba(26, 46, 60, 0.05);
-  --shadow-dark: 0 8px 32px rgba(26, 46, 60, 0.12);
-  --shadow-warm: 0 4px 20px rgba(100, 70, 50, 0.06);
+  /* Shadows (Light Mode) */
+  --shadow: 0 4px 20px rgba(49, 46, 129, 0.08);
+  --shadow-light: 0 2px 8px rgba(49, 46, 129, 0.05);
+  --shadow-dark: 0 8px 32px rgba(49, 46, 129, 0.12);
+  --shadow-warm: 0 4px 20px rgba(99, 102, 241, 0.06);
 
+  /* Radii & Fonts (Theme-independent) */
   --radius: 6px;
   --radius-lg: 10px;
   --radius-xl: 14px;
-
   --font-display: 'PingFang SC', 'Microsoft YaHei', 'SimSun', serif;
   --font-body: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
   --font-mono: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+}
+
+[data-theme="dark"] {
+  /* Brand */
+  --primary: #a5b4fc;
+  --primary-l: #c7d2fe;
+  --primary-d: #818cf8;
+  --accent: #6366f1;
+  --accent-l: #818cf8;
+  --accent-d: #4f46e5;
+  --success: #34d399;
+  --danger: #f87171;
+  --warning: #fbbf24;
+
+  /* Surfaces (Dark Mode) */
+  --bg: #0f1225;
+  --bg-warm: #161832;
+  --card-bg: #1a1d3a;
+  --card-bg-warm: #1e2140;
+
+  /* Text (Dark Mode) */
+  --text-primary: #e8ebf5;
+  --text-regular: #b4b8cc;
+  --text-secondary: #8488a4;
+  --text-muted: #5c5f7a;
+
+  /* Borders (Dark Mode) */
+  --border-base: #2a2d4a;
+  --border-light: #222542;
+  --border-lighter: #1c1f3a;
+
+  /* Shadows (Dark Mode) */
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-warm: 0 4px 20px rgba(99, 102, 241, 0.08);
 }
 
 * {
@@ -53,10 +94,16 @@ body {
   font-size: 14px;
   line-height: 1.7;
   background-image:
-    radial-gradient(ellipse at 20% 0%, rgba(196, 122, 90, 0.04) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 100%, rgba(26, 46, 60, 0.03) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 0%, rgba(99, 102, 241, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(49, 46, 129, 0.03) 0%, transparent 50%);
   background-attachment: fixed;
   min-height: 100vh;
+}
+
+[data-theme="dark"] body {
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(79, 70, 229, 0.05) 0%, transparent 50%);
 }
 
 /* ===== Scrollbar ===== */
@@ -78,9 +125,22 @@ body {
   background: #b8b0a8;
 }
 
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #2a2d4a;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #3d4060;
+}
+
 ::selection {
-  background: rgba(196, 122, 90, 0.2);
+  background: rgba(99, 102, 241, 0.2);
   color: var(--text-primary);
+}
+
+[data-theme="dark"] ::selection {
+  background: rgba(99, 102, 241, 0.35);
+  color: #e8ebf5;
 }
 
 /* ===== App Layout ===== */
@@ -110,7 +170,7 @@ body {
   bottom: 0;
   background:
     repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(255, 255, 255, 0.015) 60px, rgba(255, 255, 255, 0.015) 61px),
-    radial-gradient(ellipse at 30% 120%, rgba(196, 122, 90, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 30% 120%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
     radial-gradient(ellipse at 70% -20%, rgba(255, 255, 255, 0.04) 0%, transparent 40%);
   pointer-events: none;
 }
@@ -137,13 +197,13 @@ body {
 }
 
 .admin-entry {
-  background: rgba(201, 160, 80, 0.2);
+  background: rgba(99, 102, 241, 0.2);
   color: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(201, 160, 80, 0.3);
+  border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
 .admin-entry:hover {
-  background: rgba(201, 160, 80, 0.35);
+  background: rgba(99, 102, 241, 0.35);
   color: #fff;
 }
 
@@ -215,14 +275,19 @@ body {
   align-items: center;
   gap: 2px 4px;
   padding: 6px 16px;
-  background: rgba(254, 252, 249, 0.95);
+  background: rgba(255, 255, 255, 0.75);
   border-bottom: 1px solid var(--border-lighter);
   font-size: 11px;
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 1px 4px rgba(26, 46, 60, 0.04);
+  backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: 0 1px 0 var(--border-lighter);
+  transition: box-shadow 0.3s, background 0.3s;
+}
+.app-navbar.scrolled {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .app-navbar a {
@@ -236,7 +301,7 @@ body {
 }
 
 .app-navbar a:hover {
-  background: rgba(196, 122, 90, 0.1);
+  background: rgba(99, 102, 241, 0.1);
   color: var(--accent-d);
 }
 
@@ -341,11 +406,11 @@ body {
 
 .admin-entry-card:hover {
   box-shadow: 0 8px 30px rgba(15, 29, 53, 0.4);
-  border-color: #c9a050;
+  border-color: #6366f1;
 }
 
 .admin-entry-card .sys-entry-icon {
-  background: rgba(201, 160, 80, 0.15);
+  background: rgba(99, 102, 241, 0.15);
 }
 
 .portal-entry-card {
@@ -360,7 +425,7 @@ body {
 }
 
 .portal-entry-card .sys-entry-icon {
-  background: rgba(196, 122, 90, 0.1);
+  background: rgba(99, 102, 241, 0.1);
 }
 
 .sys-entry-icon {
@@ -555,7 +620,7 @@ body {
 }
 
 .obj-section {
-  background: linear-gradient(135deg, rgba(26, 46, 60, 0.03) 0%, rgba(196, 122, 90, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(49, 46, 129, 0.03) 0%, rgba(99, 102, 241, 0.05) 100%);
   border: 1px solid var(--border-lighter);
   border-radius: var(--radius-lg);
   padding: 14px 20px;
@@ -652,9 +717,10 @@ body {
   font-weight: 500;
   line-height: 1.6;
 }
+.formula-box :deep(p) { margin: 0; }
 
 .eg-box {
-  background: rgba(196, 122, 90, 0.06);
+  background: rgba(99, 102, 241, 0.06);
   border-left: 3px solid var(--accent);
   padding: 6px 12px;
   margin: 6px 0;
@@ -890,6 +956,23 @@ body {
   border-color: var(--accent);
   background: var(--accent);
   color: #fff;
+}
+
+/* ===== Native Form Controls ===== */
+.native-select {
+  padding: 6px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--card-bg);
+  outline: none;
+  cursor: pointer;
+}
+.native-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12);
 }
 
 /* ===== Practice / Mistake / Knowledge Pages ===== */
@@ -1182,6 +1265,11 @@ html {
 .app-header {
   position: relative;
   z-index: 10;
+  overflow: hidden;
+}
+.app-header > * {
+  transform: translateY(calc(var(--scroll-y, 0) * 0.08px));
+  transition: transform 0.1s linear;
 }
 
 .app-header::after {
@@ -1193,9 +1281,9 @@ html {
   height: 1px;
   background: linear-gradient(90deg,
       transparent 0%,
-      rgba(196, 122, 90, 0.3) 20%,
-      rgba(196, 122, 90, 0.5) 50%,
-      rgba(196, 122, 90, 0.3) 80%,
+      rgba(99, 102, 241, 0.3) 20%,
+      rgba(99, 102, 241, 0.5) 50%,
+      rgba(99, 102, 241, 0.3) 80%,
       transparent 100%);
 }
 
@@ -1245,7 +1333,7 @@ html {
   right: -20%;
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(201, 160, 80, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -1261,7 +1349,7 @@ html {
   left: -10%;
   width: 150px;
   height: 150px;
-  background: radial-gradient(circle, rgba(196, 122, 90, 0.05) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -1380,6 +1468,57 @@ html {
 /* ===== Concept Block Enhancement ===== */
 .concept-block {
   cursor: default;
+}
+
+/* ===== Dark Mode Overrides ===== */
+[data-theme="dark"] .app-navbar {
+  background: rgba(26, 29, 58, 0.95);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .app-navbar a:hover {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+[data-theme="dark"] .topic-card {
+  background: var(--card-bg);
+}
+
+[data-theme="dark"] .quick-link {
+  background: var(--card-bg);
+}
+
+[data-theme="dark"] .portal-entry-card {
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg) 100%);
+  border-color: var(--border-light);
+}
+
+[data-theme="dark"] .portal-entry-card .sys-entry-desc {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .portal-entry-card .sys-entry-title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .meta-tag.high {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+[data-theme="dark"] .meta-tag.mid {
+  background: rgba(245, 158, 11, 0.12);
+}
+
+[data-theme="dark"] .meta-tag.low {
+  background: rgba(99, 102, 241, 0.12);
+}
+
+[data-theme="dark"] .obj-section {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(99, 102, 241, 0.03) 100%);
+}
+
+[data-theme="dark"] .admin-entry-card:hover {
+  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
 }
 
 /* ===== Print Styles ===== */

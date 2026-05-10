@@ -5,8 +5,9 @@
       <button class="md-btn" title="斜体 *text*" @click="wrapText('*', '*')"><i>I</i></button>
       <button class="md-btn" title="行内代码 `code`" @click="wrapText('`', '`')">&lt;/&gt;</button>
       <button class="md-btn" title="代码块" @click="insertCodeBlock">```</button>
-      <button class="md-btn" title="无序列表" @click="insertList">📋</button>
-      <button class="md-btn" title="数学公式 $...$" @click="wrapText('$', '$')">∑</button>
+      <button class="md-btn" title="无序列表" @click="insertList">&#9776;</button>
+      <button class="md-btn" title="行内公式 $...$" @click="wrapText('$', '$')">&#8721;</button>
+      <button class="md-btn" title="块级公式 $$...$$" @click="insertDisplayMath">&#8499;</button>
       <span style="flex:1"></span>
       <button class="md-btn" :class="{ active: mode === 'edit' }" @click="mode = 'edit'">编辑</button>
       <button class="md-btn" :class="{ active: mode === 'split' }" @click="mode = 'split'">分屏</button>
@@ -33,14 +34,14 @@ import { renderRichContent } from '@/utils/renderContent'
 const props = defineProps({
   modelValue: { type: String, default: '' },
   rows: { type: Number, default: 8 },
-  placeholder: { type: String, default: '支持 Markdown 语法...' }
+  placeholder: { type: String, default: '支持 Markdown + LaTeX 语法...' }
 })
 
 const emit = defineEmits(['update:modelValue'])
 const mode = ref('edit')
 const textareaRef = ref(null)
 
-const renderedHtml = computed(() => renderRichContent(props.modelValue) || '<span style="color:#999">暂无内容</span>')
+const renderedHtml = computed(() => renderRichContent(props.modelValue) || '<span style="color:var(--admin-text-muted)">暂无内容</span>')
 
 function wrapText(before, after) {
   const ta = textareaRef.value
@@ -59,6 +60,16 @@ function insertCodeBlock() {
   const start = ta.selectionStart
   const text = props.modelValue
   const newText = text.slice(0, start) + '\n```\n\n```\n' + text.slice(start)
+  emit('update:modelValue', newText)
+}
+
+function insertDisplayMath() {
+  const ta = textareaRef.value
+  if (!ta) return
+  const start = ta.selectionStart
+  const text = props.modelValue
+  const prefix = start === 0 || text[start - 1] === '\n' ? '' : '\n'
+  const newText = text.slice(0, start) + prefix + '$$\n\n$$\n' + text.slice(start)
   emit('update:modelValue', newText)
 }
 
@@ -115,15 +126,9 @@ function insertList() {
   display: grid;
   gap: 0;
 }
-.md-body.md-mode-edit {
-  grid-template-columns: 1fr;
-}
-.md-body.md-mode-split {
-  grid-template-columns: 1fr 1fr;
-}
-.md-body.md-mode-preview {
-  grid-template-columns: 1fr;
-}
+.md-body.md-mode-edit { grid-template-columns: 1fr; }
+.md-body.md-mode-split { grid-template-columns: 1fr 1fr; }
+.md-body.md-mode-preview { grid-template-columns: 1fr; }
 .md-textarea {
   width: 100%;
   border: none;
@@ -142,7 +147,7 @@ function insertList() {
 }
 .md-preview {
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.8;
   color: var(--admin-text);
   background: var(--admin-surface);
@@ -150,10 +155,32 @@ function insertList() {
   overflow-y: auto;
   max-height: 400px;
 }
-.md-preview :deep(p) { margin: 4px 0; }
-.md-preview :deep(ul) { margin: 4px 0; padding-left: 1.5em; }
+.md-preview :deep(p) { margin: 6px 0; }
+.md-preview :deep(ul), .md-preview :deep(ol) { margin: 6px 0; padding-left: 1.5em; }
 .md-preview :deep(li) { margin: 2px 0; }
 .md-preview :deep(strong) { color: var(--admin-text); font-weight: 600; }
+.md-preview :deep(h1), .md-preview :deep(h2), .md-preview :deep(h3) { margin: 12px 0 6px; font-weight: 600; }
+.md-preview :deep(blockquote) {
+  border-left: 3px solid var(--admin-accent, #6366f1);
+  padding-left: 12px;
+  margin: 8px 0;
+  color: var(--admin-text-secondary);
+}
+.md-preview :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+}
+.md-preview :deep(th), .md-preview :deep(td) {
+  border: 1px solid var(--admin-border);
+  padding: 6px 10px;
+  text-align: left;
+  font-size: 12px;
+}
+.md-preview :deep(th) {
+  background: var(--admin-bg);
+  font-weight: 600;
+}
 .md-preview :deep(pre) {
   background: var(--admin-bg);
   padding: 10px;
@@ -169,8 +196,6 @@ function insertList() {
   font-size: 11px;
   font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
 }
-.md-preview :deep(pre code) {
-  background: none;
-  padding: 0;
-}
+.md-preview :deep(pre code) { background: none; padding: 0; }
+.md-preview :deep(.katex-error) { color: #ef4444; text-decoration: underline wavy rgba(239,68,68,0.4); }
 </style>

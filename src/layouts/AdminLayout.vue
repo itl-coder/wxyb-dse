@@ -14,101 +14,102 @@
       </div>
 
       <nav class="admin-sidebar-nav">
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">教学管理</div>
-          <router-link to="/admin" class="admin-nav-item" :class="{ active: isActive('/admin') }" @click="closeSidebar" title="数据看板">
-            <span class="nav-icon">📊</span> <span class="nav-label">数据看板</span>
-          </router-link>
-          <router-link to="/admin/behavior" class="admin-nav-item" :class="{ active: isActive('/admin/behavior') }" @click="closeSidebar" title="课堂表现">
-            <span class="nav-icon">👥</span> <span class="nav-label">课堂表现</span>
-          </router-link>
-          <router-link to="/admin/discipline" class="admin-nav-item" :class="{ active: isActive('/admin/discipline') }" @click="closeSidebar" title="纪律台账">
-            <span class="nav-icon">⚖️</span> <span class="nav-label">纪律台账</span>
-          </router-link>
-          <router-link to="/admin/phone" class="admin-nav-item" :class="{ active: isActive('/admin/phone') }" @click="closeSidebar" title="手机管理">
-            <span class="nav-icon">📱</span> <span class="nav-label">手机管理</span>
-          </router-link>
-          <router-link to="/admin/attendance" class="admin-nav-item" :class="{ active: isActive('/admin/attendance') }" @click="closeSidebar" title="考勤请假">
-            <span class="nav-icon">✓</span> <span class="nav-label">考勤请假</span>
-          </router-link>
-        </div>
-
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">学生管理</div>
-          <router-link to="/admin/students" class="admin-nav-item" :class="{ active: isActive('/admin/students') }" @click="closeSidebar" title="学生信息">
-            <span class="nav-icon">👨‍🎓</span> <span class="nav-label">学生信息</span>
-          </router-link>
-          <router-link to="/admin/reports" class="admin-nav-item" :class="{ active: isActive('/admin/reports') }" @click="closeSidebar" title="成长日报">
-            <span class="nav-icon">📋</span> <span class="nav-label">成长日报</span>
-          </router-link>
-          <router-link to="/admin/counseling" class="admin-nav-item" :class="{ active: isActive('/admin/counseling') }" @click="closeSidebar" title="心理辅导">
-            <span class="nav-icon">💬</span> <span class="nav-label">心理辅导</span>
+        <!-- Favorites Section -->
+        <div v-if="favoriteItems.length > 0" class="admin-nav-group favorites-group">
+          <div class="admin-nav-group-title">⭐ 收藏菜单</div>
+          <router-link
+            v-for="item in favoriteItems"
+            :key="'fav-' + item.menuKey"
+            :to="item.route"
+            class="admin-nav-item"
+            :class="{ active: isActive(item.route) }"
+            @click="closeSidebar"
+            :title="item.label"
+          >
+            <span class="nav-icon">{{ item.icon }}</span>
+            <span class="nav-label">{{ item.label }}</span>
+            <button class="nav-fav-toggle faved" @click.prevent="store.toggleFavorite(item.menuKey)" title="取消收藏">⭐</button>
           </router-link>
         </div>
 
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">课程与课表</div>
-          <router-link to="/admin/timetable" class="admin-nav-item" :class="{ active: isActive('/admin/timetable') }" @click="closeSidebar" title="课表管理">
-            <span class="nav-icon">📅</span> <span class="nav-label">课表管理</span>
-          </router-link>
-          <router-link to="/admin/courses" class="admin-nav-item" :class="{ active: isActive('/admin/courses') }" @click="closeSidebar" title="课程维护">
-            <span class="nav-icon">📖</span> <span class="nav-label">课程维护</span>
-          </router-link>
-        </div>
-
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">作业系统</div>
-          <router-link to="/admin/homework" class="admin-nav-item" :class="{ active: isActive('/admin/homework') }" @click="closeSidebar" title="作业管理">
-            <span class="nav-icon">📝</span> <span class="nav-label">作业管理</span>
-          </router-link>
-        </div>
-
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">家长会</div>
-          <router-link to="/admin/parent-conference" class="admin-nav-item" :class="{ active: isActive('/admin/parent-conference') }" @click="closeSidebar" title="家长会预约">
-            <span class="nav-icon">👨‍👩‍👧</span> <span class="nav-label">家长会预约</span>
-          </router-link>
-          <router-link to="/admin/conference" class="admin-nav-item" :class="{ active: isActive('/admin/conference') }" @click="closeSidebar" title="家长会准备">
-            <span class="nav-icon">📋</span> <span class="nav-label">家长会准备</span>
+        <!-- Recent Access Section -->
+        <div v-if="recentItems.length > 0" class="admin-nav-group recent-group">
+          <div class="admin-nav-group-title">🕐 最近访问</div>
+          <router-link
+            v-for="item in recentItems"
+            :key="'recent-' + item.menuKey"
+            :to="item.route"
+            class="admin-nav-item"
+            :class="{ active: isActive(item.route) }"
+            @click="closeSidebar"
+            :title="item.label"
+          >
+            <span class="nav-icon">{{ item.icon }}</span>
+            <span class="nav-label">{{ item.label }}</span>
           </router-link>
         </div>
 
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">试卷与题库</div>
-          <router-link to="/admin/exam" class="admin-nav-item" :class="{ active: isActive('/admin/exam') }" @click="closeSidebar" title="试卷错题">
-            <span class="nav-icon">📄</span> <span class="nav-label">试卷错题</span>
-          </router-link>
-          <router-link to="/admin/question-bank" class="admin-nav-item" :class="{ active: isActive('/admin/question-bank') }" @click="closeSidebar" title="题库中心">
-            <span class="nav-icon">📚</span> <span class="nav-label">题库中心</span>
-          </router-link>
-        </div>
-
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">AI智能系统</div>
-          <router-link to="/admin/course-feedback" class="admin-nav-item" :class="{ active: isActive('/admin/course-feedback') }" @click="closeSidebar" title="课堂反馈">
-            <span class="nav-icon">📝</span> <span class="nav-label">课堂反馈</span>
-          </router-link>
-          <router-link to="/admin/questions" class="admin-nav-item" :class="{ active: isActive('/admin/questions') }" @click="closeSidebar" title="智能出题">
-            <span class="nav-icon">🎯</span> <span class="nav-label">智能出题</span>
-          </router-link>
-          <router-link to="/admin/voice" class="admin-nav-item" :class="{ active: isActive('/admin/voice') }" @click="closeSidebar" title="语音记录">
-            <span class="nav-icon">🎙️</span> <span class="nav-label">语音记录</span>
-          </router-link>
-        </div>
-
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">系统设置</div>
-          <router-link to="/admin/settings" class="admin-nav-item" :class="{ active: isActive('/admin/settings') }" @click="closeSidebar" title="系统设置">
-            <span class="nav-icon">⚙️</span> <span class="nav-label">系统设置</span>
-          </router-link>
-          <router-link to="/admin/config" class="admin-nav-item" :class="{ active: isActive('/admin/config') }" @click="closeSidebar" title="系统配置中心">
-            <span class="nav-icon">🔧</span> <span class="nav-label">系统配置中心</span>
-          </router-link>
-        </div>
+        <template v-for="group in groupedMenuItems" :key="group.group">
+          <div class="admin-nav-group" v-if="group.items.length > 0">
+            <div class="admin-nav-group-title">{{ group.group }}</div>
+            <template v-for="item in group.items" :key="item.menuKey">
+              <!-- Parent with children: expandable -->
+              <div v-if="item.children && item.children.length" class="admin-nav-parent">
+                <div
+                  class="admin-nav-item admin-nav-parent-toggle"
+                  :class="{ expanded: expandedMenus.has(item.menuKey) }"
+                  @click="toggleExpand(item.menuKey)"
+                >
+                  <span class="nav-icon">{{ item.icon }}</span>
+                  <span class="nav-label">{{ item.label }}</span>
+                  <span class="nav-expand-icon">{{ expandedMenus.has(item.menuKey) ? '▾' : '▸' }}</span>
+                </div>
+                <div v-show="expandedMenus.has(item.menuKey)" class="admin-nav-children">
+                  <router-link
+                    v-for="child in item.children"
+                    :key="child.menuKey"
+                    :to="child.route"
+                    class="admin-nav-item admin-nav-child"
+                    :class="{ active: isActive(child.route) }"
+                    @click="closeSidebar"
+                    :title="child.label"
+                  >
+                    <span class="nav-icon">{{ child.icon }}</span>
+                    <span class="nav-label">{{ child.label }}</span>
+                    <button
+                      class="nav-fav-toggle"
+                      :class="{ faved: store.isFavorite(child.menuKey) }"
+                      @click.prevent="store.toggleFavorite(child.menuKey)"
+                      :title="store.isFavorite(child.menuKey) ? '取消收藏' : '添加到收藏'"
+                    >⭐</button>
+                  </router-link>
+                </div>
+              </div>
+              <!-- Leaf item: direct router-link -->
+              <router-link
+                v-else
+                :to="item.route"
+                class="admin-nav-item"
+                :class="{ active: isActive(item.route) }"
+                @click="closeSidebar"
+                :title="item.label"
+              >
+                <span class="nav-icon">{{ item.icon }}</span>
+                <span class="nav-label">{{ item.label }}</span>
+                <button
+                  class="nav-fav-toggle"
+                  :class="{ faved: store.isFavorite(item.menuKey) }"
+                  @click.prevent="store.toggleFavorite(item.menuKey)"
+                  :title="store.isFavorite(item.menuKey) ? '取消收藏' : '添加到收藏'"
+                >⭐</button>
+              </router-link>
+            </template>
+          </div>
+        </template>
       </nav>
 
       <div class="admin-sidebar-footer">
-        <span style="font-size:10px;color:var(--admin-text-muted)">v1.0.0 · 张老师</span>
+        <span style="font-size:10px;color:var(--admin-text-muted)">v1.0.0 · {{ store.currentUser?.displayName || '管理员' }}</span>
       </div>
     </aside>
 
@@ -155,11 +156,15 @@
           <button class="header-btn" title="切换至学生端" @click="$router.push('/portal')">
             👁️
           </button>
-          <div class="admin-avatar" @click="handleLogout">
-            <div class="avatar-img">张</div>
+          <button class="header-btn header-btn-logout" title="退出登录" @click="handleLogout">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span class="header-btn-label">退出</span>
+          </button>
+          <div class="admin-avatar">
+            <div class="avatar-img">{{ store.currentUser?.displayName?.charAt(0) || '管' }}</div>
             <div class="avatar-info">
-              <div class="avatar-name">张老师</div>
-              <div class="avatar-role">班主任</div>
+              <div class="avatar-name">{{ store.currentUser?.displayName || '管理员' }}</div>
+              <div class="avatar-role">{{ store.currentRole?.name || '' }}</div>
             </div>
           </div>
         </div>
@@ -173,32 +178,85 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
-import { getWatermarkConfig, saveWatermarkConfig } from '@/utils/watermark'
+import { settingsService, MENU_DEFINITIONS, MENU_GROUP_ORDER } from '@/services/dataService'
 
 const route = useRoute()
 const router = useRouter()
 const store = useAppStore()
 const sidebarOpen = ref(false)
+const expandedMenus = ref(new Set())
 
-const watermarkConfig = ref(getWatermarkConfig())
-const watermarkEnabled = computed(() => watermarkConfig.value.enabled)
+// Auto-expand parent menu when navigating to a child route
+watch(() => route.path, (path) => {
+  for (const item of MENU_DEFINITIONS) {
+    if (item.children) {
+      const hasActiveChild = item.children.some(c => path.startsWith(c.route))
+      if (hasActiveChild) {
+        expandedMenus.value.add(item.menuKey)
+      }
+    }
+  }
+}, { immediate: true })
+
+function toggleExpand(menuKey) {
+  if (expandedMenus.value.has(menuKey)) {
+    expandedMenus.value.delete(menuKey)
+  } else {
+    expandedMenus.value.add(menuKey)
+  }
+}
+
+const watermarkConfig = ref(settingsService.get())
+const watermarkEnabled = computed(() => watermarkConfig.value.watermarkEnabled)
 
 function toggleWatermark(v) {
-  watermarkConfig.value.enabled = v
-  saveWatermarkConfig({ ...watermarkConfig.value })
+  watermarkConfig.value.watermarkEnabled = v
+  settingsService.save({ watermarkEnabled: v })
 }
 
 const pageTitles = {
   Dashboard: '数据看板', Timetable: '课表管理', Behavior: '课堂表现',
-  Homework: '作业管理', Discipline: '纪律台账', Phone: '手机管理',
+  Homework: '作业追踪', HomeworkAssign: '布置作业',
+  Discipline: '纪律台账', Phone: '手机管理',
   Attendance: '考勤请假', Reports: '成长日报', Exam: '试卷错题',
   Questions: '智能出题', Counseling: '心理辅导', Conference: '家长会准备', Voice: '语音记录',
   StudentManagement: '学生信息管理', CourseManagement: '课程维护', CourseFeedback: '课堂反馈',
-  ParentConference: '家长会预约', QuestionBank: '题库中心', Settings: '系统设置'
+  ParentConference: '家长会预约', QuestionBank: '题库中心', ExamTips: '做题技巧',
+  Settings: '系统设置', ConfigCenter: '配置中心',
+  UserManagement: '用户管理', RoleManagement: '角色管理',
+  AISkills: 'Skills技能收录', AIFunctions: 'Excel公式收录', AITools: '软件工具收录',
+  AIQuotes: '名言语录收录', AIPrompts: 'Prompt收录'
 }
+
+const groupedMenuItems = computed(() => {
+  const visible = store.getVisibleMenuItems()
+  const groups = {}
+  visible.forEach(item => {
+    if (!groups[item.group]) groups[item.group] = []
+    groups[item.group].push(item)
+  })
+  return MENU_GROUP_ORDER.map(g => ({ group: g, items: groups[g] || [] })).filter(g => g.items.length > 0)
+})
+
+// Favorites and recent menus (non-group items shown in special sections)
+const favoriteItems = computed(() => store.getFavoriteMenuItems())
+const recentItems = computed(() => store.getRecentMenuItems().filter(m => !store.isFavorite(m.menuKey)).slice(0, 3))
+
+// Watch role changes and refresh
+watch(() => store.currentRole, () => {
+  // Force sidebar re-render when role changes
+}, { deep: true })
+
+// Track page for recent access
+onMounted(() => {
+  store.trackPageAccess(route.name)
+})
+watch(() => route.name, (name) => {
+  store.trackPageAccess(name)
+})
 
 const pageTitle = computed(() => pageTitles[route.name] || '数据看板')
 
@@ -219,8 +277,7 @@ function toggleFullscreen() {
 }
 
 function handleLogout() {
-  localStorage.removeItem('admin_token')
-  localStorage.removeItem('admin_user')
+  store.logout()
   router.push('/login')
 }
 </script>

@@ -255,7 +255,7 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { questionBankService, settingsService, courseService } from '@/services/dataService'
 import { useAppStore } from '@/stores/app'
-import { getWatermarkHTML, getWatermarkStyle } from '@/utils/watermark'
+import { getPrintWatermarkHTML, getPrintWatermarkStyle } from '@/utils/printTemplate'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import { marked } from 'marked'
@@ -530,8 +530,8 @@ function printPaper() {
     .pq-answer-content blockquote p{text-indent:0}
     .paper-footer{text-align:center;font-size:11px;color:#aaa;margin-top:24px;border-top:1px solid #eee;padding-top:12px}
     @media print{body{margin:16px}}
-    ${getWatermarkStyle()}
-  </style></head><body>${area.innerHTML}${getWatermarkHTML()}</body></html>`)
+    ${getPrintWatermarkStyle()}
+  </style></head><body>${area.innerHTML}${getPrintWatermarkHTML()}</body></html>`)
   w.document.close()
   setTimeout(() => w.print(), 500)
 }

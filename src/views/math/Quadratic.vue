@@ -8,21 +8,23 @@
     </div>
 
     <div class="quad-controls">
-      <div class="control-row">
-        <span v-for="p in quadParams" :key="p.key" class="param-item">
+      <div class="quad-row">
+        <span v-for="p in quadParams" :key="p.key" class="quad-param">
           <label>{{ p.label }}</label>
-          <el-slider v-model="p.value" :min="p.min" :max="p.max" :step="p.step" style="width:110px" @input="updateDisplay" show-input size="small" />
+          <input type="range" v-model.number="p.value" :min="p.min" :max="p.max" :step="p.step" class="quad-range" @input="updateDisplay" />
+          <span class="quad-val">{{ p.value.toFixed(1) }}</span>
         </span>
-        <el-button size="small" @click="resetParams">重置</el-button>
+        <button class="quad-action-btn" @click="resetParams">重置</button>
       </div>
-      <div class="control-row">
-        <el-checkbox v-model="showRoots" size="small">根</el-checkbox>
-        <el-checkbox v-model="showVertex" size="small">顶点</el-checkbox>
-        <el-checkbox v-model="showSym" size="small">对称轴</el-checkbox>
-        <el-checkbox v-model="showDelta" size="small">判别式</el-checkbox>
-        <el-select v-model="quadProblem" size="small" placeholder="DSE例题" clearable style="width:180px" @change="onProblem">
-          <el-option v-for="p in dseProblems" :key="p.key" :label="p.label" :value="p.key" />
-        </el-select>
+      <div class="quad-row">
+        <label class="quad-check"><input type="checkbox" v-model="showRoots" /> 根</label>
+        <label class="quad-check"><input type="checkbox" v-model="showVertex" /> 顶点</label>
+        <label class="quad-check"><input type="checkbox" v-model="showSym" /> 对称轴</label>
+        <label class="quad-check"><input type="checkbox" v-model="showDelta" /> 判别式</label>
+        <select v-model="quadProblem" class="quad-select" @change="onProblem($event.target.value)">
+          <option value="">DSE例题</option>
+          <option v-for="p in dseProblems" :key="p.key" :value="p.key">{{ p.label }}</option>
+        </select>
       </div>
     </div>
 
@@ -147,7 +149,7 @@ const sketchFn = (p, container) => {
   p.draw = () => {
     const sz = Math.min(container.clientWidth - 20, 640, 640)
     if (p.width !== sz) p.resizeCanvas(sz, sz)
-    p.background('#fafbfc')
+    p.background('#f8f7fc')
     drawQuad(p)
   }
 }
@@ -243,10 +245,18 @@ onMounted(() => updateDisplay())
 </script>
 
 <style scoped>
-.quad-controls { display:flex;flex-direction:column;gap:8px;padding:10px 16px;background:var(--card-bg);border:1px solid var(--border-lighter);border-radius:var(--radius-lg);margin-bottom:10px }
-.control-row { display:flex;flex-wrap:wrap;align-items:center;gap:12px }
-.param-item { display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary) }
-.param-item label { font-weight:600;min-width:16px }
+.quad-controls { display:flex;flex-direction:column;gap:6px;padding:10px 14px;background:var(--card-bg);border:1px solid var(--border-lighter);border-radius:var(--radius-lg);margin-bottom:10px;box-shadow:var(--shadow-light) }
+.quad-row { display:flex;flex-wrap:wrap;align-items:center;gap:8px }
+.quad-param { display:flex;align-items:center;gap:3px;font-size:11px;color:var(--text-secondary) }
+.quad-param label { font-weight:600;min-width:16px;font-size:10px }
+.quad-range { width:70px;accent-color:var(--accent);height:4px }
+.quad-val { font-size:10px;color:var(--text-muted);min-width:22px;font-family:var(--font-mono) }
+.quad-action-btn { padding:4px 10px;border:1px solid var(--border-light);border-radius:4px;background:var(--card-bg);color:var(--text-secondary);font-size:10px;font-family:inherit;cursor:pointer;transition:all 0.2s }
+.quad-action-btn:hover { border-color:var(--accent);color:var(--accent) }
+.quad-check { display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary);cursor:pointer }
+.quad-check input { accent-color:var(--accent) }
+.quad-select { padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:11px;font-family:inherit;color:var(--text-primary);background:var(--card-bg);outline:none }
+.quad-select:focus { border-color:var(--accent) }
 .quad-info { padding:6px 14px;font-size:11px;color:var(--text-regular);background:var(--card-bg-warm);border-top:1px solid var(--border-lighter);line-height:1.8 }
-.canvas-card { background:var(--card-bg);border-radius:var(--radius-lg);border:1px solid var(--border-lighter);box-shadow:0 2px 12px rgba(26,46,60,0.06);overflow:hidden;margin-bottom:14px }
+.canvas-card { background:var(--card-bg);border-radius:var(--radius-lg);border:1px solid var(--border-lighter);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px }
 </style>

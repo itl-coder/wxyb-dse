@@ -12,40 +12,88 @@
     <div class="geo-toolbar">
       <div class="geo-tool-group">
         <span class="geo-tool-label">工具</span>
-        <el-radio-group v-model="geoTool" size="small" @change="onToolChange">
-          <el-radio-button value="point">✏️ 点</el-radio-button>
-          <el-radio-button value="select">👆 选择</el-radio-button>
-          <el-radio-button value="edge">📏 连线</el-radio-button>
-          <el-radio-button value="face">△ 面</el-radio-button>
-          <el-radio-button value="label">🏷️ 标注</el-radio-button>
-          <el-radio-button value="color">🎨 着色</el-radio-button>
-          <el-radio-button value="delete">🗑️ 删除</el-radio-button>
-          <el-radio-button value="rotate">🔄 旋转</el-radio-button>
-        </el-radio-group>
+        <div class="geo-tool-btns">
+          <button v-for="t in tools" :key="t.value" class="geo-tool-btn" :class="{ active: geoTool === t.value }"
+            @click="geoTool = t.value; onToolChange()" :title="t.label">
+            <span class="geo-tool-ico">{{ t.icon }}</span>
+            <span class="geo-tool-name">{{ t.name }}</span>
+          </button>
+        </div>
       </div>
+
+      <div class="geo-tool-divider"></div>
 
       <div class="geo-tool-group">
         <span class="geo-tool-label">预设</span>
-        <el-button-group size="small">
-          <el-button v-for="p in presets" :key="p.key" @click="loadPreset(p.key)" :type="currentPreset===p.key?'primary':''">{{ p.label }}</el-button>
-        </el-button-group>
+        <div class="geo-preset-btns">
+          <button v-for="p in presets" :key="p.key" class="geo-preset-btn" :class="{ active: currentPreset === p.key }"
+            @click="loadPreset(p.key)">{{ p.label }}</button>
+        </div>
       </div>
 
+      <div class="geo-tool-divider"></div>
+
       <div class="geo-tool-group">
-        <el-button size="small" @click="resetView">🔄 重置视角</el-button>
-        <el-button size="small" @click="toggleGrid">📐 网格{{ showGrid?'(开)':'(关)' }}</el-button>
-        <el-button size="small" type="danger" @click="resetScene">清空场景</el-button>
-        <el-switch v-model="dashMode" active-text="虚线" size="small" style="margin-left:8px" />
+        <button class="geo-action-btn" @click="resetView" title="重置视角">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          重置
+        </button>
+        <button class="geo-action-btn" @click="toggleGrid">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" />
+            <line x1="3" y1="9" x2="21" y2="9" />
+            <line x1="3" y1="15" x2="21" y2="15" />
+            <line x1="9" y1="3" x2="9" y2="21" />
+            <line x1="15" y1="3" x2="15" y2="21" />
+          </svg>
+          网格
+        </button>
+        <button class="geo-action-btn geo-action-danger" @click="resetScene">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+          </svg>
+          清空
+        </button>
+        <label class="geo-dash-toggle" title="虚线模式">
+          <input type="checkbox" v-model="dashMode" />
+          <span class="geo-dash-label">虚线</span>
+        </label>
       </div>
     </div>
 
     <div class="geo-settings">
-      <span>Z平面 <el-slider v-model="zPlane" :min="-5" :max="5" :step="0.1" style="width:120px" show-input :format-tooltip="v=>v.toFixed(1)" /></span>
-      <span>透明度 <el-slider v-model="faceAlpha" :min="0.05" :max="0.9" :step="0.05" style="width:100px" show-input /></span>
-      <span>面颜色 <el-color-picker v-model="fillColor" size="small" /></span>
-      <span>线颜色 <el-color-picker v-model="strokeColor" size="small" /></span>
-      <span>点颜色 <el-color-picker v-model="pointColor" size="small" /></span>
-      <span>编号 <el-input v-model="labelInput" size="small" placeholder="A,B,C..." style="width:140px" clearable /></span>
+      <div class="geo-set-item">
+        <span class="geo-set-label">Z平面</span>
+        <input type="range" v-model.number="zPlane" min="-5" max="5" step="0.1" class="geo-range" />
+        <span class="geo-set-val">{{ zPlane.toFixed(1) }}</span>
+      </div>
+      <div class="geo-set-item">
+        <span class="geo-set-label">透明度</span>
+        <input type="range" v-model.number="faceAlpha" min="0.05" max="0.9" step="0.05" class="geo-range" />
+        <span class="geo-set-val">{{ faceAlpha.toFixed(2) }}</span>
+      </div>
+      <div class="geo-set-sep"></div>
+      <div class="geo-set-item">
+        <span class="geo-set-label">面</span>
+        <input type="color" v-model="fillColor" class="geo-color" />
+      </div>
+      <div class="geo-set-item">
+        <span class="geo-set-label">线</span>
+        <input type="color" v-model="strokeColor" class="geo-color" />
+      </div>
+      <div class="geo-set-item">
+        <span class="geo-set-label">点</span>
+        <input type="color" v-model="pointColor" class="geo-color" />
+      </div>
+      <div class="geo-set-sep"></div>
+      <div class="geo-set-item" style="flex:1;max-width:180px">
+        <span class="geo-set-label">编号</span>
+        <input v-model="labelInput" placeholder="A,B,C..." class="geo-text-inp" />
+      </div>
     </div>
 
     <!-- 交互画布 -->
@@ -58,9 +106,14 @@
     <div class="teaching-main">
       <div class="concept-section">
         <div class="sec-title">📖 核心概念</div>
+
         <ConceptBlock title="一、线面角（直线与平面的夹角）" tag="★ 高频">
           <p><b>几何定义</b>：直线 <i>l</i> 与它在平面 α 上的投影 <i>l'</i> 所成的锐角 θ，取值范围 0° ≤ θ ≤ 90°。</p>
-          <FormulaBox>\(\sin\theta = |\cos\langle\vec{l},\vec{n}\rangle| = \dfrac{|\vec{l}\cdot\vec{n}|}{|\vec{l}|\cdot|\vec{n}|}\)</FormulaBox>
+
+          <FormulaBox>
+            \theta = \arccos\left( \frac{|\vec{v} \cdot \vec{n}|}{|\vec{v}| \, |\vec{n}|} \right)
+          </FormulaBox>
+
           <ExampleBox>
             <b>DSE示例</b>：长方体 ABCD-A₁B₁C₁D₁ 中，AB=3, AD=4, AA₁=5，求对角线 A₁C 与底面 ABCD 所成角的正弦值。<br>
             思路：A₁C 在底面的投影为 AC，AC=√(3²+4²)=5，A₁C=√(5²+5²)=5√2，sinθ = 5/(5√2)=√2/2，θ=45°。
@@ -69,20 +122,36 @@
 
         <ConceptBlock title="二、二面角与面面角" tag="★ 高频">
           <p><b>定义</b>：两个半平面沿交线形成的夹角，取值范围 0° ≤ θ ≤ 180°。</p>
-          <FormulaBox>\(\cos\theta = \dfrac{|\vec{n}_1\cdot\vec{n}_2|}{|\vec{n}_1|\cdot|\vec{n}_2|}\)</FormulaBox>
-          <p>其中 \(\vec{n}_1, \vec{n}_2\) 分别是两个平面的法向量。</p>
+
+          <FormulaBox>
+            \cos\theta = \frac{|\vec{n}_1 \cdot \vec{n}_2|}{|\vec{n}_1| \cdot |\vec{n}_2|}
+          </FormulaBox>
+
+          <p>其中 \vec{n}_1, \vec{n}_2 分别是两个平面的法向量。</p>
+
           <ExampleBox>
             <b>求二面角步骤</b>：① 找出交线 → ② 在两个面内分别作交线的垂线 → ③ 两条垂线的夹角即为二面角 → ④ 或在交线上取点，用向量法求解
           </ExampleBox>
         </ConceptBlock>
 
         <ConceptBlock title="三、立体图形的面积与体积" tag="核心">
-          <FormulaBox>柱体体积 \(V = A_{\text{底}} \times h\) &nbsp;|&nbsp; 锥体体积 \(V = \dfrac{1}{3}A_{\text{底}} \times h\)</FormulaBox>
-          <p>球体表面积 \(S = 4\pi r^2\)，球体体积 \(V = \dfrac{4}{3}\pi r^3\)</p>
+
+          <FormulaBox>
+            柱体体积 V = A_{底} \times h
+            &nbsp;|&nbsp;
+            锥体体积 V = \frac{1}{3} A_{底} \times h
+          </FormulaBox>
+
+          <p>
+            球体表面积 S = 4\pi r^2，
+            球体体积 V = \frac{4}{3}\pi r^3
+          </p>
         </ConceptBlock>
+
       </div>
 
       <div class="teaching-sidebar">
+
         <div class="mis-section">
           <div class="sec-title">⚠️ 常见误解</div>
           <ul>
@@ -92,16 +161,18 @@
             <li>混淆棱锥与棱柱体积公式（系数1/3）</li>
           </ul>
         </div>
+
         <div class="strategy-section">
           <div class="sec-title">▶ 解题策略</div>
           <ul>
             <li>建立坐标系，用向量法统一处理</li>
-            <li>等体积法求高：\(V = \frac{1}{3}Sh\)</li>
+            <li>等体积法求高：V = \frac{1}{3}Sh</li>
             <li>三垂线定理找投影</li>
             <li>截面法转化空间问题为平面问题</li>
             <li>坐标法 + 向量法是DSE通用解法</li>
           </ul>
         </div>
+
       </div>
     </div>
   </div>
@@ -147,6 +218,17 @@ const labelInput = ref('')
 const infoMsg = ref('选择工具开始绘制。✏️点工具：点击网格放置点')
 const currentPreset = ref('')
 const canvasRef = ref(null)
+
+const tools = [
+  { value: 'point', icon: '●', name: '点' },
+  { value: 'select', icon: '⊕', name: '选择' },
+  { value: 'edge', icon: '╱', name: '连线' },
+  { value: 'face', icon: '△', name: '面' },
+  { value: 'label', icon: 'A', name: '标注' },
+  { value: 'color', icon: '◐', name: '着色' },
+  { value: 'delete', icon: '×', name: '删除' },
+  { value: 'rotate', icon: '↻', name: '旋转' }
+]
 
 const presets = [
   { key: 'cube', label: '正方体' }, { key: 'pyramid', label: '四棱锥' },
@@ -208,24 +290,24 @@ function pointInPolygon(px, py, poly) {
 // ===== 预设图形生成器 =====
 const presetBuilders = {
   cube: () => ({
-    pts: [[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]],
-    edges: [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]],
-    faces: [[0,1,2,3],[4,5,6,7],[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7]]
+    pts: [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]],
+    edges: [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]],
+    faces: [[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]]
   }),
   pyramid: () => ({
-    pts: [[-1,-1,0],[1,-1,0],[1,1,0],[-1,1,0],[0,0,2]],
-    edges: [[0,1],[1,2],[2,3],[3,0],[0,4],[1,4],[2,4],[3,4]],
-    faces: [[0,1,2,3],[0,1,4],[1,2,4],[2,3,4],[3,0,4]]
+    pts: [[-1, -1, 0], [1, -1, 0], [1, 1, 0], [-1, 1, 0], [0, 0, 2]],
+    edges: [[0, 1], [1, 2], [2, 3], [3, 0], [0, 4], [1, 4], [2, 4], [3, 4]],
+    faces: [[0, 1, 2, 3], [0, 1, 4], [1, 2, 4], [2, 3, 4], [3, 0, 4]]
   }),
   tetra: () => ({
-    pts: [[0,0,0],[1,0,0],[0.5,0.866,0],[0.5,0.289,0.816]],
-    edges: [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]],
-    faces: [[0,1,2],[0,1,3],[1,2,3],[2,0,3]]
+    pts: [[0, 0, 0], [1, 0, 0], [0.5, 0.866, 0], [0.5, 0.289, 0.816]],
+    edges: [[0, 1], [1, 2], [2, 0], [0, 3], [1, 3], [2, 3]],
+    faces: [[0, 1, 2], [0, 1, 3], [1, 2, 3], [2, 0, 3]]
   }),
   prism: () => ({
-    pts: [[0,0,0],[1,0,0],[0.5,0.866,0],[0,0,1.5],[1,0,1.5],[0.5,0.866,1.5]],
-    edges: [[0,1],[1,2],[2,0],[3,4],[4,5],[5,3],[0,3],[1,4],[2,5]],
-    faces: [[0,1,2],[3,4,5],[0,1,4,3],[1,2,5,4],[2,0,3,5]]
+    pts: [[0, 0, 0], [1, 0, 0], [0.5, 0.866, 0], [0, 0, 1.5], [1, 0, 1.5], [0.5, 0.866, 1.5]],
+    edges: [[0, 1], [1, 2], [2, 0], [3, 4], [4, 5], [5, 3], [0, 3], [1, 4], [2, 5]],
+    faces: [[0, 1, 2], [3, 4, 5], [0, 1, 4, 3], [1, 2, 5, 4], [2, 0, 3, 5]]
   }),
   hexprism: () => {
     const n = 6, r = 1.2, h = 2
@@ -248,9 +330,9 @@ const presetBuilders = {
     return { pts, edges, faces }
   },
   octa: () => ({
-    pts: [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1.414],[0,0,-1.414]],
-    edges: [[0,2],[0,3],[0,4],[0,5],[1,2],[1,3],[1,4],[1,5],[2,4],[3,4],[2,5],[3,5]],
-    faces: [[0,2,4],[2,1,4],[1,3,4],[3,0,4],[0,5,2],[2,5,1],[1,5,3],[3,5,0]]
+    pts: [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1.414], [0, 0, -1.414]],
+    edges: [[0, 2], [0, 3], [0, 4], [0, 5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 4], [3, 4], [2, 5], [3, 5]],
+    faces: [[0, 2, 4], [2, 1, 4], [1, 3, 4], [3, 0, 4], [0, 5, 2], [2, 5, 1], [1, 5, 3], [3, 5, 0]]
   }),
   cone: () => {
     const seg = 24, r = 1.2, h = 2.2
@@ -345,7 +427,7 @@ const sketchFn = (p, container) => {
   p.draw = () => {
     const sz = Math.min(container.clientWidth - 20, 680, 680)
     if (p.width !== sz) p.resizeCanvas(sz, sz)
-    p.background('#fafbfc')
+    p.background('#f8f7fc')
     drawGeo(p)
   }
 
@@ -404,7 +486,7 @@ function drawGeo(p) {
       p.line(a.sx, a.sy, b.sx, b.sy); p.line(c.sx, c.sy, d.sx, d.sy)
     }
     // 地面淡色
-    p.noStroke(); p.fill(235, 240, 248, 80); p.beginShape()
+    p.noStroke(); p.fill(240, 242, 250, 100); p.beginShape()
     const gp = [geoProject({ x: -5, y: 0, z: -5 }, ox, oy), geoProject({ x: 5, y: 0, z: -5 }, ox, oy), geoProject({ x: 5, y: 0, z: 5 }, ox, oy), geoProject({ x: -5, y: 0, z: 5 }, ox, oy)]
     for (const pt of gp) p.vertex(pt.sx, pt.sy)
     p.endShape(p.CLOSE)
@@ -727,46 +809,243 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+/* Toolbar */
 .geo-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
-  padding: 10px 16px;
+  gap: 0;
+  padding: 8px 12px;
   background: var(--card-bg);
   border: 1px solid var(--border-lighter);
   border-radius: var(--radius-lg);
   align-items: center;
   margin-bottom: 10px;
+  box-shadow: var(--shadow-light);
 }
+
 .geo-tool-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.geo-tool-label {
-  font-size: 11px;
-  color: var(--text-secondary);
-  font-weight: 600;
-  min-width: 28px;
-}
-.geo-settings {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  align-items: center;
-  padding: 6px 16px;
-  background: var(--card-bg-warm);
-  border: 1px solid var(--border-lighter);
-  border-radius: var(--radius);
-  margin-bottom: 10px;
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-.geo-settings span {
   display: flex;
   align-items: center;
   gap: 4px;
 }
+
+.geo-tool-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-right: 2px;
+  white-space: nowrap;
+}
+
+.geo-tool-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--border-lighter);
+  margin: 0 6px;
+}
+
+/* Tool buttons */
+.geo-tool-btns {
+  display: flex;
+  gap: 2px;
+}
+
+.geo-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.geo-tool-btn:hover {
+  background: var(--bg-warm);
+  color: var(--text-primary);
+}
+
+.geo-tool-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+.geo-tool-ico {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.geo-tool-name {
+  font-weight: 500;
+}
+
+/* Preset buttons */
+.geo-preset-btns {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.geo-preset-btn {
+  padding: 4px 9px;
+  border: 1px solid var(--border-lighter);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.geo-preset-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.geo-preset-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* Action buttons */
+.geo-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-lighter);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.geo-action-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.geo-action-danger:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.04);
+}
+
+.geo-dash-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+.geo-dash-toggle input {
+  accent-color: var(--accent);
+}
+
+.geo-dash-label {
+  user-select: none;
+}
+
+/* Settings bar */
+.geo-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+  padding: 6px 14px;
+  background: var(--card-bg-warm);
+  border: 1px solid var(--border-lighter);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+}
+
+.geo-set-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.geo-set-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.geo-set-val {
+  font-size: 10px;
+  color: var(--text-secondary);
+  min-width: 30px;
+  font-family: var(--font-mono);
+}
+
+.geo-set-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border-light);
+}
+
+.geo-range {
+  width: 70px;
+  accent-color: var(--accent);
+  height: 4px;
+}
+
+.geo-color {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 1px;
+}
+
+.geo-text-inp {
+  padding: 3px 8px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--card-bg);
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.geo-text-inp:focus {
+  border-color: var(--accent);
+}
+
+/* Canvas */
+.canvas-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-lighter);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
 .geo-info {
   padding: 6px 14px;
   font-size: 11px;
@@ -774,13 +1053,5 @@ onBeforeUnmount(() => {
   background: var(--card-bg-warm);
   border-top: 1px solid var(--border-lighter);
   line-height: 1.6;
-}
-.canvas-card {
-  background: var(--card-bg);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-lighter);
-  box-shadow: 0 2px 12px rgba(26,46,60,0.06);
-  overflow: hidden;
-  margin-bottom: 14px;
 }
 </style>

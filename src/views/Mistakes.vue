@@ -20,11 +20,11 @@
         <h3>{{ m.title }}</h3>
         <span style="font-size:11px;color:var(--text-muted)">{{ m.tag }}</span>
       </div>
-      <div style="background:rgba(196,90,90,0.06);padding:8px 12px;border-radius:6px;margin:8px 0">
-        <span style="color:var(--danger);font-weight:600">❌ 错误做法：</span>{{ m.wrong }}
+      <div class="mistake-wrong">
+        <span class="mistake-label">❌ 错误做法：</span>{{ m.wrong }}
       </div>
-      <div style="background:rgba(107,158,122,0.06);padding:8px 12px;border-radius:6px;margin:8px 0">
-        <span style="color:var(--success);font-weight:600">✅ 正确做法：</span>{{ m.correct }}
+      <div class="mistake-correct">
+        <span class="mistake-label-correct">✅ 正确做法：</span>{{ m.correct }}
       </div>
       <div style="font-size:12px;color:var(--accent);margin-top:4px">💡 {{ m.tip }}</div>
       <div v-if="m.steps" style="margin-top:8px">
@@ -45,3 +45,32 @@ delete moduleLabels.all
 const activeModule = ref('3d')
 const currentMistakes = computed(() => mistakeData[activeModule.value] || [])
 </script>
+
+<style scoped>
+.mistake-wrong {
+  background: rgba(239, 68, 68, 0.06);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 8px 0;
+}
+.mistake-correct {
+  background: rgba(16, 185, 129, 0.06);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 8px 0;
+}
+.mistake-label {
+  color: var(--danger);
+  font-weight: 600;
+}
+.mistake-label-correct {
+  color: var(--success);
+  font-weight: 600;
+}
+[data-theme="dark"] .mistake-wrong {
+  background: rgba(248, 113, 113, 0.08);
+}
+[data-theme="dark"] .mistake-correct {
+  background: rgba(52, 211, 153, 0.08);
+}
+</style>

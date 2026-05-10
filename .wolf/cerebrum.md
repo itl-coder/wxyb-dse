@@ -10,6 +10,7 @@
 
 ## Key Learnings
 
+- **Dual-login guard pattern:** Two separate login pages (/login for admin, /portal/login for portal) each with their own token (admin_token, portal_token) and independent auth guards in router.beforeEach. Admin routes use `meta.requiresAuth`, portal routes use `meta.requiresPortalAuth`. Each login page redirects to its home if already authenticated.
 - **Project:** dse-learning-system
 - **Dynamic grid columns in scoped styles:** Use CSS `v-bind('refName.length')` in `<style scoped>` for dynamic `grid-template-columns` instead of inline `:style`. Works with Vue 3.4+ and keeps styling in CSS.
 - **Timetable data flow:** weeklyScheduleService stores the template (weekday + period), timetableService stores calendar instances (specific dates). `generateMonth()` expands the template into calendar entries.
@@ -28,6 +29,8 @@
 
 ## Do-Not-Repeat
 
+- [2026-05-10] **Auth migration: Always provide localStorage key fallback when changing storage format.** When migrating from old `admin_user` key to new `dse_admin_user`, the `loadUserFromStorage()` must check old keys and auto-migrate. Otherwise old sessions have a valid `admin_token` but no user data, causing router guard → login redirect → login auto-redirect → infinite loop → browser crash. Always pair token checks with `store.isAuthenticated` verification in redirect logic.
+- [2026-05-10] **Never remove/alter UI elements without explicit user permission:** When the user asks for a specific change (e.g. "make login validation strict"), only make that change. Do NOT remove unrelated tabs, buttons, or layout elements. The user's reaction ("只让你做登陆限定 谁让你移除了，布局都变丑了") shows they value existing UI choices. Scope changes precisely to what was requested.
 - [2026-05-09] **Vue SFC `</script>` in template literals:** When writing template literals inside `<script setup>`, the string `</script>` (even inside backticks) will be parsed as the end of the script block by the Vue SFC compiler. Always escape as `<\/script>`. This caused a build failure after applying the print beautification patch.
 - [2026-05-09] **`@vavt/v3-extension` ExportPDF with md-editor-v3 v6:** The ExportPDF component crashes with `TypeError: Cannot read properties of undefined (reading 'value')` because ModalToolbar ref is undefined. Do not use it. Use custom `window.open()` + `window.print()` pattern instead.
 - [2026-05-09] **md-editor-v3 invalid toolbar keys:** 'mermaid' and 'previewOnly' are NOT valid toolbar keys for md-editor-v3 v6.5.0. Using them causes errors. Check the official docs for the supported toolbar list.

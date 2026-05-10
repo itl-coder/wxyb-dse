@@ -558,7 +558,7 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { timetableService, weeklyScheduleService, courseService, studentService } from '@/services/dataService'
 import { useAppStore } from '@/stores/app'
-import { getWatermarkHTML, getWatermarkStyle, buildExportHTML } from '@/utils/watermark'
+import { buildExportHTML } from '@/utils/printTemplate'
 import { createWorker } from 'tesseract.js'
 
 const store = useAppStore()

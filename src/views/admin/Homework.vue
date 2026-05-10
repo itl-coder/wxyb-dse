@@ -44,7 +44,8 @@
 
       <!-- Tracking Table -->
       <div class="hw-track-table-wrap">
-        <el-table :data="trackedHomeworks" border stripe size="small" style="width:100%;font-size:11px"
+        <el-watermark v-if="elWmProps" v-bind="elWmProps" style="width:100%">
+          <el-table :data="trackedHomeworks" border stripe size="small" style="width:100%;font-size:11px"
           :span-method="trackSpanMethod" :row-class-name="trackRowClassName" max-height="520">
           <el-table-column prop="seq" label="序号" width="46" align="center" fixed="left" />
           <el-table-column prop="subject" label="科目" width="95" fixed="left">
@@ -96,6 +97,61 @@
             </template>
           </el-table-column>
         </el-table>
+        </el-watermark>
+        <template v-else>
+          <el-table :data="trackedHomeworks" border stripe size="small" style="width:100%;font-size:11px"
+          :span-method="trackSpanMethod" :row-class-name="trackRowClassName" max-height="520">
+          <el-table-column prop="seq" label="序号" width="46" align="center" fixed="left" />
+          <el-table-column prop="subject" label="科目" width="95" fixed="left">
+            <template #default="{ row }">
+              <span :style="{color: subjectColor(row.subject), fontWeight:600}">{{ row.subject }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="studentName" label="学生姓名" width="78" fixed="left" />
+          <el-table-column prop="title" label="作业内容" min-width="150" show-overflow-tooltip />
+          <el-table-column prop="submitStatus" label="是否提交" width="88" align="center">
+            <template #default="{ row }">
+              <span :style="{color: row.submitStatus === '已提交' ? 'var(--admin-success)' : row.submitStatus === '未提交' ? 'var(--admin-danger)' : 'var(--admin-text-muted)'}">{{ row.submitStatus || '—' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="quality" label="完成质量" width="95" align="center">
+            <template #default="{ row }">
+              <el-tag v-if="row.quality" size="small" :type="row.quality === '优秀' ? 'success' : row.quality === '良好' ? 'primary' : row.quality === '一般' ? 'warning' : 'info'" effect="plain">{{ row.quality }}</el-tag>
+              <span v-else style="color:var(--admin-text-muted)">—</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="accuracy" label="正确率" width="78" align="center">
+            <template #default="{ row }">
+              <span v-if="row.accuracy != null" :style="{color: row.accuracy >= 80 ? 'var(--admin-success)' : row.accuracy >= 60 ? 'var(--admin-warning)' : 'var(--admin-danger)', fontWeight:600}">{{ row.accuracy }}%</span>
+              <span v-else style="color:var(--admin-text-muted)">—</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="errorSummary" label="错题总结" min-width="130" show-overflow-tooltip />
+          <el-table-column prop="teacherComment" label="教师点评" min-width="130" show-overflow-tooltip />
+          <el-table-column prop="movedToTA" label="搬到助教" width="88" align="center">
+            <template #default="{ row }">
+              <span v-if="row.movedToTA === true" style="color:var(--admin-primary)">✓</span>
+              <span v-else style="color:var(--admin-text-muted)">—</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="retrieved" label="已领回" width="78" align="center">
+            <template #default="{ row }">
+              <span v-if="row.retrieved === true" style="color:var(--admin-success)">✓</span>
+              <span v-else style="color:var(--admin-text-muted)">—</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="作业状态" width="115" fixed="right" align="center">
+            <template #default="{ row }">
+              <el-tag size="small" :type="hwStatusTagType(row.status)" effect="dark">{{ row.status || '—' }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="84" fixed="right" align="center">
+            <template #default="{ row }">
+              <el-button size="small" text type="primary" @click="openTrackingEdit(row)">编辑</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        </template>
         <div class="hw-pagination" style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between">
           <span style="font-size:11px;color:var(--admin-text-muted)">共 {{ trackedHomeworks.length }} 条记录</span>
           <el-pagination v-model:current-page="hwCurrentPage" v-model:page-size="hwPageSize" :page-sizes="[10,15,20,50]" :total="trackedHomeworks.length" layout="total, sizes, prev, pager, next, jumper" size="small" background />
@@ -105,6 +161,7 @@
       <!-- Hidden A4 Export Container -->
       <div class="hw-export-hidden" aria-hidden="true">
         <div id="hwExportContainer" class="hw-export-container">
+          <div v-html="watermarkOverlayHTML"></div>
           <div class="hw-export-header">
             <h1>{{ store.schoolName }} · 作业追踪表</h1>
             <div class="hw-export-meta">
@@ -167,7 +224,6 @@
               </template>
             </el-table-column>
           </el-table>
-          <div v-html="watermarkOverlayHTML"></div>
           <div class="hw-export-footer">
             <span>{{ store.schoolName }} · 作业追踪系统</span>
             <span>共 {{ trackedHomeworks.length }} 条记录</span>
@@ -275,7 +331,7 @@ import { ElMessage } from 'element-plus'
 import html2canvas from 'html2canvas'
 import { homeworkService, studentService, courseService } from '@/services/dataService'
 import { useAppStore } from '@/stores/app'
-import { getWatermarkOverlayHTML } from '@/utils/watermark'
+import { getOverlayWatermarkHTML, getElWatermarkProps } from '@/utils/printTemplate'
 
 const store = useAppStore()
 const homeworks = ref([])
@@ -300,7 +356,8 @@ const electiveSubjects = computed(() => flatSubjectList.value.filter(s => !coreS
 const allHwStatuses = ['已完成', '未完成', '部分完成', '未到截止时间', '已提交', '未提交', '已批改', '书籍/作业丢失']
 
 const today = new Date().toISOString().split('T')[0]
-const watermarkOverlayHTML = computed(() => getWatermarkOverlayHTML())
+const watermarkOverlayHTML = computed(() => getOverlayWatermarkHTML())
+const elWmProps = computed(() => getElWatermarkProps())
 
 const subjectColorMap = { '数学':'#3b82f6', '中国语文':'#22c55e', '英国语文':'#8b5cf6', 'English Reading':'#8b5cf6', 'English Writing':'#a78bfa', 'English Listening':'#c4b5fd', 'English Speaking':'#ddd6fe', '物理':'#f59e0b', '化学':'#ef4444', '生物':'#10b981', '历史':'#78716c', '地理':'#06b6d4', '经济':'#f97316', '资讯及通讯科技':'#6366f1', '企业、会计与财务概论':'#14b8a6', '视觉艺术':'#ec4899', '体育':'#84cc16', '音乐':'#d946ef', '数学延伸M1':'#60a5fa', '数学延伸M2':'#93c5fd', '公民与社会发展':'#64748b' }
 function subjectColor(s) { return subjectColorMap[s] || 'var(--admin-accent)' }

@@ -7,16 +7,16 @@
 
     <div class="card">
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-        <el-select v-model="examIdx" placeholder="考试类型" style="width:140px">
-          <el-option v-for="(t,i) in examTypes" :key="i" :label="t" :value="i" />
-        </el-select>
-        <el-select v-model="modFilter" placeholder="模块筛选" style="width:140px">
-          <el-option v-for="(v,k) in allMods" :key="k" :label="v" :value="k" />
-        </el-select>
-        <el-select v-model="diffFilter" placeholder="难度筛选" style="width:120px">
-          <el-option label="全部难度" :value="0" />
-          <el-option v-for="d in [1,2,3,4,5,6,7,8]" :key="d" :label="'难度 '+d" :value="d" />
-        </el-select>
+        <select v-model="examIdx" class="native-select">
+          <option v-for="(t,i) in examTypes" :key="i" :value="i">{{ t }}</option>
+        </select>
+        <select v-model="modFilter" class="native-select">
+          <option v-for="(v,k) in allMods" :key="k" :value="k">{{ v }}</option>
+        </select>
+        <select v-model="diffFilter" class="native-select">
+          <option :value="0">全部难度</option>
+          <option v-for="d in [1,2,3,4,5,6,7,8]" :key="d" :value="d">难度 {{ d }}</option>
+        </select>
         <span style="font-size:12px;color:var(--text-secondary)">共 {{ filteredProblems.length }} 题</span>
       </div>
     </div>
@@ -63,3 +63,21 @@ function toggleProblem(id) {
   expanded.value[id] = !expanded.value[id]
 }
 </script>
+
+<style scoped>
+.native-select {
+  padding: 6px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--card-bg);
+  outline: none;
+  cursor: pointer;
+  min-width: 130px;
+}
+.native-select:focus {
+  border-color: var(--accent);
+}
+</style>

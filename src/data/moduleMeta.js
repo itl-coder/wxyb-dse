@@ -21,9 +21,7 @@ export const mathModules = [
   { id: 'cent', icon: '△', name: '三角形四心',
     desc: '重心/外心/内心/垂心 · 欧拉线 · 拖拽观察变化',
     freq: 'mid', stars: 3 },
-  { id: 'mov', icon: '🏃', name: '动点问题',
-    desc: '参数方程演示 · 摆线/螺线 · 速度/加速度向量',
-    freq: 'low', stars: 2 },
+
   { id: 'quad', icon: '📈', name: '二次函数',
     desc: 'y=ax²+bx+c · 顶点式 · 判别式Δ · 根 · 对称轴 · 区间最值',
     freq: 'high', stars: 5 },

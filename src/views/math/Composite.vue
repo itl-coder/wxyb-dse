@@ -1,50 +1,75 @@
 <template>
   <div class="teaching-wrap">
     <div class="obj-section">
-      <div class="sec-title">📐 学习目标 · 函数变换</div>
+      <div class="sec-title">&#x1F4D0; 学习目标 · 函数工坊</div>
       <ul class="obj-grid">
         <li v-for="o in objectives" :key="o">{{ o }}</li>
       </ul>
     </div>
 
-    <div class="comp-controls">
-      <div class="control-row">
-        <el-select v-model="compFn" size="small" style="width:120px" @change="updateDesc">
-          <el-option v-for="(name,key) in funcNames" :key="key" :label="name" :value="key" />
-        </el-select>
-        <span v-for="p in compParams" :key="p.key" class="param-item">
-          <label>{{ p.label }}</label>
-          <el-slider v-model="p.value" :min="p.min" :max="p.max" :step="p.step" style="width:100px" @input="updateDesc" show-input size="small" />
-        </span>
-        <el-button size="small" @click="resetComp">重置</el-button>
+    <div class="cfw-controls">
+      <div class="cfw-row">
+        <div class="cfw-fn-select">
+          <label>外函数 f</label>
+          <select v-model="outerFn" class="cfw-select" @change="updateWorkshop">
+            <option v-for="f in outerFunctions" :key="f.key" :value="f.key">{{ f.label }}</option>
+          </select>
+        </div>
+        <span class="cfw-compose">∘</span>
+        <div class="cfw-fn-select">
+          <label>内函数 g</label>
+          <select v-model="innerFn" class="cfw-select" @change="updateWorkshop">
+            <option v-for="f in innerFunctions" :key="f.key" :value="f.key">{{ f.label }}</option>
+          </select>
+        </div>
+        <div class="cfw-result-label">=</div>
+        <div class="cfw-result" v-html="compositeLabel"></div>
       </div>
-      <div class="control-row">
-        <el-checkbox v-model="stepMode" size="small">分步模式</el-checkbox>
-        <template v-if="stepMode">
-          <el-radio-group v-model="compStep" size="small">
-            <el-radio-button v-for="(name,i) in stepLabels" :key="i" :value="i">{{ name }}</el-radio-button>
-          </el-radio-group>
-          <el-checkbox v-model="overlayMode" size="small">叠加</el-checkbox>
+
+      <div class="cfw-row">
+        <template v-if="innerFn === 'custom'">
+          <span class="cfw-param">
+            <label>px+q: p</label>
+            <input type="range" :value="innerP" :min="-3" :max="3" :step="0.1" class="cfw-range" @input="innerP = +$event.target.value" />
+            <span class="cfw-val">{{ innerP.toFixed(1) }}</span>
+          </span>
+          <span class="cfw-param">
+            <label>q</label>
+            <input type="range" :value="innerQ" :min="-3" :max="3" :step="0.1" class="cfw-range" @input="innerQ = +$event.target.value" />
+            <span class="cfw-val">{{ innerQ.toFixed(1) }}</span>
+          </span>
         </template>
+        <template v-if="outerFn === 'custom'">
+          <span class="cfw-param">
+            <label>a</label>
+            <input type="range" :value="outerA" :min="-3" :max="3" :step="0.1" class="cfw-range" @input="outerA = +$event.target.value" />
+            <span class="cfw-val">{{ outerA.toFixed(1) }}</span>
+          </span>
+          <span class="cfw-param">
+            <label>k</label>
+            <input type="range" :value="outerK" :min="-3" :max="3" :step="0.1" class="cfw-range" @input="outerK = +$event.target.value" />
+            <span class="cfw-val">{{ outerK.toFixed(1) }}</span>
+          </span>
+        </template>
+        <label class="cfw-check"><input type="checkbox" v-model="compareMode" /> 对比模式</label>
+        <button class="cfw-reset-btn" @click="resetWorkshop">重置</button>
       </div>
     </div>
 
     <div class="canvas-card">
-      <P5Canvas :sketch="sketchFn" />
-      <div class="comp-info" v-html="infoHtml"></div>
+      <P5Canvas ref="canvasRef" :sketch="sketchFn" />
+      <div class="cfw-info" v-html="infoHtml"></div>
     </div>
 
     <div class="teaching-main">
       <div class="concept-section">
         <div class="sec-title">📖 核心概念</div>
-        <ConceptBlock title="一、标准变换顺序" tag="★ 高频">
-          <p>y = a·f(bx+c) + d 的变换过程：</p>
-          <FormulaBox>① f(x) → f(x+c) 水平平移 c 单位（c>0向左）<br>② → f(bx+c) 水平伸缩 1/|b| 倍<br>③ → a·f(bx+c) 垂直伸缩 |a| 倍<br>④ → a·f(bx+c)+d 垂直平移 d 单位（d>0向上）</FormulaBox>
-          <p><b>注意</b>：a<0 或 b<0 时还涉及反射变换</p>
+        <ConceptBlock title="一、复合函数定义" tag="★ 核心">
+          <p>复合函数 (f∘g)(x) = f(g(x))，先作用内函数 g，再作用外函数 f。</p>
+          <FormulaBox>定义域：x 在 g 的定义域内，且 g(x) 在 f 的定义域内<br>值域：f(g(x)) 的值域 ⊆ f 的值域</FormulaBox>
         </ConceptBlock>
-        <ConceptBlock title="二、复合函数概念" tag="★ 核心">
-          <p>复合函数 (f∘g)(x) = f(g(x))，先作用 g，再作用 f。</p>
-          <p>DSE 常见：sin(2x)、|2x-3|、√(x²+1) 等都是复合函数。</p>
+        <ConceptBlock title="二、标准变换顺序" tag="★ 高频">
+          <FormulaBox>y = a·f(bx+c) + d 的变换：<br>① f(x) → f(x+c) 水平平移<br>② → f(bx+c) 水平伸缩<br>③ → a·f(bx+c) 垂直伸缩<br>④ → a·f(bx+c)+d 垂直平移</FormulaBox>
         </ConceptBlock>
       </div>
       <div class="teaching-sidebar">
@@ -52,18 +77,19 @@
           <div class="sec-title">⚠️ 常见误解</div>
           <ul>
             <li>变换顺序错误 — 必须先平移再伸缩</li>
-            <li>水平方向符号搞反 — f(x+2) 向左移2</li>
             <li>忘记 f(bx+c) = f(b(x+c/b))，水平伸缩后平移 c/b</li>
-            <li>反射与伸缩顺序混淆</li>
+            <li>复合后定义域可能缩小</li>
+            <li>ln(g(x)) 要求 g(x) > 0</li>
+            <li>sqrt(g(x)) 要求 g(x) ≥ 0</li>
           </ul>
         </div>
         <div class="strategy-section">
           <div class="sec-title">▶ 解题策略</div>
           <ul>
-            <li>找出原始函数 f(x)</li>
+            <li>找出内函数 g(x) 和外函数 f(x)</li>
+            <li>确定内函数的值域</li>
+            <li>检查内函数值域是否在外函数定义域内</li>
             <li>按顺序分解变换：平移→伸缩→反射→平移</li>
-            <li>画图验证变换结果</li>
-            <li>注意 sin/cos 五点法的变换</li>
           </ul>
         </div>
       </div>
@@ -72,202 +98,228 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import P5Canvas from '@/components/common/P5Canvas.vue'
 import ConceptBlock from '@/components/common/ConceptBlock.vue'
 import FormulaBox from '@/components/common/FormulaBox.vue'
 
 const objectives = [
-  '理解函数平移、伸缩、反射变换的几何意义',
-  '掌握 y = a·f(bx+c)+d 的标准变换顺序',
-  '能从原函数图像推导变换后的图像',
-  '掌握复合函数 (f∘g)(x) 的基本概念',
-  '熟练运用五点法分析三角函数的复合变换'
+  '理解复合函数 (f∘g)(x) = f(g(x)) 的构造方式',
+  '掌握常见外函数与内函数的组合特性',
+  '能从原函数图像推导复合函数图像',
+  '理解复合函数定义域的变化',
+  '熟练分析 sin(x²)、ln(x+1) 等经典复合函数'
 ]
 
-const funcs = {
-  sin: Math.sin,
-  cos: Math.cos,
-  quad: x => x * x,
-  abs: Math.abs,
-  sqrt: x => x >= 0 ? Math.sqrt(x) : NaN,
-  cube: x => x * x * x
-}
-const funcNames = { sin: 'sin x', cos: 'cos x', quad: 'x²', abs: '|x|', sqrt: '√x', cube: 'x³' }
-const stepLabels = ['f(x)', 'f(bx)', 'f(bx+c)', 'a·f(bx+c)', '完整']
+const outerFunctions = [
+  { key: 'sin', label: 'sin x' },
+  { key: 'cos', label: 'cos x' },
+  { key: 'exp', label: 'eˣ' },
+  { key: 'ln', label: 'ln x' },
+  { key: 'sqrt', label: '√x' },
+  { key: 'abs', label: '|x|' },
+  { key: 'sq', label: 'x²' }
+]
 
-const compFn = ref('sin')
-const stepMode = ref(false)
-const overlayMode = ref(false)
-const compStep = ref(4)
+const innerFunctions = [
+  { key: 'linear', label: 'px+q' },
+  { key: 'sq', label: 'x²' },
+  { key: 'abs', label: '|x|' },
+  { key: 'cube', label: 'x³' },
+  { key: 'custom', label: '自定义' }
+]
+
+const outerFn = ref('sin')
+const innerFn = ref('sq')
+const innerP = ref(1), innerQ = ref(0)
+const outerA = ref(1), outerK = ref(0)
+const compareMode = ref(false)
 const infoHtml = ref('')
-let panX = 0, panY = 0
 
-const compParams = reactive([
-  { key: 'ca', label: 'a', value: 1, min: -3, max: 3, step: 0.1 },
-  { key: 'cb', label: 'b', value: 1, min: -3, max: 3, step: 0.1 },
-  { key: 'cc', label: 'c', value: 0, min: -3, max: 3, step: 0.1 },
-  { key: 'cd', label: 'd', value: 0, min: -3, max: 3, step: 0.1 }
-])
-
-function getCP() {
-  return { a: compParams[0].value, b: compParams[1].value, c: compParams[2].value, d: compParams[3].value }
+function g(x) {
+  switch (innerFn.value) {
+    case 'linear': return innerP.value * x + innerQ.value
+    case 'sq': return x * x
+    case 'abs': return Math.abs(x)
+    case 'cube': return x * x * x
+    case 'custom': return innerP.value * x + innerQ.value
+    default: return x
+  }
 }
 
-function resetComp() {
-  compParams[0].value = 1; compParams[1].value = 1; compParams[2].value = 0; compParams[3].value = 0
-  updateDesc()
+function f(x) {
+  switch (outerFn.value) {
+    case 'sin': return Math.sin(x)
+    case 'cos': return Math.cos(x)
+    case 'exp': return Math.exp(x)
+    case 'ln': return x > 0 ? Math.log(x) : NaN
+    case 'sqrt': return x >= 0 ? Math.sqrt(x) : NaN
+    case 'abs': return Math.abs(x)
+    case 'sq': return x * x
+    default: return x
+  }
 }
 
-function updateDesc() {
-  const { a, b, c, d } = getCP()
-  const steps = []
-  if (c !== 0) steps.push(`① 平移 x: ${c>0?'左':'右'}${Math.abs(c).toFixed(1)}`)
-  if (b !== 1) steps.push(`② 横缩 ${Math.abs(1/b).toFixed(2)}倍${b<0?'（水平反射）':''}`)
-  if (a !== 1) steps.push(`③ 纵伸 ${Math.abs(a).toFixed(2)}倍${a<0?'（垂直反射）':''}`)
-  if (d !== 0) steps.push(`④ ${d>0?'上':'下'}移 ${Math.abs(d).toFixed(1)}`)
-  infoHtml.value =
-    `<b>原函数</b>：y=${funcNames[compFn.value]}(x)<br>` +
-    `<b>变换后</b>：y=${a.toFixed(1)}·${funcNames[compFn.value]}(${b.toFixed(1)}x${c>=0?'+':''}${c.toFixed(1)})${d>=0?'+':''}${d.toFixed(1)}<br>` +
-    (steps.length ? `<b>变换</b>：${steps.join(' → ')}` : '(原函数)') +
-    '<br><span style="color:#64748b;font-size:11px">标准顺序：平移→伸缩→反射→平移</span>'
+function fg(x) {
+  const gx = g(x)
+  return f(gx)
+}
+
+function getDomain() {
+  const fn = outerFn.value
+  switch (fn) {
+    case 'ln': return { desc: 'g(x) > 0' }
+    case 'sqrt': return { desc: 'g(x) ≥ 0' }
+    case 'exp': case 'sin': case 'cos': case 'abs': case 'sq': return { desc: 'x ∈ R' }
+    default: return { desc: 'x ∈ R' }
+  }
+}
+
+const compositeLabel = computed(() => {
+  const outerLabel = outerFunctions.find(o => o.key === outerFn.value)?.label || outerFn.value
+  let innerLabel
+  switch (innerFn.value) {
+    case 'linear': innerLabel = `${innerP.value.toFixed(1)}x${innerQ.value >= 0 ? '+' : ''}${innerQ.value.toFixed(1)}`; break
+    case 'sq': innerLabel = 'x²'; break
+    case 'abs': innerLabel = '|x|'; break
+    case 'cube': innerLabel = 'x³'; break
+    case 'custom': innerLabel = `${innerP.value.toFixed(1)}x${innerQ.value >= 0 ? '+' : ''}${innerQ.value.toFixed(1)}`; break
+    default: innerLabel = 'x'
+  }
+  return `f(g(x)) = ${outerLabel.replace('x', `(${innerLabel})`)}`
+})
+
+function updateWorkshop() {
+  const domain = getDomain()
+  let h = `<b>复合函数</b>：${compositeLabel.value}<br>`
+  h += `<b>定义域</b>：${domain.desc}<br>`
+  h += `<b>示例点</b>：`
+  for (let x = -2; x <= 2; x += 0.5) {
+    const y = fg(x)
+    h += `f(g(${x.toFixed(1)})) = ${isNaN(y) ? '无定义' : y.toFixed(3)} &nbsp;`
+  }
+  infoHtml.value = h
+}
+
+function resetWorkshop() {
+  outerFn.value = 'sin'; innerFn.value = 'sq'
+  innerP.value = 1; innerQ.value = 0
+  outerA.value = 1; outerK.value = 0
+  compareMode.value = false
+  updateWorkshop()
 }
 
 const sketchFn = (p, container) => {
-  let dragActive = false, lmx = 0, lmy = 0
   p.setup = () => {
-    const sz = Math.min(container.clientWidth - 20, 640, 640)
-    p.createCanvas(sz, sz); p.frameRate(30); p.textFont('sans-serif')
+    const sz = Math.min(container.clientWidth - 20, 650)
+    p.createCanvas(sz, sz)
+    p.frameRate(30)
+    p.textFont('sans-serif')
   }
   p.draw = () => {
-    const sz = Math.min(container.clientWidth - 20, 640, 640)
+    const sz = Math.min(container.clientWidth - 20, 650)
     if (p.width !== sz) p.resizeCanvas(sz, sz)
-    p.background('#fafbfc')
-    drawComp(p)
-  }
-  p.mousePressed = () => { dragActive = true; lmx = p.mouseX; lmy = p.mouseY }
-  p.mouseReleased = () => { dragActive = false }
-  p.mouseDragged = () => {
-    if (dragActive) { panX += p.mouseX - lmx; panY += p.mouseY - lmy; lmx = p.mouseX; lmy = p.mouseY }
+    p.background('#f8f7fc')
+    drawComposite(p)
   }
 }
 
-function drawStep(p, step, col, dash, label, toS, f) {
-  const { a, b, c, d } = getCP()
-  p.stroke(col); p.strokeWeight(dash ? 1.5 : 2.5)
-  if (dash) p.drawingContext.setLineDash([4, 4])
-  p.beginShape()
-  for (let x = -3; x <= 3; x += 0.02) {
-    let y
-    if (step === 0) y = f(x)
-    else if (step === 1) y = f(b * x)
-    else if (step === 2) y = f(b * x + c)
-    else if (step === 3) y = a * f(b * x + c)
-    else y = a * f(b * x + c) + d
-    if (isNaN(y) || Math.abs(y) > 5) continue
-    const [sx, sy] = toS(x, y); p.vertex(sx, sy)
-  }
-  p.endShape()
-  if (dash) p.drawingContext.setLineDash([])
-  if (label) {
-    p.fill(col); p.noStroke(); p.textSize(9); p.textAlign(p.LEFT, p.TOP)
-    const lx = 2.2
-    let ly
-    if (step === 0) ly = f(lx)
-    else if (step === 1) ly = f(b * lx)
-    else if (step === 2) ly = f(b * lx + c)
-    else if (step === 3) ly = a * f(b * lx + c)
-    else ly = a * f(b * lx + c) + d
-    if (!isNaN(ly) && Math.abs(ly) < 5) { const [slx, sly] = toS(lx, ly); p.text(label, slx + 4, sly - 6) }
-  }
-}
-
-function drawComp(p) {
-  const { a, b, c, d } = getCP()
-  const W = p.width, H = p.height, m = 45
-  const gs = (W - 2 * m) / 6
-  const ox = m + 3 * gs + panX, oy = m + 3 * gs + panY
+function drawComposite(p) {
+  const W = p.width, H = p.height, m = 40
+  const gs = (W - 2 * m) / 8
+  const ox = m + 4 * gs, oy = m + 4 * gs
   const toS = (x, y) => [ox + x * gs, oy - y * gs]
-  const f = funcs[compFn.value]
 
-  // 网格
-  p.stroke(220, 225, 235); p.strokeWeight(0.5)
-  for (let i = 0; i <= 6; i++) { p.line(m + i * gs, m, m + i * gs, H - m); p.line(m, m + i * gs, W - m, m + i * gs) }
+  // Grid
+  p.stroke(228, 230, 240); p.strokeWeight(0.5)
+  for (let i = 0; i <= 8; i++) {
+    p.line(m + i * gs, m, m + i * gs, H - m)
+    p.line(m, m + i * gs, W - m, m + i * gs)
+  }
 
-  // 坐标轴
-  p.stroke('#94a3b8'); p.strokeWeight(1.5)
+  // Axes
+  p.stroke('#7c7c9e'); p.strokeWeight(1.2)
   p.line(ox, m, ox, H - m); p.line(m, oy, W - m, oy)
-  p.fill('#94a3b8'); p.noStroke()
-  p.triangle(W - m - 1, oy, W - m - 9, oy - 4, W - m - 9, oy + 4)
-  p.triangle(ox, 1, ox - 4, 10, ox + 4, 10)
-
-  // 轴标签
-  p.textSize(9)
+  p.fill('#7c7c9e'); p.noStroke(); p.textSize(9)
   for (let i = -3; i <= 3; i++) {
     if (i === 0) continue
-    const [lx, ly] = toS(i, 0)
-    p.textAlign(p.CENTER, p.TOP); p.text(i, lx, oy + 4)
-    p.textAlign(p.RIGHT, p.CENTER); p.text(i, ox - 6, ly)
+    p.textAlign(p.CENTER, p.TOP); p.text(i, ox + i * gs, oy + 4)
+    p.textAlign(p.RIGHT, p.CENTER); p.text(i, ox - 5, oy - i * gs)
   }
   p.textAlign(p.RIGHT, p.TOP); p.text('O', ox - 4, oy + 4)
 
-  if (stepMode.value) {
-    if (overlayMode.value) {
-      const colors = ['#94a3b8', '#2d6a9f', '#e67e22', '#9b59b6', '#c0392b']
-      for (let s = 0; s <= 4; s++) drawStep(p, s, colors[s], s !== compStep.value, stepLabels[s], toS, f)
-    } else {
-      for (let s = 0; s < compStep.value; s++) {
-        const gray = 150 - s * 20
-        drawStep(p, s, p.color(gray, gray, gray + 20, 80), true, null, toS, f)
-      }
-      const colors = ['#94a3b8', '#2d6a9f', '#e67e22', '#9b59b6', '#c0392b']
-      drawStep(p, compStep.value, colors[compStep.value], false, stepLabels[compStep.value], toS, f)
-    }
-  } else {
-    // 原函数虚线
-    p.stroke(150, 160, 175); p.strokeWeight(1.5); p.drawingContext.setLineDash([4, 4])
+  // Inner function g(x) — dashed gray
+  if (compareMode.value) {
+    p.stroke('#94a3b8', 150); p.strokeWeight(1.3); p.drawingContext.setLineDash([4, 3])
+    p.noFill()
     p.beginShape()
-    for (let x = -3; x <= 3; x += 0.02) {
-      const y = f(x); if (isNaN(y) || Math.abs(y) > 5) continue
-      const [sx, sy] = toS(x, y); p.vertex(sx, sy)
+    let gStarted = false
+    for (let x = -4; x <= 4; x += 0.02) {
+      const y = g(x)
+      if (isNaN(y) || Math.abs(y) > 5) { if (gStarted) { p.endShape(); gStarted = false } continue }
+      const [sx, sy] = toS(x, y)
+      if (sx >= m && sx <= W - m && sy >= m && sy <= H - m) {
+        if (!gStarted) { p.beginShape(); gStarted = true }
+        p.vertex(sx, sy)
+      } else if (gStarted) { p.endShape(); gStarted = false }
     }
-    p.endShape(); p.drawingContext.setLineDash([])
-
-    // 变换后实线
-    p.stroke('#c0392b'); p.strokeWeight(2.5); p.beginShape()
-    for (let x = -3; x <= 3; x += 0.02) {
-      const inner = b * x + c; let y = f(inner)
-      if (isNaN(y) || Math.abs(y) > 5) continue
-      y = a * y + d; const [sx, sy] = toS(x, y); p.vertex(sx, sy)
-    }
-    p.endShape()
-
-    // 图例
-    p.fill(150, 160, 175); p.noStroke(); p.textSize(10); p.textAlign(p.LEFT, p.TOP)
-    p.text('原函数', m + 6, m + 6)
-    p.fill('#c0392b'); p.text('变换后', m + 6, m + 22)
+    if (gStarted) p.endShape()
+    p.drawingContext.setLineDash([])
+    p.fill('#94a3b8'); p.textSize(10); p.textAlign(p.LEFT, p.TOP)
+    p.text('g(x)', ox + gs * 1.5, oy - gs * 2.5)
   }
 
-  // sin/cos 离散点
-  if (compFn.value === 'sin' || compFn.value === 'cos') {
-    p.fill('#2d5a87'); p.noStroke(); p.textSize(8)
-    for (let x = -3; x <= 3; x += 0.5) {
-      const inner = b * x + c; let y = Math[compFn.value === 'cos' ? 'cos' : 'sin'](inner)
-      if (isNaN(y) || Math.abs(y) > 5) continue
-      y = a * y + d; const [sx, sy] = toS(x, y)
-      p.fill('#2d5a87', 100); p.circle(sx, sy, 3)
+  // Composite function f(g(x)) — solid blue
+  p.stroke('#6366f1'); p.strokeWeight(2.3)
+  p.noFill()
+  p.beginShape()
+  let started = false
+  let prevY = NaN
+  for (let x = -4; x <= 4; x += 0.015) {
+    const y = fg(x)
+    if (isNaN(y) || Math.abs(y) > 6) {
+      if (started) { p.endShape(); started = false }
+      prevY = NaN
+      continue
     }
+    if (!isNaN(prevY) && Math.abs(y - prevY) > 3) {
+      if (started) { p.endShape(); started = false }
+    }
+    const [sx, sy] = toS(x, y)
+    if (sx >= m && sx <= W - m && sy >= m && sy <= H - m) {
+      if (!started) { p.beginShape(); started = true }
+      p.vertex(sx, sy)
+    } else if (started) { p.endShape(); started = false }
+    prevY = y
   }
+  if (started) p.endShape()
+
+  // Label
+  p.fill('#6366f1'); p.textSize(11); p.textAlign(p.LEFT, p.BOTTOM)
+  p.text('f(g(x))', ox + gs * 1, oy - gs * 1)
 }
 
-onMounted(() => updateDesc())
+onMounted(() => updateWorkshop())
 </script>
 
 <style scoped>
-.comp-controls { display:flex;flex-direction:column;gap:8px;padding:10px 16px;background:var(--card-bg);border:1px solid var(--border-lighter);border-radius:var(--radius-lg);margin-bottom:10px }
-.control-row { display:flex;flex-wrap:wrap;align-items:center;gap:10px }
-.param-item { display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary) }
-.param-item label { font-weight:600;min-width:16px }
-.comp-info { padding:6px 14px;font-size:11px;color:var(--text-regular);background:var(--card-bg-warm);border-top:1px solid var(--border-lighter);line-height:1.8 }
-.canvas-card { background:var(--card-bg);border-radius:var(--radius-lg);border:1px solid var(--border-lighter);box-shadow:0 2px 12px rgba(26,46,60,0.06);overflow:hidden;margin-bottom:14px }
+.cfw-controls { display:flex;flex-direction:column;gap:8px;padding:10px 14px;background:var(--card-bg);border:1px solid var(--border-lighter);border-radius:var(--radius-lg);margin-bottom:10px;box-shadow:var(--shadow-light) }
+.cfw-row { display:flex;flex-wrap:wrap;align-items:center;gap:10px }
+.cfw-fn-select { display:flex;flex-direction:column;gap:2px }
+.cfw-fn-select label { font-size:10px;color:var(--text-muted);font-weight:600 }
+.cfw-select { padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:12px;font-family:inherit;color:var(--text-primary);background:var(--card-bg);outline:none;cursor:pointer;min-width:90px }
+.cfw-select:focus { border-color:var(--accent) }
+.cfw-compose { font-size:22px;color:var(--accent);font-weight:700;font-family:var(--font-mono) }
+.cfw-result-label { font-size:14px;color:var(--text-secondary);font-weight:600 }
+.cfw-result { font-size:13px;color:var(--accent);font-weight:700;font-family:var(--font-mono);letter-spacing:0.5px }
+.cfw-param { display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary) }
+.cfw-param label { font-weight:600;min-width:30px }
+.cfw-range { width:70px;accent-color:var(--accent);height:4px }
+.cfw-val { font-size:10px;color:var(--text-muted);min-width:22px;font-family:var(--font-mono) }
+.cfw-check { display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary);cursor:pointer;white-space:nowrap }
+.cfw-check input { accent-color:var(--accent) }
+.cfw-reset-btn { padding:4px 10px;border:1px solid var(--border-light);border-radius:6px;background:var(--card-bg);color:var(--text-secondary);font-size:11px;font-family:inherit;cursor:pointer;transition:all 0.2s }
+.cfw-reset-btn:hover { border-color:var(--accent);color:var(--accent) }
+.cfw-info { padding:8px 14px;font-size:11px;color:var(--text-regular);background:var(--card-bg-warm);border-top:1px solid var(--border-lighter);line-height:1.8 }
+.canvas-card { background:var(--card-bg);border-radius:var(--radius-lg);border:1px solid var(--border-lighter);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px }
 </style>

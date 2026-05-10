@@ -31,12 +31,16 @@
 
         <!-- Markdown Editor (md-editor-v3) -->
         <div class="rw-md-editor-wrap">
-          <MdEditor v-model="reportContent" :theme="store.theme" language="zh-CN" previewTheme="github" :toolbars="mdToolbars" :noPrettier="true" :noMermaid="true" />
+          <el-watermark v-if="elWmProps" v-bind="elWmProps" style="width:100%;height:100%">
+            <MdEditor v-model="reportContent" :theme="store.theme" language="zh-CN" previewTheme="github" :toolbars="mdToolbars" :noPrettier="true" :noMermaid="true" />
+          </el-watermark>
+          <MdEditor v-else v-model="reportContent" :theme="store.theme" language="zh-CN" previewTheme="github" :toolbars="mdToolbars" :noPrettier="true" :noMermaid="true" />
         </div>
 
         <!-- Hidden export container (used by html2canvas) -->
         <div class="rw-export-hidden" style="position:absolute;left:-9999px;top:0;width:800px" aria-hidden="true">
           <div id="reportExportContainer" class="report-export-container">
+            <div v-html="watermarkOverlayHTML"></div>
             <div class="re-ornament-top">
               <div class="re-ornament-line"></div>
               <div class="re-ornament-diamond">◆</div>
@@ -80,7 +84,6 @@
               <div class="re-footer-line"></div>
               <div class="re-footer-text">{{ store.schoolName }} · 用心陪伴每一位学生的成长</div>
               <div class="re-footer-date">生成于 {{ today }}</div>
-            <div v-html="watermarkOverlayHTML"></div>
             </div>
             <div class="re-corner re-corner-tl"></div>
             <div class="re-corner re-corner-tr"></div>
@@ -109,7 +112,7 @@ import 'md-editor-v3/lib/style.css'
 import { studentService, behaviorService, homeworkService, attendanceService } from '@/services/dataService'
 import { useAppStore } from '@/stores/app'
 import { marked } from 'marked'
-import { getWatermarkOverlayHTML } from '@/utils/watermark'
+import { getOverlayWatermarkHTML, getElWatermarkProps } from '@/utils/printTemplate'
 
 const store = useAppStore()
 const selectedStudentId = ref(null)
@@ -121,7 +124,8 @@ const studentList = ref([])
 const mdToolbars = ['bold', 'italic', 'underline', 'strikeThrough', 'title', '|', 'quote', 'unorderedList', 'orderedList', 'codeRow', 'code', '|', 'link', 'katex', 'table', '|', 'revoke', 'next', 'save', 'preview', 'fullscreen']
 
 const today = new Date().toISOString().split('T')[0]
-const watermarkOverlayHTML = computed(() => getWatermarkOverlayHTML())
+const watermarkOverlayHTML = computed(() => getOverlayWatermarkHTML())
+const elWmProps = computed(() => getElWatermarkProps())
 
 // 励志语录源
 const quotes = [

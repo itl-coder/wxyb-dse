@@ -308,7 +308,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { examService, studentService, courseService, errorBookService, questionBankService } from '@/services/dataService'
-import { getWatermarkHTML, getWatermarkStyle } from '@/utils/watermark'
+import { getPrintWatermarkHTML, getPrintWatermarkStyle } from '@/utils/printTemplate'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import { marked } from 'marked'
@@ -600,12 +600,12 @@ function printErrors() {
     .err-body blockquote{border-left:3px solid #c4a85c;margin:10px 0;padding:6px 14px;background:#faf7ee;font-style:italic;color:#5c3d1e}
     .err-body blockquote p{text-indent:0}
     @page{size:A4;margin:15mm}
-    ${getWatermarkStyle()}
+    ${getPrintWatermarkStyle()}
   </style></head><body><h2>错题汇总卷</h2>`
   filteredErrors.value.forEach((e, i) => {
     html += `<div class="err-item"><div class="err-num">${i+1}. [${e.subject} · ${e.topic}] <span style="color:#888;font-size:11px">${errorTypeLabel(e.errorType)}</span></div><div class="err-body">${marked.parse(e.question || '')}</div><div class="err-meta">来源：${e.source} · 关联学生：${e.studentNames}</div></div>`
   })
-  html += getWatermarkHTML() + '</body></html>'
+  html += getPrintWatermarkHTML() + '</body></html>'
   const w = window.open('', '_blank', 'width=750,height=600')
   w.document.write(html); w.document.close()
   setTimeout(() => w.print(), 300)
@@ -623,12 +623,12 @@ function printErrorRedo() {
     .err-body blockquote{border-left:3px solid #c4a85c;margin:10px 0;padding:6px 14px;background:#faf7ee;font-style:italic;color:#5c3d1e}
     .err-body blockquote p{text-indent:0}
     @page{size:A4;margin:15mm}
-    ${getWatermarkStyle()}
+    ${getPrintWatermarkStyle()}
   </style></head><body><h2>错题重做练习卷</h2>`
   filteredErrors.value.forEach((e, i) => {
     html += `<div class="err-item"><div class="err-num">${i+1}. <span style="color:#666;font-size:11px">[${e.subject} · ${e.topic}]</span></div><div class="err-body">${marked.parse(e.question || '')}</div><div class="answer-space"></div></div>`
   })
-  html += getWatermarkHTML() + '</body></html>'
+  html += getPrintWatermarkHTML() + '</body></html>'
   const w = window.open('', '_blank', 'width=750,height=600')
   w.document.write(html); w.document.close()
   setTimeout(() => w.print(), 300)

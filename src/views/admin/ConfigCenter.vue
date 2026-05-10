@@ -13,6 +13,103 @@
       </div>
     </div>
 
+    <!-- Portal Visibility Quick Config -->
+    <div class="admin-card portal-config-card">
+      <div class="portal-config-head">
+        <div>
+          <h3 style="margin:0;font-size:14px;color:var(--admin-text)">门户可见性配置</h3>
+          <p style="margin:2px 0 0;font-size:11px;color:var(--admin-text-muted)">控制学生门户中各模块是否可见</p>
+        </div>
+        <el-button size="small" text @click="resetPortalConfig">恢复默认</el-button>
+      </div>
+      <div class="portal-toggles">
+        <div class="pt-row" v-for="item in portalToggles" :key="item.key">
+          <div class="pt-info">
+            <span class="pt-icon">{{ item.icon }}</span>
+            <span class="pt-label">{{ item.label }}</span>
+            <span class="pt-desc">{{ item.desc }}</span>
+          </div>
+          <el-switch v-model="portalCfg[item.key]" size="small" @change="savePortalConfig" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Exam Visibility Detail Config -->
+    <div class="admin-card portal-config-card">
+      <div class="portal-config-head">
+        <div>
+          <h3 style="margin:0;font-size:14px;color:var(--admin-text)">考试可见性详细配置</h3>
+          <p style="margin:2px 0 0;font-size:11px;color:var(--admin-text-muted)">按考试类型、月份、年级精细控制考试记录可见范围</p>
+        </div>
+        <el-button size="small" text @click="resetExamVisibility">恢复默认</el-button>
+      </div>
+
+      <!-- 月考 — by month -->
+      <div class="ev-section">
+        <div class="ev-section-head">
+          <span>📅 月考（按月份）</span>
+          <span class="ev-section-hint">勾选可见月份</span>
+        </div>
+        <div class="ev-chips">
+          <button
+            v-for="m in 12" :key="'m'+m"
+            class="ev-chip" :class="{ on: examVisibility.monthly[m] }"
+            @click="examVisibility.monthly[m] = !examVisibility.monthly[m]; saveExamVisibility()"
+          >{{ m }}月</button>
+        </div>
+      </div>
+
+      <!-- 期中 — by grade -->
+      <div class="ev-section">
+        <div class="ev-section-head">
+          <span>📝 期中考试（按年级）</span>
+        </div>
+        <div class="ev-grade-row">
+          <div class="ev-grade-item" v-for="g in gradeOptions" :key="'mid'+g.key">
+            <span class="ev-grade-label">{{ g.label }}</span>
+            <el-switch v-model="examVisibility.midterm[g.key]" size="small" @change="saveExamVisibility" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 期末 — by grade -->
+      <div class="ev-section">
+        <div class="ev-section-head">
+          <span>📋 期末考试（按年级）</span>
+        </div>
+        <div class="ev-grade-row">
+          <div class="ev-grade-item" v-for="g in gradeOptions" :key="'fin'+g.key">
+            <span class="ev-grade-label">{{ g.label }}</span>
+            <el-switch v-model="examVisibility.final[g.key]" size="small" @change="saveExamVisibility" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 其他考试类型 -->
+      <div class="ev-section">
+        <div class="ev-section-head">
+          <span>📊 其他考试类型</span>
+        </div>
+        <div class="ev-other-row">
+          <div class="ev-other-item">
+            <span class="ev-other-icon">🏆</span>
+            <span class="ev-other-label">模考</span>
+            <el-switch v-model="examVisibility.mock" size="small" @change="saveExamVisibility" />
+          </div>
+          <div class="ev-other-item">
+            <span class="ev-other-icon">📄</span>
+            <span class="ev-other-label">DSE真题</span>
+            <el-switch v-model="examVisibility.dse" size="small" @change="saveExamVisibility" />
+          </div>
+          <div class="ev-other-item">
+            <span class="ev-other-icon">📝</span>
+            <span class="ev-other-label">课堂测验</span>
+            <el-switch v-model="examVisibility.quiz" size="small" @change="saveExamVisibility" />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="config-grid">
       <div
         v-for="col in collections"
@@ -69,9 +166,60 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { initAllData } from '@/services/dataService'
+import { initAllData, portalConfigService } from '@/services/dataService'
 
 const expanded = ref(null)
+const portalCfg = ref(portalConfigService.get())
+
+const portalToggles = [
+  { key: 'showTimetable', label: '今日课表', desc: '门户首页课表展示', icon: '📅' },
+  { key: 'showHomework', label: '待完成作业', desc: '门户首页 & 作业页面', icon: '📝' },
+  { key: 'showScores', label: '近期成绩', desc: '门户首页成绩条 & 考试页分数', icon: '📊' },
+  { key: 'showRanking', label: '排名显示', desc: '考试记录中的排名信息', icon: '🏆' },
+  { key: 'showTeacherFeedback', label: '老师反馈', desc: '首页反馈 & 学情页反馈 & 考试反馈', icon: '💬' },
+  { key: 'showExamRecords', label: '考试记录', desc: '我的考试页面整体可见', icon: '📄' },
+  { key: 'showAttendance', label: '出勤统计', desc: '出勤率数字显示', icon: '✓' },
+  { key: 'showBehavior', label: '课堂表现', desc: '学情页课堂表现记录', icon: '👥' },
+  { key: 'showExamTips', label: '做题技巧', desc: '门户做题技巧页面', icon: '💡' }
+]
+
+function savePortalConfig() {
+  portalConfigService.update(portalCfg.value)
+  ElMessage.success('门户可见性已保存')
+}
+
+function resetPortalConfig() {
+  portalCfg.value = portalConfigService.reset()
+  examVisibility.value = portalCfg.value.examVisibility
+  ElMessage.success('已恢复默认设置（全部可见）')
+}
+
+// --- Exam Visibility ---
+const examVisibility = ref(portalCfg.value.examVisibility || portalConfigService.get().examVisibility)
+const gradeOptions = [
+  { key: 's5', label: '中五 (F5)' },
+  { key: 's6', label: '中六 (F6)' }
+]
+
+function saveExamVisibility() {
+  portalCfg.value.examVisibility = examVisibility.value
+  portalConfigService.update({ examVisibility: examVisibility.value })
+  ElMessage.success('考试可见性已保存')
+}
+
+function resetExamVisibility() {
+  examVisibility.value = JSON.parse(JSON.stringify({
+    monthly: { 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true, 9: true, 10: true, 11: true, 12: true },
+    midterm: { s5: true, s6: true },
+    final: { s5: true, s6: true },
+    mock: true,
+    dse: true,
+    quiz: true
+  }))
+  portalCfg.value.examVisibility = examVisibility.value
+  portalConfigService.update({ examVisibility: examVisibility.value })
+  ElMessage.success('考试可见性已恢复默认（全部可见）')
+}
 const fullJsonVisible = ref(false)
 const editVisible = ref(false)
 const editKey = ref('')
@@ -101,7 +249,9 @@ const collectionMeta = [
   { key: 'parentConferences', label: '家长会预约', icon: '👨‍👩‍👧' },
   { key: 'examPapers', label: '试卷分析', icon: '📋' },
   { key: 'quickActions', label: '快捷操作', icon: '⚡' },
-  { key: 'schoolSettings', label: '学校设置', icon: '⚙️' }
+  { key: 'schoolSettings', label: '学校设置', icon: '⚙️' },
+  { key: 'portalConfig', label: '门户可见性', icon: '👁️' },
+  { key: 'examTips', label: '做题技巧', icon: '💡' }
 ]
 
 function loadCollection(key) {
@@ -225,6 +375,57 @@ async function resetCollection() {
 .config-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .config-header-card { margin-bottom: 16px; }
 
+/* Portal Config Card */
+.portal-config-card {
+  margin-bottom: 18px;
+  padding: 20px 22px;
+}
+
+.portal-config-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.portal-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.pt-row:hover { background: var(--admin-bg); }
+
+.pt-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pt-icon { font-size: 18px; width: 30px; text-align: center; flex-shrink: 0; }
+
+.pt-label {
+  font-size: 13px;
+  color: var(--admin-text);
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.pt-desc {
+  font-size: 11px;
+  color: var(--admin-text-muted);
+}
+
 .config-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -279,5 +480,70 @@ async function resetCollection() {
 
 @media (max-width: 768px) {
   .config-grid { grid-template-columns: 1fr; }
+}
+
+/* ---- Exam Visibility ---- */
+.ev-section {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--admin-bg);
+}
+.ev-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+.ev-section-head {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600; color: var(--admin-text);
+  margin-bottom: 10px;
+}
+
+.ev-section-hint {
+  font-size: 10px; color: var(--admin-text-muted); font-weight: 400;
+  margin-left: auto;
+}
+
+.ev-chips {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+
+.ev-chip {
+  width: 44px; padding: 5px 0; border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background: var(--card-bg);
+  font-size: 11px; color: var(--admin-text-secondary);
+  cursor: pointer; transition: all 0.16s;
+  text-align: center; font-family: var(--font-body);
+}
+.ev-chip:hover { border-color: var(--admin-accent); color: var(--admin-accent); }
+.ev-chip.on {
+  background: var(--admin-accent); border-color: var(--admin-accent);
+  color: #fff; font-weight: 600;
+}
+
+.ev-grade-row {
+  display: flex; gap: 20px;
+}
+
+.ev-grade-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px; background: var(--admin-bg); border-radius: 8px;
+}
+
+.ev-grade-label {
+  font-size: 12px; color: var(--admin-text); font-weight: 500; min-width: 60px;
+}
+
+.ev-other-row {
+  display: flex; gap: 16px; flex-wrap: wrap;
+}
+
+.ev-other-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px; background: var(--admin-bg); border-radius: 8px;
+}
+
+.ev-other-icon { font-size: 16px; }
+
+.ev-other-label {
+  font-size: 12px; color: var(--admin-text); font-weight: 500;
 }
 </style>
