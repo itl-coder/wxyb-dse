@@ -20,6 +20,9 @@
           <button class="hop-arr" @click="nextWeek">▸</button>
           <button class="hop-today-btn" @click="goToday">今天</button>
         </div>
+        <div class="hop-tb-center">
+          <button v-for="cn in classNames" :key="cn" class="hop-class-tab" :class="{ active: activeClass === cn }" @click="activeClass = cn">{{ cn }}</button>
+        </div>
         <div class="hop-tb-right">
           <span class="hop-summary">{{ doneCount }}/{{ activeDayCount }} 天已交接</span>
           <button class="hop-export-btn" @click="exportImage" :disabled="exporting">
@@ -53,10 +56,7 @@
             </span>
           </div>
 
-          <!-- 无记录 -->
-          <div v-if="!d.record" class="hop-day-empty">该日暂无交接内容</div>
-
-          <template v-else>
+          <template v-if="d.record">
             <!-- 作业收集 -->
             <div v-if="d.record.sections?.homework && d.record.homeworkItems?.length" class="hop-block">
               <div class="hop-block-title">📝 作业收集情况</div>
@@ -64,10 +64,8 @@
                 <div v-for="(h, i) in d.record.homeworkItems" :key="i" class="hop-hw-item">
                   <div class="hop-hw-head">
                     <span class="hop-hw-subject">{{ h.subject }}</span>
-                    <span class="hop-hw-count">实交 {{ h.count }}{{ h.totalCount ? ' / 应交 ' + h.totalCount : '' }}
-                      份</span>
-                    <span class="hop-hw-grade"
-                      :class="h.graded === true ? 'done' : h.graded === 'partial' ? 'part' : 'no'">
+                    <span class="hop-hw-count">实交 {{ h.count }}{{ h.totalCount ? ' / 应交 ' + h.totalCount : '' }} 份</span>
+                    <span class="hop-hw-grade" :class="h.graded === true ? 'done' : h.graded === 'partial' ? 'part' : 'no'">
                       {{ h.graded === true ? '✓ 已收取' : h.graded === 'partial' ? '◐ 部分收取' : '○ 未收取' }}
                     </span>
                   </div>
@@ -85,8 +83,7 @@
               <div class="hop-block-title">📋 会议纪要</div>
               <div class="hop-mt-card">
                 <div class="hop-mt-title">{{ d.record.meetingNotes.title }}</div>
-                <div v-if="d.record.meetingNotes.content" class="hop-mt-content">{{ d.record.meetingNotes.content }}
-                </div>
+                <div v-if="d.record.meetingNotes.content" class="hop-mt-content">{{ d.record.meetingNotes.content }}</div>
                 <div v-if="d.record.meetingNotes.transcription" class="hop-mt-trans">
                   <b>📝 文字记录：</b>{{ d.record.meetingNotes.transcription }}
                 </div>
@@ -97,12 +94,10 @@
             <div v-if="d.record.sections?.students && d.record.studentSituations?.length" class="hop-block">
               <div class="hop-block-title">👥 学生特殊情况同步 ({{ d.record.studentSituations.length }}条)</div>
               <div class="hop-stu-grid">
-                <div v-for="(s, i) in d.record.studentSituations" :key="i" class="hop-stu-card"
-                  :class="{ handled: s.handled }">
+                <div v-for="(s, i) in d.record.studentSituations" :key="i" class="hop-stu-card" :class="{ handled: s.handled }">
                   <div class="hop-stu-card-hd">
                     <span class="hop-stu-name">{{ s.studentName }}</span>
-                    <span class="hop-stu-status" :class="s.handled ? 'ok' : 'warn'">{{ s.handled ? '✓ 已处理' : '⚠ 待跟进'
-                      }}</span>
+                    <span class="hop-stu-status" :class="s.handled ? 'ok' : 'warn'">{{ s.handled ? '✓ 已处理' : '⚠ 待跟进' }}</span>
                   </div>
                   <span class="hop-stu-type-tag">{{ s.type }}</span>
                   <div v-if="s.description" class="hop-stu-desc">{{ s.description }}</div>
@@ -126,8 +121,7 @@
                 </div>
                 <div class="hop-phone-divider"></div>
                 <div class="hop-phone-stat">
-                  <span class="hop-phone-val warn">{{ d.record.phoneManagement.totalPhones -
-                    d.record.phoneManagement.receivedPhones }}</span>
+                  <span class="hop-phone-val warn">{{ d.record.phoneManagement.totalPhones - d.record.phoneManagement.receivedPhones }}</span>
                   <span class="hop-phone-lbl">未交数量</span>
                 </div>
               </div>
@@ -145,8 +139,7 @@
                   <div class="hop-leave-head">
                     <span class="hop-leave-name">{{ l.studentName }}</span>
                     <span class="hop-leave-reason">{{ l.reason }}</span>
-                    <span class="hop-leave-tag" :class="l.parentNotified ? 'ok' : 'warn'">{{ l.parentNotified ? '家长知晓' :
-                      '待通知家长' }}</span>
+                    <span class="hop-leave-tag" :class="l.parentNotified ? 'ok' : 'warn'">{{ l.parentNotified ? '家长知晓' : '待通知家长' }}</span>
                     <span v-if="l.phoneGiven" class="hop-leave-tag phone">📱 已发手机</span>
                   </div>
                   <div class="hop-leave-time">离校时间：{{ l.leaveTime || '未填写' }}</div>
@@ -190,6 +183,12 @@ function checkEnabled() { const cfg = portalConfigService.get(); enabled.value =
 function startCd() { countdown.value = 10; cdTimer = setInterval(() => { countdown.value--; if (countdown.value <= 0) { clearInterval(cdTimer); goHome() } }, 1000) }
 function goHome() { router.push('/') }
 
+// ===== 班级 =====
+const CLASS_NAMES_KEY = 'dse_handover_classNames'
+function loadClassNames() { try { const v = localStorage.getItem(CLASS_NAMES_KEY); return v ? JSON.parse(v) : ['A1 班', '港大班'] } catch { return ['A1 班', '港大班'] } }
+const classNames = ref(loadClassNames())
+const activeClass = ref(classNames.value[0] || 'A1 班')
+
 // ===== 周视图 =====
 const shiftConfig = ref(shiftConfigService.get())
 const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
@@ -211,8 +210,9 @@ const weekDays = computed(() => dayKeys.map((k, i) => {
 
 const weekDaysWithRecords = computed(() => weekDays.value.map(d => {
   const ds = dateKeyToISO(d.key, weekStart.value)
-  const records = handoverService.getByDate(ds)
-  const record = records.length > 0 ? (records.find(r => r.shift === d.shift) || records[0]) : null
+  const allRecords = handoverService.getByDate(ds)
+  const cls = activeClass.value
+  const record = allRecords.find(r => r.shift === d.shift && r.className === cls) || allRecords.find(r => r.className === cls) || null
   return { ...d, record }
 }).filter(d => d.record))
 
@@ -376,6 +376,35 @@ onUnmounted(() => { if (cdTimer) clearInterval(cdTimer) })
   color: #fff
 }
 
+.hop-tb-center {
+  display: flex;
+  align-items: center;
+  gap: 4px
+}
+
+.hop-class-tab {
+  padding: 5px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border-base);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all .2s
+}
+
+.hop-class-tab:hover {
+  border-color: var(--accent);
+  color: var(--accent)
+}
+
+.hop-class-tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent)
+}
+
 .hop-tb-right {
   display: flex;
   align-items: center;
@@ -531,6 +560,21 @@ onUnmounted(() => { if (cdTimer) clearInterval(cdTimer) })
   background: var(--card-bg);
   border-radius: var(--radius-lg);
   border: 1px dashed var(--border-base)
+}
+
+.hop-class-section {
+  margin-bottom: 10px
+}
+
+.hop-class-subhead {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 6px 12px;
+  background: rgba(99, 102, 241, .05);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  border-left: 3px solid var(--accent)
 }
 
 /* 内容块 */

@@ -37,8 +37,12 @@
     <div class="hoa-main-grid">
       <div class="hoa-form-col">
         <div class="admin-card hoa-day-head">
+          <div class="hoa-class-tabs">
+            <button v-for="cn in classNames" :key="cn" class="hoa-class-tab" :class="{ active: activeClass === cn }"
+              @click="switchClass(cn)">{{ cn }}</button>
+          </div>
           <div class="hoa-dh-inner">
-            <h3>{{ activeDayLabel }}</h3>
+            <h3>{{ activeDayLabel }} · {{ activeClass }}</h3>
             <span v-if="activeShift" class="hoa-shift-badge"
               :class="activeShift === 'L' ? 'sl' : activeShift === 'M' ? 'sm' : 'sa'">
               {{
@@ -60,7 +64,8 @@
           <div class="admin-card hoa-sec">
             <div class="hoa-sec-hd" @click="toggleSec('hw')">
               <span>📝 作业收集 <em class="hoa-badge">{{ form.homeworkItems.length }}科</em></span>
-              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.homework" size="small" @click.stop /> <span class="hoa-arr">{{ sec.hw ? '▾' : '▸' }}</span></span>
+              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.homework"
+                  size="small" @click.stop /> <span class="hoa-arr">{{ sec.hw ? '▾' : '▸' }}</span></span>
             </div>
             <div v-show="sec.hw" class="hoa-sec-bd">
               <div v-if="form.homeworkItems.length === 0" class="hoa-empty">暂无，点击下方添加</div>
@@ -96,7 +101,8 @@
             <div class="hoa-sec-hd" @click="toggleSec('mt')">
               <span>📋 会议纪要 <em class="hoa-badge" :class="{ on: form.meetingNotes.hasMeeting }">{{
                 form.meetingNotes.hasMeeting ? '有' : '无' }}</em></span>
-              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.meeting" size="small" @click.stop /> <span class="hoa-arr">{{ sec.mt ? '▾' : '▸' }}</span></span>
+              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.meeting"
+                  size="small" @click.stop /> <span class="hoa-arr">{{ sec.mt ? '▾' : '▸' }}</span></span>
             </div>
             <div v-show="sec.mt" class="hoa-sec-bd">
               <div class="hoa-sw-row"><span>当日有会议</span><el-switch v-model="form.meetingNotes.hasMeeting"
@@ -111,7 +117,7 @@
                     <div v-if="!form.meetingNotes.recordingUrl">
                       <button v-if="!recording" class="hoa-rec-btn" @click="startRecord">🎙️ 录音</button>
                       <button v-else class="hoa-rec-btn recing" @click="stopRecord">⏹️ 停止 ({{ fmtDur(recDur)
-                        }})</button>
+                      }})</button>
                     </div>
                     <div v-else>
                       <audio :src="form.meetingNotes.recordingUrl" controls style="width:100%;height:30px" />
@@ -130,7 +136,8 @@
           <div class="admin-card hoa-sec">
             <div class="hoa-sec-hd" @click="toggleSec('stu')">
               <span>👥 学生特殊情况 <em class="hoa-badge">{{ form.studentSituations.length }}条</em></span>
-              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.students" size="small" @click.stop /> <span class="hoa-arr">{{ sec.stu ? '▾' : '▸' }}</span></span>
+              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.students"
+                  size="small" @click.stop /> <span class="hoa-arr">{{ sec.stu ? '▾' : '▸' }}</span></span>
             </div>
             <div v-show="sec.stu" class="hoa-sec-bd">
               <div v-if="form.studentSituations.length === 0" class="hoa-empty">暂无，点击下方添加</div>
@@ -155,8 +162,11 @@
           <!-- 手机管理 -->
           <div class="admin-card hoa-sec">
             <div class="hoa-sec-hd" @click="toggleSec('phone')">
-              <span>📱 班级手机管理 <em class="hoa-badge" :class="{ on: form.sections.phones }">{{ form.sections.phones ? '开' : '关' }}</em></span>
-              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.phones" size="small" @click.stop /> <span class="hoa-arr">{{ sec.phone ? '▾' : '▸' }}</span></span>
+              <span>📱 班级手机管理 <em class="hoa-badge" :class="{ on: form.sections.phones }">{{ form.sections.phones ? '开'
+                : '关'
+                  }}</em></span>
+              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.phones"
+                  size="small" @click.stop /> <span class="hoa-arr">{{ sec.phone ? '▾' : '▸' }}</span></span>
             </div>
             <div v-show="sec.phone" class="hoa-sec-bd">
               <div class="hoa-phone-grid">
@@ -165,8 +175,8 @@
                 <div class="admin-form-group"><label>实际收到数量</label><el-input-number
                     v-model="form.phoneManagement.receivedPhones" size="small" :min="0" style="width:100%" /></div>
               </div>
-              <div class="admin-form-group"><label>未交原因</label><el-input
-                  v-model="form.phoneManagement.unreceivedReason" size="small" placeholder="如：A同学请假未交、B同学家长未同意…" />
+              <div class="admin-form-group"><label>未交原因</label><el-input v-model="form.phoneManagement.unreceivedReason"
+                  size="small" placeholder="如：A同学请假未交、B同学家长未同意…" />
               </div>
               <p class="hoa-rec-hint">学生请假时手机会直接发放，不计入实收数量</p>
             </div>
@@ -176,7 +186,8 @@
           <div class="admin-card hoa-sec">
             <div class="hoa-sec-hd" @click="toggleSec('leave')">
               <span>🏥 请假情况 <em class="hoa-badge">{{ form.leaveRecords.length }}人</em></span>
-              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.leave" size="small" @click.stop /> <span class="hoa-arr">{{ sec.leave ? '▾' : '▸' }}</span></span>
+              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.leave"
+                  size="small" @click.stop /> <span class="hoa-arr">{{ sec.leave ? '▾' : '▸' }}</span></span>
             </div>
             <div v-show="sec.leave" class="hoa-sec-bd">
               <div v-if="form.leaveRecords.length === 0" class="hoa-empty">暂无请假记录，点击下方添加</div>
@@ -206,7 +217,8 @@
           <div class="admin-card hoa-sec">
             <div class="hoa-sec-hd" @click="toggleSec('note')">
               <span>📌 其他备注</span>
-              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.notes" size="small" @click.stop /> <span class="hoa-arr">{{ sec.note ? '▾' : '▸' }}</span></span>
+              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.notes"
+                  size="small" @click.stop /> <span class="hoa-arr">{{ sec.note ? '▾' : '▸' }}</span></span>
             </div>
             <div v-show="sec.note" class="hoa-sec-bd">
               <el-input v-model="form.generalNotes" size="small" type="textarea" :rows="4"
@@ -231,6 +243,17 @@
             </div>
           </div>
           <p class="hoa-sc-legend">L=7:30-16:30 / M=13:00-22:00 / A=9:00-18:00</p>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-title" style="font-size:13px;margin-bottom:10px">🏫 班级名称</div>
+          <div class="hoa-cn-list">
+            <div v-for="(cn, i) in classNames" :key="i" class="hoa-cn-row">
+              <span class="hoa-sc-day">班级{{ i + 1 }}</span>
+              <el-input v-model="classNames[i]" size="small" style="width:100px" @change="saveClassNames"
+                placeholder="如：A1 班" />
+            </div>
+          </div>
         </div>
 
         <div class="admin-card">
@@ -287,8 +310,16 @@ const activeShift = computed(() => shiftConfig.value[activeDay.value] || '')
 const sec = reactive({ hw: true, mt: false, stu: false, phone: false, leave: false, note: false })
 function toggleSec(k) { sec[k] = !sec[k] }
 
+// ===== 班级 =====
+const CLASS_NAMES_KEY = 'dse_handover_classNames'
+const defaultClassNames = ['A1 班', '港大班']
+function loadClassNames() { try { const v = localStorage.getItem(CLASS_NAMES_KEY); return v ? JSON.parse(v) : [...defaultClassNames] } catch { return [...defaultClassNames] } }
+function saveClassNames() { localStorage.setItem(CLASS_NAMES_KEY, JSON.stringify(classNames.value)) }
+const classNames = ref(loadClassNames())
+const activeClass = ref(classNames.value[0] || 'A1 班')
+
 // ===== 表单 =====
-const emptyForm = () => ({ date: '', shift: '', sections: { homework: true, meeting: true, students: true, phones: false, leave: false, notes: true }, homeworkItems: [], meetingNotes: { hasMeeting: false, title: '', content: '', recordingUrl: '', transcription: '' }, studentSituations: [], phoneManagement: { enabled: false, totalPhones: 0, receivedPhones: 0, unreceivedReason: '' }, leaveRecords: [], generalNotes: '' })
+const emptyForm = () => ({ date: '', shift: '', className: activeClass.value, sections: { homework: true, meeting: true, students: true, phones: false, leave: false, notes: true }, homeworkItems: [], meetingNotes: { hasMeeting: false, title: '', content: '', recordingUrl: '', transcription: '' }, studentSituations: [], phoneManagement: { enabled: false, totalPhones: 0, receivedPhones: 0, unreceivedReason: '' }, leaveRecords: [], generalNotes: '' })
 const form = reactive(emptyForm())
 const editingId = ref(null)
 const saving = ref(false)
@@ -299,16 +330,18 @@ function addStudent() { form.studentSituations.push({ studentName: '', type: '�
 function addLeaveRecord() { form.leaveRecords.push({ studentName: '', reason: '', parentNotified: false, leaveTime: '', phoneGiven: false }) }
 
 function switchDay(dk) { if (activeDay.value === dk) return; activeDay.value = dk; loadDay() }
+function switchClass(cls) { if (activeClass.value === cls) return; activeClass.value = cls; loadDay() }
 function loadDay() {
   const ds = dateKeyToISO(activeDay.value, weekStart.value)
   const records = handoverService.getByDate(ds)
   const shift = activeShift.value
-  if (records.length > 0) { const m = records.find(r => r.shift === shift) || records[records.length - 1]; loadRecord(m) }
-  else { resetForm(); form.date = ds; form.shift = shift }
+  const cls = activeClass.value
+  if (records.length > 0) { const m = records.find(r => r.shift === shift && r.className === cls) || records.find(r => r.className === cls) || null; if (m) loadRecord(m); else { resetForm(); form.date = ds; form.shift = shift; form.className = cls } }
+  else { resetForm(); form.date = ds; form.shift = shift; form.className = cls }
 }
-function resetForm() { editingId.value = null; const e = emptyForm(); Object.keys(e).forEach(k => { if (k === 'homeworkItems' || k === 'studentSituations' || k === 'leaveRecords') form[k] = []; else if (k === 'meetingNotes') form.meetingNotes = { hasMeeting: false, title: '', content: '', recordingUrl: '', transcription: '' }; else if (k === 'phoneManagement') form.phoneManagement = { enabled: false, totalPhones: 0, receivedPhones: 0, unreceivedReason: '' }; else if (k === 'sections') form.sections = { homework: true, meeting: true, students: true, phones: false, leave: false, notes: true }; else form[k] = e[k] }) }
+function resetForm() { editingId.value = null; const e = emptyForm(); Object.keys(e).forEach(k => { if (k === 'homeworkItems' || k === 'studentSituations' || k === 'leaveRecords') form[k] = []; else if (k === 'meetingNotes') form.meetingNotes = { hasMeeting: false, title: '', content: '', recordingUrl: '', transcription: '' }; else if (k === 'phoneManagement') form.phoneManagement = { enabled: false, totalPhones: 0, receivedPhones: 0, unreceivedReason: '' }; else if (k === 'sections') form.sections = { homework: true, meeting: true, students: true, phones: false, leave: false, notes: true }; else if (k === 'className') form.className = activeClass.value; else form[k] = e[k] }) }
 function loadRecord(rec) {
-  editingId.value = rec.id; form.date = rec.date; form.shift = rec.shift || ''
+  editingId.value = rec.id; form.date = rec.date; form.shift = rec.shift || ''; form.className = rec.className || ''
   form.homeworkItems = rec.homeworkItems ? JSON.parse(JSON.stringify(rec.homeworkItems)) : []
   form.meetingNotes = rec.meetingNotes ? JSON.parse(JSON.stringify(rec.meetingNotes)) : { hasMeeting: false, title: '', content: '', recordingUrl: '', transcription: '' }
   form.studentSituations = rec.studentSituations ? JSON.parse(JSON.stringify(rec.studentSituations)) : []
@@ -322,7 +355,7 @@ async function saveCurrentDay() {
   if (!form.date || !form.shift) return ElMessage.warning('请设置班次')
   saving.value = true
   try {
-    const data = { date: form.date, shift: form.shift, sections: JSON.parse(JSON.stringify(form.sections)), homeworkItems: JSON.parse(JSON.stringify(form.homeworkItems.filter(h => h.subject))), meetingNotes: JSON.parse(JSON.stringify(form.meetingNotes)), studentSituations: JSON.parse(JSON.stringify(form.studentSituations.filter(s => s.studentName))), phoneManagement: JSON.parse(JSON.stringify(form.phoneManagement)), leaveRecords: JSON.parse(JSON.stringify(form.leaveRecords.filter(l => l.studentName))), generalNotes: form.generalNotes }
+    const data = { date: form.date, shift: form.shift, className: form.className, sections: JSON.parse(JSON.stringify(form.sections)), homeworkItems: JSON.parse(JSON.stringify(form.homeworkItems.filter(h => h.subject))), meetingNotes: JSON.parse(JSON.stringify(form.meetingNotes)), studentSituations: JSON.parse(JSON.stringify(form.studentSituations.filter(s => s.studentName))), phoneManagement: JSON.parse(JSON.stringify(form.phoneManagement)), leaveRecords: JSON.parse(JSON.stringify(form.leaveRecords.filter(l => l.studentName))), generalNotes: form.generalNotes }
     if (editingId.value) handoverService.update(editingId.value, data); else { const c = handoverService.create(data); editingId.value = c.id }
     ElMessage.success('已保存')
   } catch { ElMessage.error('保存失败') }
@@ -758,6 +791,47 @@ onUnmounted(() => { if (recInt) clearInterval(recInt); if (cdTimer) clearInterva
 
 .hoa-pv-status.off {
   color: var(--admin-text-muted)
+}
+
+.hoa-class-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px
+}
+
+.hoa-class-tab {
+  padding: 6px 18px;
+  border-radius: 6px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-bg-secondary);
+  color: var(--admin-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--admin-font);
+  transition: all .15s
+}
+
+.hoa-class-tab:hover {
+  background: var(--admin-surface-hover)
+}
+
+.hoa-class-tab.active {
+  background: var(--admin-accent);
+  color: #fff;
+  border-color: var(--admin-accent)
+}
+
+.hoa-cn-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px
+}
+
+.hoa-cn-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px
 }
 
 .hoa-phone-grid {
