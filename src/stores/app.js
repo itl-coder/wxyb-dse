@@ -176,7 +176,7 @@ export const useAppStore = defineStore('app', () => {
   // Named page -> menuKey mapping for recent access tracking
   const pageToMenuKey = {
     'Dashboard': 'dashboard', 'Timetable': 'timetable', 'Behavior': 'behavior',
-    'Homework': 'homework', 'HomeworkAssign': 'homework-assign',
+    'Homework': 'homework', 'HomeworkAssign': 'homework-assign', 'ShiftHandover': 'handover',
     'Discipline': 'discipline', 'Phone': 'phone',
     'Attendance': 'attendance', 'Reports': 'reports', 'Exam': 'exam',
     'Questions': 'questions', 'QuestionBank': 'question-bank', 'ExamTips': 'exam-tips',

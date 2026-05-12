@@ -377,9 +377,13 @@ body {
 /* ===== System Entry Cards ===== */
 .system-entries {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 14px;
   margin-bottom: 20px;
+}
+
+.system-entries.has-handover {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .sys-entry {
@@ -426,6 +430,21 @@ body {
 
 .portal-entry-card .sys-entry-icon {
   background: rgba(99, 102, 241, 0.1);
+}
+
+.handover-entry-card {
+  background: linear-gradient(135deg, #1a2f1d 0%, #1f3a24 100%);
+  border: 1px solid #2a4a30;
+  color: #fff;
+}
+
+.handover-entry-card:hover {
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.25);
+  border-color: #10b981;
+}
+
+.handover-entry-card .sys-entry-icon {
+  background: rgba(16, 185, 129, 0.15);
 }
 
 .sys-entry-icon {
@@ -1118,6 +1137,12 @@ body {
 }
 
 /* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .system-entries.has-handover {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .teaching-main {
     grid-template-columns: 1fr;
@@ -1132,6 +1157,10 @@ body {
   }
 
   .topic-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .system-entries {
     grid-template-columns: 1fr;
   }
 
@@ -1499,6 +1528,15 @@ html {
 
 [data-theme="dark"] .portal-entry-card .sys-entry-title {
   color: var(--text-primary);
+}
+
+[data-theme="dark"] .handover-entry-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+[data-theme="dark"] .handover-entry-card:hover {
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.15);
 }
 
 [data-theme="dark"] .meta-tag.high {

@@ -172,6 +172,7 @@ const expanded = ref(null)
 const portalCfg = ref(portalConfigService.get())
 
 const portalToggles = [
+  { key: 'handoverEnabled', label: '早晚班交接', desc: '启用/停用早晚班交接功能,关闭后访问将提示当日无交接内容', icon: '🤝' },
   { key: 'showTimetable', label: '今日课表', desc: '门户首页课表展示', icon: '📅' },
   { key: 'showHomework', label: '待完成作业', desc: '门户首页 & 作业页面', icon: '📝' },
   { key: 'showScores', label: '近期成绩', desc: '门户首页成绩条 & 考试页分数', icon: '📊' },

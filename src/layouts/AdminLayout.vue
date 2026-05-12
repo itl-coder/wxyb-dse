@@ -219,7 +219,7 @@ function toggleWatermark(v) {
 
 const pageTitles = {
   Dashboard: '数据看板', Timetable: '课表管理', Behavior: '课堂表现',
-  Homework: '作业追踪', HomeworkAssign: '布置作业',
+  Homework: '作业追踪', HomeworkAssign: '布置作业', ShiftHandover: '早晚班交接',
   Discipline: '纪律台账', Phone: '手机管理',
   Attendance: '考勤请假', Reports: '成长日报', Exam: '试卷错题',
   Questions: '智能出题', Counseling: '心理辅导', Conference: '家长会准备', Voice: '语音记录',

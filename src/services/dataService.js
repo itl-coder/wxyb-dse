@@ -175,6 +175,7 @@ export const MENU_DEFINITIONS = [
   { menuKey: 'attendance', route: '/admin/attendance', icon: '✓', label: '考勤请假', group: '常用功能', priority: 3, tags: ['daily'] },
   { menuKey: 'homework-assign', route: '/admin/homework-assign', icon: '📝', label: '布置作业', group: '常用功能', priority: 4, tags: ['daily'] },
   { menuKey: 'homework', route: '/admin/homework', icon: '📋', label: '作业追踪', group: '常用功能', priority: 5, tags: ['daily'] },
+  { menuKey: 'handover', route: '/admin/handover', icon: '🤝', label: '早晚班交接', group: '常用功能', priority: 6, tags: ['daily'] },
   // 2. 教学管理
   { menuKey: 'timetable', route: '/admin/timetable', icon: '📅', label: '课表管理', group: '教学管理', priority: 6 },
   { menuKey: 'discipline', route: '/admin/discipline', icon: '⚖️', label: '纪律台账', group: '教学管理', priority: 7 },
@@ -250,7 +251,7 @@ const defaultRoles = [
       'ai.voice.view', 'ai.voice.create',
       'settings.view'
     ],
-    menuIds: ['dashboard', 'behavior', 'homework-assign', 'homework', 'discipline', 'phone', 'attendance', 'students', 'reports', 'counseling', 'timetable', 'courses', 'parent-conference', 'conference', 'exam', 'question-bank', 'exam-tips', 'course-feedback', 'questions', 'voice', 'ai-data-center', 'settings'],
+    menuIds: ['dashboard', 'behavior', 'homework-assign', 'homework', 'handover', 'discipline', 'phone', 'attendance', 'students', 'reports', 'counseling', 'timetable', 'courses', 'parent-conference', 'conference', 'exam', 'question-bank', 'exam-tips', 'course-feedback', 'questions', 'voice', 'ai-data-center', 'settings'],
     dataScope: 'class', isSystem: true,
     createdAt: '2025-09-01'
   },
@@ -273,7 +274,7 @@ const defaultRoles = [
       'ai.view', 'ai.feedback.view', 'ai.questions.view', 'ai.voice.view',
       'settings.view', 'settings.config.view'
     ],
-    menuIds: ['dashboard', 'behavior', 'homework-assign', 'homework', 'discipline', 'phone', 'attendance', 'students', 'reports', 'counseling', 'timetable', 'courses', 'parent-conference', 'conference', 'exam', 'question-bank', 'exam-tips', 'course-feedback', 'questions', 'voice', 'ai-data-center', 'settings', 'config'],
+    menuIds: ['dashboard', 'behavior', 'homework-assign', 'homework', 'handover', 'discipline', 'phone', 'attendance', 'students', 'reports', 'counseling', 'timetable', 'courses', 'parent-conference', 'conference', 'exam', 'question-bank', 'exam-tips', 'course-feedback', 'questions', 'voice', 'ai-data-center', 'settings', 'config'],
     dataScope: 'campus', isSystem: true,
     createdAt: '2025-09-01'
   }
@@ -601,6 +602,7 @@ const defaultPortalConfig = {
   showHomework: true,
   showTimetable: true,
   showExamTips: true,
+  handoverEnabled: true,
   examVisibility: {
     monthly: { 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true, 9: true, 10: true, 11: true, 12: true },
     midterm: { s5: true, s6: true },
@@ -649,6 +651,65 @@ export const portalConfigService = {
     return JSON.parse(JSON.stringify(defaultPortalConfig))
   }
 }
+
+// ==================== 早晚班交接服务 ====================
+const defaultShiftConfig = {
+  monday: 'L',
+  tuesday: 'L',
+  wednesday: 'M',
+  thursday: 'M',
+  friday: 'L',
+  saturday: '',
+  sunday: ''
+}
+
+export const shiftConfigService = {
+  get() {
+    try {
+      const raw = localStorage.getItem(STORAGE_PREFIX + 'shiftConfig')
+      return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(defaultShiftConfig))
+    } catch { return JSON.parse(JSON.stringify(defaultShiftConfig)) }
+  },
+  save(config) {
+    localStorage.setItem(STORAGE_PREFIX + 'shiftConfig', JSON.stringify(config))
+  },
+  reset() {
+    localStorage.setItem(STORAGE_PREFIX + 'shiftConfig', JSON.stringify(defaultShiftConfig))
+    return JSON.parse(JSON.stringify(defaultShiftConfig))
+  }
+}
+
+// Handover records — format: { id, date, shift, homeworkItems[], meetingNotes, studentSituations[], generalNotes, createdBy, createdAt, updatedAt }
+export const handoverService = {
+  getAll() {
+    return load('handover').sort((a, b) => b.date.localeCompare(a.date))
+  },
+  getByDateRange(start, end) {
+    return this.getAll().filter(r => r.date >= start && r.date <= end)
+  },
+  getByDate(date) {
+    return load('handover').filter(r => r.date === date)
+  },
+  getById(id) {
+    return readEntity('handover', id)
+  },
+  create(data) {
+    return createEntity('handover', { ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
+  },
+  update(id, data) {
+    return updateEntity('handover', id, { ...data, updatedAt: new Date().toISOString() })
+  },
+  delete(id) {
+    return deleteEntity('handover', id)
+  },
+  // Check if handover exists for a given date
+  hasForDate(date) {
+    return load('handover').some(r => r.date === date)
+  }
+}
+
+// Initialize empty handover records if not exists
+initIfEmpty('handover', [])
 
 // ==================== 通用 CRUD ====================
 function createEntity(collection, data) {

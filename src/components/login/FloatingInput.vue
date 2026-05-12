@@ -11,6 +11,7 @@
         :disabled="disabled"
         :autocomplete="autocomplete"
         :maxlength="maxlength"
+        :placeholder="placeholder"
         class="fi-input"
         @input="$emit('update:modelValue', $event.target.value)"
         @focus="focused = true"
@@ -145,7 +146,8 @@ const inputType = computed(() => {
 }
 
 .fi-wrap.focused .fi-label,
-.fi-wrap.filled .fi-label {
+.fi-wrap.filled .fi-label,
+.fi-input:not(:placeholder-shown) ~ .fi-label {
   top: 8px;
   transform: translateY(0) scale(0.75);
   color: rgba(129, 140, 248, 0.55);

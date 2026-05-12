@@ -1,12 +1,20 @@
 <template>
   <div>
     <!-- System entry points -->
-    <div class="system-entries">
+    <div class="system-entries" :class="{ 'has-handover': showHandover }">
       <router-link to="/admin" class="sys-entry admin-entry-card">
         <div class="sys-entry-icon">🏫</div>
         <div class="sys-entry-info">
           <div class="sys-entry-title">管理后台</div>
           <div class="sys-entry-desc">学情问诊 · 班级管理 · AI智能分析</div>
+        </div>
+        <span class="sys-entry-arrow">→</span>
+      </router-link>
+      <router-link v-if="showHandover" to="/handover" class="sys-entry handover-entry-card">
+        <div class="sys-entry-icon">🤝</div>
+        <div class="sys-entry-info">
+          <div class="sys-entry-title">早晚班交接</div>
+          <div class="sys-entry-desc">作业收集 · 会议纪要 · 学生情况同步</div>
         </div>
         <span class="sys-entry-arrow">→</span>
       </router-link>
@@ -45,8 +53,17 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import TopicCard from '@/components/common/TopicCard.vue'
 import { mathModules } from '@/data/moduleMeta.js'
+import { portalConfigService } from '@/services/dataService'
+
+const showHandover = ref(true)
+
+onMounted(() => {
+  const cfg = portalConfigService.get()
+  showHandover.value = cfg.handoverEnabled !== false
+})
 
 const routeMap = {
   '3d': '/3d-geometry', trig: '/trigonometry', log: '/log-exp',

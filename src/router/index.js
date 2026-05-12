@@ -31,7 +31,9 @@ const routes = [
       // 其他学科
       { path: 'chinese', name: 'Chinese', component: () => import('@/views/subjects/Chinese.vue') },
       { path: 'physics', name: 'Physics', component: () => import('@/views/subjects/Physics.vue') },
-      { path: 'chemistry', name: 'Chemistry', component: () => import('@/views/subjects/Chemistry.vue') }
+      { path: 'chemistry', name: 'Chemistry', component: () => import('@/views/subjects/Chemistry.vue') },
+      // 早晚班交接 (前台)
+      { path: 'handover', name: 'HandoverPublic', component: () => import('@/views/ShiftHandoverPublic.vue') }
     ]
   },
 
@@ -51,6 +53,7 @@ const routes = [
       { path: 'behavior', name: 'Behavior', component: () => import('@/views/admin/Behavior.vue') },
       { path: 'homework', name: 'Homework', component: () => import('@/views/admin/Homework.vue') },
       { path: 'homework-assign', name: 'HomeworkAssign', component: () => import('@/views/admin/HomeworkAssign.vue'), meta: { permission: 'homework.assign' } },
+      { path: 'handover', name: 'ShiftHandover', component: () => import('@/views/admin/ShiftHandover.vue'), meta: { menuKey: 'handover' } },
       { path: 'discipline', name: 'Discipline', component: () => import('@/views/admin/Discipline.vue') },
       { path: 'phone', name: 'Phone', component: () => import('@/views/admin/Phone.vue') },
       { path: 'attendance', name: 'Attendance', component: () => import('@/views/admin/Attendance.vue') },
