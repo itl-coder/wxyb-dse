@@ -33,3 +33,12 @@
 | 22:42 | Completed AI数据收录中心 Phase 1-4: AdminLayout expandable nav + CSS + 5 routes + 5 full module pages (AISkills, AIFunctions, AITools, AIQuotes, AIPrompts) | AdminLayout.vue, admin.css, router/index.js, 5 new views, anatomy.md | Build passed (42.99s, 0 errors) | ~28K tokens |
 | 23:06 | Fixed FormulaBox to auto-render LaTeX via useKatex + updated ConceptBlock with TreeWalker for inline \(...\) formulas, added aiCategoryService + AiCategoryManager component, updated all 5 AI modules | FormulaBox.vue, ConceptBlock.vue, dataService.js, AiCategoryManager.vue, 5 AI module views, main.css | Build passed | ~12K tokens |
 | 23:17 | Complete math rendering overhaul: latexSanitizer.js, MathRenderer.vue (KaTeX+MathJax hybrid, debounce, DOM cleanup), updated FormulaBox/ConceptBlock/KatexDisplay/useKatex | latexSanitizer.js, MathRenderer.vue, FormulaBox.vue, ConceptBlock.vue, KatexDisplay.vue, useKatex.js | Build passed (22.32s) | ~14K tokens |
+
+## Session: 2026-05-18 11:12
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:35 | Fixed system-wide layout issues: PortalLayout mobile nav, PortalHome overflow, Dashboard dialog widths, HomePage grid, navbar scroll | PortalLayout.vue, PortalHome.vue, Dashboard.vue, main.css | Build passes | ~2800t |
+| 09:57 | 考试座位模块核心修复: (1)SeatGrid SortableJS从grid级改为per-row实例,修复座位拖拽实际拖行bug (2)新增gridKey强制重渲染同步DOM与store (3)data-room-id/data-row/data-from-room属性补充 (4)StudentPool拖入目标教室自动检测 (5)ExamSeatPublic前台视觉优化(间距/字号/打印/响应式) (6)exportHelper打印模板A4自适应 | SeatGrid.vue StudentPool.vue ExamSeatPublic.vue exportHelper.js | build通过 | ~4500 |
+| 10:08 | 座位模块双重重构: (1)ExamSeatPublic前台完全重写—贡院殿试暗黑美学(深墨底色+朱砂金点缀+CSS Grid座位 plaque+入场动画+仪式感排版) (2)ImportExcelDialog修复—对话框加宽至820px/列检测正则增强(选科/科目/编号)/额外字段保留/检测列信息展示/拖拽上传/空行过滤 | ExamSeatPublic.vue ImportExcelDialog.vue | build通过63s | ~6000 |
+| 12:06 | Fixed groupByClass unused param in seatAllocator.js — implemented class-grouping mode for "班级独立排布" menu option. Build verified clean. | src/views/admin/exam-seat/utils/seatAllocator.js | clean build | ~120t |

@@ -3,15 +3,22 @@
     <div class="admin-card">
       <div class="admin-card-header">
         <div>
-          <div class="admin-card-title">📝 作业追踪</div>
-          <div class="admin-card-subtitle">作业提交统计 · 未交作业提醒 · 核心/选修分类追踪</div>
+          <div class="admin-card-title">📝 作业管理</div>
+          <div class="admin-card-subtitle">作业布置 · 提交统计 · 未交提醒 · 核心/选修分类追踪</div>
         </div>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px" v-if="activeTab === 'track'">
           <el-button size="small" type="primary" @click="exportTable" :loading="exporting">
             {{ exporting ? '导出中...' : '🖨️ 导出A4打印' }}
           </el-button>
         </div>
       </div>
+
+      <div class="hw-tabs">
+        <button class="hw-tab" :class="{ active: activeTab === 'track' }" @click="activeTab = 'track'">📋 作业追踪</button>
+        <button class="hw-tab" :class="{ active: activeTab === 'assign' }" @click="activeTab = 'assign'">📝 布置作业</button>
+      </div>
+
+      <div v-show="activeTab === 'track'">
 
       <!-- Filters -->
       <div class="hw-track-filters">
@@ -322,11 +329,19 @@
         </div>
       </div>
     </div>
+
+      <div v-show="activeTab === 'assign'">
+        <HomeworkAssign />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import HomeworkAssign from './HomeworkAssign.vue'
+
+const activeTab = ref('track')
 import { ElMessage } from 'element-plus'
 import html2canvas from 'html2canvas'
 import { homeworkService, studentService, courseService } from '@/services/dataService'
@@ -534,6 +549,34 @@ async function exportTable() {
 </script>
 
 <style scoped>
+/* Tabs */
+.hw-tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--admin-border);
+  padding-bottom: 0;
+}
+.hw-tab {
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  color: var(--admin-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+  font-family: var(--admin-font);
+}
+.hw-tab:hover { color: var(--admin-text-secondary); }
+.hw-tab.active {
+  color: var(--admin-accent-light);
+  border-bottom-color: var(--admin-accent);
+  font-weight: 600;
+}
+
 /* Filters */
 .hw-track-filters {
   background: var(--admin-bg);

@@ -1,0 +1,334 @@
+/* ============================================================
+   DSE 智能学情管理系统 — Design Tokens
+   全球唯一真相源（Single Source of Truth）
+   所有 CSS 变量在此定义，main.css / admin.css 仅保留组件样式
+   基于 UI/UX Pro Max 设计系统 + MASTER.md
+   ============================================================ */
+
+/* ==================== 品牌色阶 (新) ==================== */
+:root {
+  --color-primary-50:  #EEF2FF;
+  --color-primary-100: #E0E7FF;
+  --color-primary-200: #C7D2FE;
+  --color-primary-300: #A5B4FC;
+  --color-primary-400: #818CF8;
+  --color-primary-500: #6366F1;
+  --color-primary-600: #4F46E5;
+  --color-primary-700: #4338CA;
+  --color-primary-800: #3730A3;
+  --color-primary-900: #312E81;
+  --color-primary-950: #1E1B4B;
+
+  /* ---- 语义色 ---- */
+  --color-success:       #10B981;
+  --color-success-light: #34D399;
+  --color-success-dark:  #059669;
+  --color-warning:       #F59E0B;
+  --color-warning-light: #FBBF24;
+  --color-warning-dark:  #D97706;
+  --color-danger:        #EF4444;
+  --color-danger-light:  #F87171;
+  --color-danger-dark:   #DC2626;
+  --color-info:          #3B82F6;
+  --color-info-light:    #60A5FA;
+  --color-info-dark:     #2563EB;
+  --color-accent-orange: #F97316;
+
+  /* ---- 中性色阶 ---- */
+  --color-white:    #FFFFFF;
+  --color-gray-50:  #FAF9F6;
+  --color-gray-100: #F5F2ED;
+  --color-gray-200: #EDEAE6;
+  --color-gray-300: #E0DDD8;
+  --color-gray-400: #C0BDB;
+  --color-gray-500: #A0A0B0;
+  --color-gray-600: #78788E;
+  --color-gray-700: #4A4A5E;
+  --color-gray-800: #2A2A3A;
+  --color-gray-900: #1A1A24;
+  --color-black:    #0F0F16;
+
+  /* ---- 新字体栈 (Noto Sans SC + system fallback) ---- */
+  --font-display: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+  --font-body:    'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+  --font-mono:    'JetBrains Mono', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+
+  /* ---- 新字号层级 ---- */
+  --text-xs:   11px;
+  --text-sm:   13px;
+  --text-base: 15px;
+  --text-lg:   17px;
+  --text-xl:   20px;
+  --text-2xl:  24px;
+  --text-3xl:  32px;
+  --text-4xl:  40px;
+
+  /* ---- 行高 ---- */
+  --leading-tight:   1.3;
+  --leading-snug:    1.5;
+  --leading-normal:  1.7;
+  --leading-relaxed: 1.85;
+
+  /* ---- 字重 ---- */
+  --weight-normal:   400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* ---- 间距（8dp 体系） ---- */
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ---- 圆角 ---- */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --radius-full: 999px;
+
+  /* ---- 阴影层级 ---- */
+  --shadow-xs:   0 1px 2px rgba(26, 26, 36, 0.04);
+  --shadow-sm:   0 2px 8px  rgba(26, 26, 36, 0.05);
+  --shadow-md:   0 4px 16px rgba(26, 26, 36, 0.07);
+  --shadow-lg:   0 8px 32px rgba(26, 26, 36, 0.11);
+  --shadow-xl:   0 12px 48px rgba(26, 26, 36, 0.15);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+
+  /* ---- 动效 ---- */
+  --duration-fast:   150ms;
+  --duration-normal: 250ms;
+  --duration-slow:   350ms;
+  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:      cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out:  cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ---- Z-Index 层级 ---- */
+  --z-base:     0;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-overlay:  300;
+  --z-modal:    400;
+  --z-toast:    500;
+
+  /* ---- 图标尺寸 ---- */
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+  --icon-xl: 32px;
+
+  /* ---- ECharts 图表色板 ---- */
+  --chart-1:  #6366F1;
+  --chart-2:  #06B6D4;
+  --chart-3:  #10B981;
+  --chart-4:  #F59E0B;
+  --chart-5:  #EF4444;
+  --chart-6:  #8B5CF6;
+  --chart-7:  #EC4899;
+  --chart-8:  #F97316;
+  --chart-9:  #3B82F6;
+  --chart-10: #14B8A6;
+}
+
+/* ============================================================
+   门户 (Portal) Light Mode — 默认主题
+   保留旧变量名以兼容现有组件样式
+   ============================================================ */
+:root {
+  /* Brand (Indigo/Violet) */
+  --primary:   #312E81;
+  --primary-l: #4338CA;
+  --primary-d: #1E1B4B;
+  --accent:    #6366F1;
+  --accent-l:  #818CF8;
+  --accent-d:  #4F46E5;
+  --success:   #10B981;
+  --danger:    #EF4444;
+  --warning:   #F59E0B;
+
+  /* Surfaces */
+  --bg:          #FAF9F6;
+  --bg-warm:     #F5F2ED;
+  --card-bg:     #FFFFFF;
+  --card-bg-warm:#FDFCFA;
+
+  /* Text */
+  --text-primary:   #1A1A24;
+  --text-regular:   #4A4A5E;
+  --text-secondary: #78788E;
+  --text-muted:     #A0A0B0;
+
+  /* Borders */
+  --border-base:    #E0DDD8;
+  --border-light:   #EDEAE6;
+  --border-lighter: #F5F3F0;
+
+  /* Shadows — 暖色调投射 */
+  --shadow:      0 4px 20px rgba(49, 46, 129, 0.08);
+  --shadow-light: 0 2px 8px rgba(49, 46, 129, 0.04);
+  --shadow-dark:  0 8px 32px rgba(49, 46, 129, 0.11);
+  --shadow-warm:  0 4px 20px rgba(99, 102, 241, 0.06);
+
+  /* Radii (兼容) */
+  --radius:    var(--radius-sm);
+  --radius-lg: var(--radius-md);
+  --radius-xl: var(--radius-lg);
+}
+
+/* ============================================================
+   门户 Dark Mode
+   ============================================================ */
+[data-theme="dark"] {
+  --primary:   #A5B4FC;
+  --primary-l: #C7D2FE;
+  --primary-d: #818CF8;
+  --accent:    #6366F1;
+  --accent-l:  #818CF8;
+  --accent-d:  #4F46E5;
+  --success:   #34D399;
+  --danger:    #F87171;
+  --warning:   #FBBF24;
+
+  --bg:          #0F1225;
+  --bg-warm:     #161832;
+  --card-bg:     #1A1D3A;
+  --card-bg-warm:#1E2140;
+
+  --text-primary:   #E8EBF5;
+  --text-regular:   #B4B8CC;
+  --text-secondary: #8488A4;
+  --text-muted:     #5C5F7A;
+
+  --border-base:    #2A2D4A;
+  --border-light:   #222542;
+  --border-lighter: #1C1F3A;
+
+  --shadow:      0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-dark:  0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-warm:  0 4px 20px rgba(99, 102, 241, 0.08);
+}
+
+/* ============================================================
+   管理后台 (Admin) — 暗色默认
+   ============================================================ */
+[data-theme="admin"],
+.admin-layout {
+  --admin-bg:              #06090F;
+  --admin-bg-secondary:    #0B101E;
+  --admin-surface:         #0D1323;
+  --admin-surface-hover:   #131B30;
+  --admin-surface-active:  #18203C;
+  --admin-border:          #1A2340;
+  --admin-border-light:    #243050;
+  --admin-text:            #E4ECF6;
+  --admin-text-secondary:  #8899B4;
+  --admin-text-muted:      #4A5470;
+  --admin-accent:          #6366F1;
+  --admin-accent-light:    #818CF8;
+  --admin-accent-dark:     #4F46E5;
+  --admin-accent-cyan:     #06B6D4;
+  --admin-accent-gradient:       linear-gradient(135deg, #6366F1 0%, #06B6D4 100%);
+  --admin-accent-gradient-hover: linear-gradient(135deg, #4F46E5 0%, #0891B2 100%);
+  --admin-accent-reverse:        linear-gradient(135deg, #06B6D4 0%, #6366F1 100%);
+  --admin-primary:         #5B9CF5;
+  --admin-success:         #10B981;
+  --admin-warning:         #F59E0B;
+  --admin-danger:          #F87171;
+  --admin-info:            #22D3EE;
+  --admin-glass-bg:        rgba(13, 19, 35, 0.65);
+  --admin-glass-border:    rgba(99, 102, 241, 0.12);
+  --admin-glow:            0 0 20px rgba(99, 102, 241, 0.15);
+  --admin-glow-cyan:       0 0 20px rgba(6, 182, 212, 0.12);
+  --admin-table-header-bg:  rgba(99, 102, 241, 0.06);
+  --admin-table-stripe-bg:  rgba(255, 255, 255, 0.012);
+  --admin-table-hover-bg:   rgba(99, 102, 241, 0.06);
+  --admin-table-border:     #1A2340;
+  --admin-sidebar-width:           220px;
+  --admin-sidebar-collapsed-width: 64px;
+  --admin-header-height:           56px;
+  --admin-font:            var(--font-body);
+  --admin-radius-sm:       var(--radius-sm);
+  --admin-radius:          var(--radius-md);
+  --admin-radius-lg:       var(--radius-lg);
+  --admin-shadow-sm:       0 1px 3px rgba(0, 0, 0, 0.4);
+  --admin-shadow:          0 4px 16px rgba(0, 0, 0, 0.5);
+  --admin-shadow-lg:       0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================
+   管理后台 Light Mode
+   ============================================================ */
+[data-theme="light"] .admin-layout,
+.admin-layout[data-theme="light"] {
+  --admin-bg:              #F4F5FA;
+  --admin-bg-secondary:    #EBEEF6;
+  --admin-surface:         #FFFFFF;
+  --admin-surface-hover:   #F4F5FC;
+  --admin-surface-active:  #EAEAF8;
+  --admin-border:          #D8DAE8;
+  --admin-border-light:    #E4E6F2;
+  --admin-text:            #171C2E;
+  --admin-text-secondary:  #4A4E6A;
+  --admin-text-muted:      #888BA8;
+  --admin-accent:          #4F46E5;
+  --admin-accent-light:    #6366F1;
+  --admin-accent-dark:     #4338CA;
+  --admin-accent-cyan:     #0891B2;
+  --admin-accent-gradient:       linear-gradient(135deg, #4F46E5 0%, #0891B2 100%);
+  --admin-accent-gradient-hover: linear-gradient(135deg, #4338CA 0%, #0E7490 100%);
+  --admin-accent-reverse:        linear-gradient(135deg, #0891B2 0%, #4F46E5 100%);
+  --admin-primary:         #3B6DF0;
+  --admin-success:         #10B981;
+  --admin-warning:         #F59E0B;
+  --admin-danger:          #EF4444;
+  --admin-info:            #06B6D4;
+  --admin-glass-bg:        rgba(255, 255, 255, 0.75);
+  --admin-glass-border:    rgba(99, 102, 241, 0.12);
+  --admin-glow:            0 0 20px rgba(99, 102, 241, 0.08);
+  --admin-glow-cyan:       0 0 20px rgba(6, 182, 212, 0.06);
+  --admin-table-header-bg:  #F4F5FC;
+  --admin-table-stripe-bg:  rgba(0, 0, 0, 0.015);
+  --admin-table-hover-bg:   rgba(99, 102, 241, 0.04);
+  --admin-table-border:     #E4E6F2;
+  --admin-shadow-sm:        0 1px 3px rgba(49, 46, 129, 0.05);
+  --admin-shadow:           0 4px 16px rgba(49, 46, 129, 0.07);
+  --admin-shadow-lg:        0 8px 32px rgba(49, 46, 129, 0.1);
+}
+
+/* ============================================================
+   Skeleton 加载动画
+   ============================================================ */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg,
+    var(--color-gray-200) 25%,
+    var(--color-gray-100) 37%,
+    var(--color-gray-200) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+.admin-layout .skeleton {
+  background: linear-gradient(90deg,
+    var(--admin-border) 25%,
+    var(--admin-surface-hover) 37%,
+    var(--admin-border) 63%
+  );
+  background-size: 200% 100%;
+}

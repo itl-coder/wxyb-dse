@@ -73,6 +73,14 @@
             <el-option v-for="t in previewThemeOptions" :key="t.value" :label="t.label" :value="t.value" />
           </el-select>
         </div>
+        <div class="admin-form-group">
+          <label>座位表 — 显示班级</label>
+          <el-switch v-model="schoolSettings.seatShowClass" size="small" active-text="显示" inactive-text="隐藏" />
+        </div>
+        <div class="admin-form-group">
+          <label>座位表 — 显示选修科目</label>
+          <el-switch v-model="schoolSettings.seatShowElectives" size="small" active-text="显示" inactive-text="隐藏" />
+        </div>
         <el-button v-if="store.hasPermission('settings.edit')" type="primary" size="small" @click="saveSchoolSettings">保存偏好</el-button>
       </div>
 
@@ -389,7 +397,8 @@ const schoolSettings = reactive({
   schoolLogo: '', semesterStart: '2025-09-01', semesterEnd: '2026-07-15',
   homeroomTeacher: '张老师', reportFooter: '用心陪伴每一位学生的成长',
   watermarkEnabled: true, watermarkText: '内部资料·仅供家长会使用',
-  previewTheme: 'default'
+  previewTheme: 'default', seatShowClass: true, seatShowElectives: true,
+  showTeacherSign: true, showParentSign: true
 })
 
 // Profile

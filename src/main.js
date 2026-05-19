@@ -10,6 +10,7 @@ import App from './App.vue'
 import router from './router'
 import pinia from './stores'
 import { initAllData } from './services/dataService'
+import './styles/tokens.css'
 import './styles/main.css'
 import './styles/admin.css'
 

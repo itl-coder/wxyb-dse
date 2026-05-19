@@ -1,101 +1,5 @@
-/* === DSE 智能学情管理系统 — AI + Tech + 智能教育 主题 === */
-
-/* ==================== Dark Theme (Default) ==================== */
-:root,
-[data-theme="dark"] {
-  /* Backgrounds */
-  --admin-bg: #06090f;
-  --admin-bg-secondary: #0b101e;
-  --admin-surface: #0d1323;
-  --admin-surface-hover: #131b30;
-  --admin-surface-active: #18203c;
-
-  /* Borders */
-  --admin-border: #1a2340;
-  --admin-border-light: #243050;
-
-  /* Text */
-  --admin-text: #e4ecf4;
-  --admin-text-secondary: #8899b4;
-  --admin-text-muted: #4a5470;
-
-  /* Accent — AI Tech gradient (indigo → cyan) */
-  --admin-accent: #6366f1;
-  --admin-accent-light: #818cf8;
-  --admin-accent-dark: #4f46e5;
-  --admin-accent-cyan: #06b6d4;
-  --admin-accent-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
-  --admin-accent-gradient-hover: linear-gradient(135deg, #4f46e5 0%, #0891b2 100%);
-  --admin-accent-reverse: linear-gradient(135deg, #06b6d4 0%, #6366f1 100%);
-
-  /* Semantic colors */
-  --admin-primary: #5b9cf5;
-  --admin-success: #10b981;
-  --admin-warning: #f59e0b;
-  --admin-danger: #f87171;
-  --admin-info: #22d3ee;
-
-  /* Special effects */
-  --admin-glass-bg: rgba(13, 19, 35, 0.65);
-  --admin-glass-border: rgba(99, 102, 241, 0.12);
-  --admin-glow: 0 0 20px rgba(99, 102, 241, 0.15);
-  --admin-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.12);
-
-  /* Table */
-  --admin-table-header-bg: rgba(99, 102, 241, 0.06);
-  --admin-table-stripe-bg: rgba(255, 255, 255, 0.012);
-  --admin-table-hover-bg: rgba(99, 102, 241, 0.06);
-  --admin-table-border: #1a2340;
-
-  /* Layout */
-  --admin-sidebar-width: 240px;
-  --admin-sidebar-collapsed-width: 64px;
-  --admin-header-height: 56px;
-  --admin-font: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  --admin-radius-sm: 6px;
-  --admin-radius: 10px;
-  --admin-radius-lg: 14px;
-  --admin-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --admin-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  --admin-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
-}
-
-/* ==================== Light Theme ==================== */
-[data-theme="light"] {
-  --admin-bg: #f4f5fa;
-  --admin-bg-secondary: #ebeef6;
-  --admin-surface: #ffffff;
-  --admin-surface-hover: #f4f5fc;
-  --admin-surface-active: #eaeaf8;
-  --admin-border: #d8dae8;
-  --admin-border-light: #e4e6f2;
-  --admin-text: #171c2e;
-  --admin-text-secondary: #4a4e6a;
-  --admin-text-muted: #888ba8;
-  --admin-accent: #4f46e5;
-  --admin-accent-light: #6366f1;
-  --admin-accent-dark: #4338ca;
-  --admin-accent-cyan: #0891b2;
-  --admin-accent-gradient: linear-gradient(135deg, #4f46e5 0%, #0891b2 100%);
-  --admin-accent-gradient-hover: linear-gradient(135deg, #4338ca 0%, #0e7490 100%);
-  --admin-accent-reverse: linear-gradient(135deg, #0891b2 0%, #4f46e5 100%);
-  --admin-primary: #3b6df0;
-  --admin-success: #10b981;
-  --admin-warning: #f59e0b;
-  --admin-danger: #ef4444;
-  --admin-info: #06b6d4;
-  --admin-glass-bg: rgba(255, 255, 255, 0.75);
-  --admin-glass-border: rgba(99, 102, 241, 0.12);
-  --admin-glow: 0 0 20px rgba(99, 102, 241, 0.08);
-  --admin-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.06);
-  --admin-table-header-bg: #f4f5fc;
-  --admin-table-stripe-bg: rgba(0, 0, 0, 0.015);
-  --admin-table-hover-bg: rgba(99, 102, 241, 0.04);
-  --admin-table-border: #e4e6f2;
-  --admin-shadow-sm: 0 1px 3px rgba(49, 46, 129, 0.05);
-  --admin-shadow: 0 4px 16px rgba(49, 46, 129, 0.07);
-  --admin-shadow-lg: 0 8px 32px rgba(49, 46, 129, 0.1);
-}
+/* === DSE 智能学情管理系统 — 管理后台布局与组件样式 === */
+/* Admin Token 变量定义已迁移至 tokens.css */
 
 /* ==================== Selection ==================== */
 ::selection {
@@ -826,6 +730,49 @@
 }
 .admin-sidebar-toggle:hover { background: var(--admin-surface-hover); color: var(--admin-text); }
 
+@media (max-width: 1200px) {
+  /* 小屏幕自动折叠侧边栏，释放内容空间 */
+  .admin-sidebar {
+    width: var(--admin-sidebar-collapsed-width) !important;
+    min-width: var(--admin-sidebar-collapsed-width) !important;
+  }
+  .admin-sidebar.open {
+    width: var(--admin-sidebar-width) !important;
+    min-width: var(--admin-sidebar-width) !important;
+    z-index: 201;
+    box-shadow: 8px 0 40px rgba(0,0,0,0.5);
+  }
+  .admin-sidebar.collapsed {
+    width: var(--admin-sidebar-collapsed-width) !important;
+    min-width: var(--admin-sidebar-collapsed-width) !important;
+  }
+  .admin-main { margin-left: var(--admin-sidebar-collapsed-width) !important; }
+  .admin-main.sidebar-collapsed { margin-left: var(--admin-sidebar-collapsed-width) !important; }
+  .admin-sidebar .logo-text,
+  .admin-sidebar .logo-sub,
+  .admin-sidebar .admin-nav-group-title,
+  .admin-sidebar .nav-label,
+  .admin-sidebar .nav-fav-toggle,
+  .admin-sidebar .admin-sidebar-footer span,
+  .admin-sidebar .nav-expand-icon { display: none; }
+  .admin-sidebar.open .logo-text,
+  .admin-sidebar.open .logo-sub,
+  .admin-sidebar.open .admin-nav-group-title,
+  .admin-sidebar.open .nav-label,
+  .admin-sidebar.open .nav-fav-toggle,
+  .admin-sidebar.open .admin-sidebar-footer span,
+  .admin-sidebar.open .nav-expand-icon { display: initial; }
+  .admin-sidebar .admin-nav-item { justify-content: center; padding: 10px 8px; margin: 2px 8px; }
+  .admin-sidebar .admin-nav-item .nav-icon { margin: 0; font-size: 20px; }
+  .admin-sidebar .admin-nav-item.active::before { display: none; }
+  .admin-sidebar .admin-sidebar-logo { justify-content: center; padding: 16px 8px; }
+  .admin-sidebar .admin-sidebar-logo .logo-icon { margin: 0; }
+  .admin-sidebar.open .admin-nav-item { justify-content: flex-start; padding: 10px 14px; margin: 2px 8px; }
+  .admin-sidebar.open .admin-nav-item .nav-icon { margin-right: 10px; font-size: 16px; }
+  .admin-sidebar.open .admin-sidebar-logo { justify-content: flex-start; padding: 20px 16px 16px; }
+  .admin-content { padding: 14px 18px; }
+}
+
 @media (max-width: 768px) {
   .admin-sidebar {
     transform: translateX(-100%);
@@ -846,7 +793,11 @@
 .admin-sidebar::-webkit-scrollbar-track { background: transparent; }
 .admin-sidebar::-webkit-scrollbar-thumb { background: var(--admin-border); border-radius: 2px; }
 
-/* ==================== Element Plus Theme Overrides (Dark) ==================== */
+/* ============================================================
+   Element Plus 主题覆盖（自动适配暗色/亮色，由 tokens.css 变量驱动）
+   ============================================================ */
+
+/* ---- Buttons ---- */
 .admin-layout .el-button--primary {
   --el-button-bg-color: var(--admin-accent);
   --el-button-border-color: var(--admin-accent);
@@ -856,26 +807,39 @@
   --el-button-bg-color: var(--admin-accent-dark);
   --el-button-border-color: var(--admin-accent-dark);
 }
+.admin-layout .el-button--default {
+  --el-button-bg-color: var(--admin-surface);
+  --el-button-border-color: var(--admin-border);
+  --el-button-text-color: var(--admin-text-secondary);
+}
+.admin-layout .el-button--default:hover {
+  --el-button-border-color: var(--admin-accent);
+  --el-button-text-color: var(--admin-accent);
+}
+
+/* ---- Input / Select ---- */
 .admin-layout .el-input__wrapper {
-  background: var(--admin-bg);
+  background: var(--admin-surface);
   border-color: var(--admin-border);
   box-shadow: none;
 }
 .admin-layout .el-input__inner { color: var(--admin-text); }
-.admin-layout .el-select .el-input__wrapper { background: var(--admin-bg); }
+.admin-layout .el-select .el-input__wrapper { background: var(--admin-surface); }
+.admin-layout .el-input-number .el-input__wrapper { background: var(--admin-surface); }
+
+/* Focus ring */
 .admin-layout .el-input__wrapper.is-focus,
 .admin-layout .el-select .el-input__wrapper.is-focus,
-.admin-layout .el-input__wrapper:focus,
-.admin-layout .el-select .el-input__wrapper:focus {
+.admin-layout .el-select .el-input.is-focus .el-input__wrapper,
+.admin-layout .el-input-number.is-focus .el-input__wrapper {
   box-shadow: 0 0 0 1px var(--admin-accent-light) !important;
   border-color: var(--admin-accent-light) !important;
 }
-.admin-layout .el-select .el-input.is-focus .el-input__wrapper {
-  box-shadow: 0 0 0 1px var(--admin-accent-light) !important;
-  border-color: var(--admin-accent-light) !important;
-}
+
+/* ---- Select Dropdown / Popper ---- */
 .admin-layout .el-select-dropdown,
-.admin-layout .el-popper.is-light {
+.admin-layout .el-popper.is-light,
+.admin-layout .el-message-box {
   background: var(--admin-surface) !important;
   border: 1px solid var(--admin-border) !important;
 }
@@ -885,7 +849,14 @@
   background: var(--admin-surface-hover) !important;
   color: var(--admin-text);
 }
-.admin-layout .el-select-dropdown__item.selected { color: var(--admin-accent-light); font-weight: 600; }
+.admin-layout .el-select-dropdown__item.selected {
+  color: var(--admin-accent-light);
+  font-weight: 600;
+}
+.admin-layout .el-message-box__title { color: var(--admin-text); }
+.admin-layout .el-message-box__message { color: var(--admin-text-secondary); }
+
+/* ---- Dialog / Drawer ---- */
 .admin-layout .el-dialog {
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
@@ -893,7 +864,7 @@
 .admin-layout .el-dialog__title { color: var(--admin-text); }
 .admin-layout .el-dialog__body { color: var(--admin-text-secondary); }
 
-/* Element Plus Table Overrides */
+/* ---- Table ---- */
 .admin-layout .el-table {
   --el-table-bg-color: transparent;
   --el-table-tr-bg-color: transparent;
@@ -906,7 +877,9 @@
   background: var(--admin-table-header-bg);
   border-bottom: 2px solid var(--admin-border);
 }
-.admin-layout .el-table tr:hover > td { background: var(--admin-table-hover-bg); }
+.admin-layout .el-table tr:hover > td {
+  background: var(--admin-table-hover-bg);
+}
 .admin-layout .el-table .cell {
   white-space: nowrap;
   overflow: hidden;
@@ -914,7 +887,7 @@
   line-height: 1.5;
 }
 
-/* Table fixed columns */
+/* Table fixed columns — need explicit bg for sticky overlay */
 .admin-layout .el-table__fixed,
 .admin-layout .el-table__fixed-right {
   --el-table-bg-color: var(--admin-surface);
@@ -938,125 +911,44 @@
 }
 .admin-layout .el-table__fixed .el-table__row--striped td.el-table__cell,
 .admin-layout .el-table__fixed-right .el-table__row--striped td.el-table__cell {
-  background-color: var(--admin-bg);
+  background-color: var(--admin-bg-secondary);
 }
 
+/* ---- Pagination ---- */
 .admin-layout .el-pagination {
   --el-pagination-text-color: var(--admin-text-secondary);
   --el-pagination-bg-color: transparent;
 }
+
+/* ---- Tabs ---- */
 .admin-layout .el-tabs__header { border-bottom-color: var(--admin-border); }
 .admin-layout .el-tabs__item { color: var(--admin-text-muted); }
 .admin-layout .el-tabs__item.is-active { color: var(--admin-accent-light); }
 .admin-layout .el-tabs__active-bar { background-color: var(--admin-accent-light); }
-.admin-layout .el-checkbox__label { color: var(--admin-text-secondary); }
-.admin-layout .el-radio__label { color: var(--admin-text-secondary); }
 
-/* Tree component */
+/* ---- Form Components ---- */
+.admin-layout .el-checkbox__label,
+.admin-layout .el-radio__label,
+.admin-layout .el-switch__label { color: var(--admin-text-secondary); }
+
+/* ---- Tree ---- */
 .admin-layout .el-tree {
   background: transparent;
   color: var(--admin-text-secondary);
 }
-.admin-layout .el-tree-node__content:hover {
-  background: var(--admin-surface-hover);
-}
+.admin-layout .el-tree-node__content:hover { background: var(--admin-surface-hover); }
 .admin-layout .el-tree-node.is-current > .el-tree-node__content {
   background: var(--admin-surface-active);
   color: var(--admin-accent-light);
 }
 
-/* ==================== Element Plus Light Theme Overrides ==================== */
-[data-theme="light"] .admin-layout .el-button--primary {
-  --el-button-bg-color: var(--admin-accent);
-  --el-button-border-color: var(--admin-accent);
-  --el-button-text-color: #fff;
-}
-[data-theme="light"] .admin-layout .el-input__wrapper {
-  background: #fff;
-  border-color: var(--admin-border);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-[data-theme="light"] .admin-layout .el-input__inner { color: var(--admin-text); }
-[data-theme="light"] .admin-layout .el-select .el-input__wrapper { background: #fff; }
-[data-theme="light"] .admin-layout .el-select-dropdown { background: #fff; border-color: var(--admin-border); }
-[data-theme="light"] .admin-layout .el-select-dropdown__item { color: var(--admin-text); }
-[data-theme="light"] .admin-layout .el-select-dropdown__item:hover { background: var(--admin-surface-hover); }
-[data-theme="light"] .admin-layout .el-dialog {
-  background: #fff;
-  border: 1px solid var(--admin-border);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-}
-[data-theme="light"] .admin-layout .el-dialog__title { color: var(--admin-text); }
-[data-theme="light"] .admin-layout .el-dialog__body { color: var(--admin-text-secondary); }
-[data-theme="light"] .admin-layout .el-table {
-  --el-table-bg-color: transparent;
-  --el-table-tr-bg-color: transparent;
-  --el-table-header-bg-color: var(--admin-table-header-bg);
-  --el-table-border-color: var(--admin-table-border);
-  --el-table-text-color: var(--admin-text-secondary);
-  --el-table-header-text-color: var(--admin-text-muted);
-}
-[data-theme="light"] .admin-layout .el-table th.el-table__cell {
-  background: var(--admin-table-header-bg);
-  border-bottom: 2px solid var(--admin-border);
-}
-[data-theme="light"] .admin-layout .el-table tr:hover > td { background: var(--admin-table-hover-bg); }
-[data-theme="light"] .admin-layout .el-table__fixed th.el-table__cell,
-[data-theme="light"] .admin-layout .el-table__fixed-right th.el-table__cell {
-  background-color: var(--admin-table-header-bg);
-}
-[data-theme="light"] .admin-layout .el-pagination { --el-pagination-text-color: var(--admin-text-secondary); }
-[data-theme="light"] .admin-layout .el-tabs__header { border-bottom-color: var(--admin-border); }
-[data-theme="light"] .admin-layout .el-tabs__item { color: var(--admin-text-muted); }
-[data-theme="light"] .admin-layout .el-tabs__item.is-active { color: var(--admin-accent); }
-[data-theme="light"] .admin-layout .el-tabs__active-bar { background-color: var(--admin-accent); }
-[data-theme="light"] .admin-layout .el-checkbox__label,
-[data-theme="light"] .admin-layout .el-radio__label { color: var(--admin-text-secondary); }
-[data-theme="light"] .admin-layout .el-switch__label { color: var(--admin-text-secondary); }
-[data-theme="light"] .admin-layout .el-popper.is-light { background: #fff; border-color: var(--admin-border); }
-[data-theme="light"] .admin-layout .el-message-box { background: #fff; border-color: var(--admin-border); }
-[data-theme="light"] .admin-layout .el-message-box__title { color: var(--admin-text); }
-[data-theme="light"] .admin-layout .el-message-box__message { color: var(--admin-text-secondary); }
-[data-theme="light"] .admin-layout .el-input-number .el-input__wrapper { background: #fff; }
-[data-theme="light"] .admin-layout .el-input__wrapper.is-focus,
-[data-theme="light"] .admin-layout .el-select .el-input.is-focus .el-input__wrapper {
-  box-shadow: 0 0 0 1px var(--admin-accent) !important;
-  border-color: var(--admin-accent) !important;
-}
-[data-theme="light"] .admin-layout .el-select-dropdown,
-[data-theme="light"] .admin-layout .el-popper.is-light {
-  background: #fff !important;
-  border-color: var(--admin-border) !important;
-}
-[data-theme="light"] .admin-layout .el-select-dropdown__item { color: var(--admin-text); }
-[data-theme="light"] .admin-layout .el-select-dropdown__item.hover,
-[data-theme="light"] .admin-layout .el-select-dropdown__item:hover {
-  background: var(--admin-surface-hover) !important;
-}
-[data-theme="light"] .admin-form-group .admin-input {
-  background: #fff;
-  border-color: var(--admin-border);
-  color: var(--admin-text);
-}
-[data-theme="light"] .admin-form-group .admin-input:focus {
-  border-color: var(--admin-accent);
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
-}
-[data-theme="light"] .admin-layout .el-button--default {
-  --el-button-bg-color: #fff;
-  --el-button-border-color: var(--admin-border);
-  --el-button-text-color: var(--admin-text-secondary);
-}
-[data-theme="light"] .admin-layout .el-button--default:hover {
-  --el-button-border-color: var(--admin-accent);
-  --el-button-text-color: var(--admin-accent);
-}
-[data-theme="light"] .admin-stat-card { box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-[data-theme="light"] .admin-stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-[data-theme="light"] .admin-table td { color: var(--admin-text-secondary); }
-[data-theme="light"] .admin-table tr:hover td { background: var(--admin-table-hover-bg); }
-[data-theme="light"] .login-page { background: linear-gradient(135deg, #f0eef8 0%, #e8e5f4 100%); }
-[data-theme="light"] .login-card { box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
-
-/* ==================== Text Display Improvements ==================== */
+/* ---- Admin Card Cell Display ---- */
 .admin-card .el-table__cell { word-break: break-word; }
+
+/* ---- Login Page Light-Only ---- */
+[data-theme="light"] .login-page {
+  background: linear-gradient(135deg, #f0eef8 0%, #e8e5f4 100%);
+}
+[data-theme="light"] .login-card {
+  box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+}

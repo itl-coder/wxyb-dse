@@ -234,7 +234,7 @@ function scoreBarColor(r) {
   font-size: 12px; color: rgba(255,255,255,0.55); margin: 0;
 }
 
-.welcome-stats { display: flex; gap: 22px; flex-shrink: 0; }
+.welcome-stats { display: flex; gap: 22px; flex-shrink: 0; flex-wrap: wrap; }
 
 .wstat { text-align: center; }
 
@@ -417,7 +417,8 @@ function scoreBarColor(r) {
 }
 
 .practice-card {
-  width: 100px; padding: 16px 12px;
+  min-width: 90px; flex: 1;
+  max-width: 140px; padding: 16px 12px;
   background: var(--bg-warm); border: 1px solid var(--border-light);
   border-radius: 12px;
   display: flex; flex-direction: column; align-items: center; gap: 6px;

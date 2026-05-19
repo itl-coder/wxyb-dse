@@ -219,7 +219,7 @@ function toggleWatermark(v) {
 
 const pageTitles = {
   Dashboard: '数据看板', Timetable: '课表管理', Behavior: '课堂表现',
-  Homework: '作业追踪', HomeworkAssign: '布置作业', ShiftHandover: '早晚班交接',
+  Homework: '作业管理', ShiftHandover: '早晚班交接',
   Discipline: '纪律台账', Phone: '手机管理',
   Attendance: '考勤请假', Reports: '成长日报', Exam: '试卷错题',
   Questions: '智能出题', Counseling: '心理辅导', Conference: '家长会准备', Voice: '语音记录',
@@ -228,7 +228,8 @@ const pageTitles = {
   Settings: '系统设置', ConfigCenter: '配置中心',
   UserManagement: '用户管理', RoleManagement: '角色管理',
   AISkills: 'Skills技能收录', AIFunctions: 'Excel公式收录', AITools: '软件工具收录',
-  AIQuotes: '名言语录收录', AIPrompts: 'Prompt收录'
+  AIQuotes: '名言语录收录', AIPrompts: 'Prompt收录',
+  ExamSeat: '考试座位安排'
 }
 
 const groupedMenuItems = computed(() => {
@@ -241,9 +242,17 @@ const groupedMenuItems = computed(() => {
   return MENU_GROUP_ORDER.map(g => ({ group: g, items: groups[g] || [] })).filter(g => g.items.length > 0)
 })
 
-// Favorites and recent menus (non-group items shown in special sections)
-const favoriteItems = computed(() => store.getFavoriteMenuItems())
-const recentItems = computed(() => store.getRecentMenuItems().filter(m => !store.isFavorite(m.menuKey)).slice(0, 3))
+// Favorites and recent menus (dedup against main menu to avoid duplicates)
+const visibleMenuKeys = computed(() => new Set(store.getVisibleMenuItems().map(m => m.menuKey)))
+const favoriteItems = computed(() => {
+  return store.getFavoriteMenuItems()
+    .filter(m => !visibleMenuKeys.value.has(m.menuKey))
+})
+const recentItems = computed(() => {
+  return store.getRecentMenuItems()
+    .filter(m => !store.isFavorite(m.menuKey) && !visibleMenuKeys.value.has(m.menuKey))
+    .slice(0, 5)
+})
 
 // Watch role changes and refresh
 watch(() => store.currentRole, () => {

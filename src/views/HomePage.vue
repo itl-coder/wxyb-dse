@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- System entry points -->
-    <div class="system-entries" :class="{ 'has-handover': showHandover }">
+    <div class="system-entries" :class="{ 'has-handover': showHandover, 'has-examseat': showExamSeat }">
       <router-link to="/admin" class="sys-entry admin-entry-card">
         <div class="sys-entry-icon">🏫</div>
         <div class="sys-entry-info">
@@ -15,6 +15,14 @@
         <div class="sys-entry-info">
           <div class="sys-entry-title">早晚班交接</div>
           <div class="sys-entry-desc">作业收集 · 会议纪要 · 学生情况同步</div>
+        </div>
+        <span class="sys-entry-arrow">→</span>
+      </router-link>
+      <router-link v-if="showExamSeat" to="/exam-seat" class="sys-entry examseat-entry-card">
+        <div class="sys-entry-icon">🪑</div>
+        <div class="sys-entry-info">
+          <div class="sys-entry-title">考试座位安排</div>
+          <div class="sys-entry-desc">考场查询 · 座位分布 · 打印导出</div>
         </div>
         <span class="sys-entry-arrow">→</span>
       </router-link>
@@ -59,10 +67,12 @@ import { mathModules } from '@/data/moduleMeta.js'
 import { portalConfigService } from '@/services/dataService'
 
 const showHandover = ref(true)
+const showExamSeat = ref(true)
 
 onMounted(() => {
   const cfg = portalConfigService.get()
   showHandover.value = cfg.handoverEnabled !== false
+  showExamSeat.value = cfg.examSeatEnabled !== false
 })
 
 const routeMap = {

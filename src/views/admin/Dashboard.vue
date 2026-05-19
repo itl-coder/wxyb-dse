@@ -454,4 +454,10 @@ async function removeAction(action) {
 .dtl-student { font-weight: 500; color: var(--admin-text); }
 .dtl-class-tag { font-size: 10px; color: var(--admin-text-muted); background: var(--admin-bg); padding: 1px 6px; border-radius: 4px; }
 .dtl-vio { color: var(--admin-text-secondary); }
+
+@media (max-width: 768px) {
+  .el-dialog { width: 92% !important; }
+  .dr-stats-row { gap: 14px; }
+  .admin-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
 </style>

@@ -162,6 +162,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { examService, portalConfigService } from '@/services/dataService'
+import { portalChartTheme, lineSeriesStyle } from '@/utils/echartTheme'
 
 const store = useAppStore()
 const student = computed(() => store.currentStudent)
@@ -209,92 +210,77 @@ function isExamVisible(exam, cfg) {
 
 // --- ECharts options ---
 const radarOption = computed(() => {
+  const theme = portalChartTheme()
   const labels = radarData.value.map(d => d.label)
   const values = radarData.value.map(d => d.value)
   const maxVal = Math.ceil(Math.max(...values, 60) / 10) * 10
+  const primary = theme.color[0]
+  const cardBg = theme.tooltip?.backgroundColor || '#FFFFFF'
 
   return {
     tooltip: {
+      ...theme.tooltip,
       trigger: 'item',
-      formatter: (p) => `${p.name}: <b>${p.value}%</b>`
+      formatter: (p) => `${p.name}: <b>${p.value}%</b>`,
     },
     legend: { show: false },
     radar: {
       center: ['50%', '52%'],
       radius: '68%',
       indicator: labels.map(l => ({ name: l, max: maxVal })),
-      axisName: { color: '#8a8a8a', fontSize: 11 },
-      axisLine: { lineStyle: { color: '#e0d8d0' } },
-      splitLine: { lineStyle: { color: '#e8e2da' } },
-      splitArea: { areaStyle: { color: ['#fefcf9', '#f6f3ee'] } }
+      axisName: { color: theme.textStyle?.color ? '#A0A0B0' : '#A0A0B0', fontSize: 11 },
+      axisLine: { lineStyle: { color: '#E0DDD8' } },
+      splitLine: { lineStyle: { color: '#EDEAE6' } },
+      splitArea: { areaStyle: { color: [cardBg, cardBg] } },
     },
     series: [{
       type: 'radar',
-      data: [{ value: values, name: '当前水平', areaStyle: { color: 'rgba(196,122,90,0.18)' } }],
-      symbol: 'circle',
-      symbolSize: 5,
-      lineStyle: { color: '#c47a5a', width: 2 },
-      itemStyle: { color: '#c47a5a' },
-      areaStyle: { color: 'rgba(196,122,90,0.12)' }
-    }]
+      data: [{ value: values, name: '当前水平', areaStyle: { color: 'rgba(99,102,241,0.18)' } }],
+      ...lineSeriesStyle(primary),
+      areaStyle: { color: 'rgba(99,102,241,0.12)' },
+    }],
   }
 })
 
 const trendOption = computed(() => {
+  const theme = portalChartTheme()
   const labels = trendData.value.map(d => d.label + '月')
   const values = trendData.value.map(d => d.value)
   const minVal = Math.floor(Math.min(...values, 40) / 10) * 10
   const maxVal = Math.ceil(Math.max(...values, 80) / 10) * 10
+  const primary = theme.color[0]
 
   return {
     tooltip: {
+      ...theme.tooltip,
       trigger: 'axis',
       formatter: (params) => `${params[0].axisValue}<br/>平均分: <b>${params[0].value}%</b>`,
-      backgroundColor: '#fff',
-      borderColor: '#e0d8d0',
-      textStyle: { color: '#1c1c1c', fontSize: 12 }
     },
-    grid: { left: 16, right: 20, top: 20, bottom: 16, containLabel: true },
+    grid: theme.grid,
     xAxis: {
+      ...theme.categoryAxis,
       type: 'category',
       data: labels,
-      axisLine: { lineStyle: { color: '#e0d8d0' } },
-      axisTick: { show: false },
-      axisLabel: { color: '#8a8a8a', fontSize: 11 }
     },
     yAxis: {
+      ...theme.valueAxis,
       type: 'value',
       min: minVal,
       max: maxVal,
-      axisLabel: { color: '#8a8a8a', fontSize: 10, formatter: '{value}%' },
-      splitLine: { lineStyle: { color: '#f0ece5', type: 'dashed' } },
-      axisLine: { show: false },
-      axisTick: { show: false }
+      axisLabel: { color: '#A0A0B0', fontSize: 10, formatter: '{value}%' },
     },
     series: [{
       type: 'line',
       data: values,
       smooth: true,
-      symbol: 'circle',
-      symbolSize: 8,
-      lineStyle: { color: '#c47a5a', width: 2.5 },
-      itemStyle: { color: '#c47a5a', borderColor: '#fff', borderWidth: 2 },
-      areaStyle: {
-        color: {
-          type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-          colorStops: [
-            { offset: 0, color: 'rgba(196,122,90,0.22)' },
-            { offset: 1, color: 'rgba(196,122,90,0.02)' }
-          ]
-        }
-      },
+      ...lineSeriesStyle(primary),
       markLine: {
         silent: true,
         data: [{ type: 'average', name: '平均' }],
-        lineStyle: { color: '#c49a5a', type: 'dashed', width: 1 },
-        label: { fontSize: 10, color: '#c49a5a', formatter: '均 {c}%' }
-      }
-    }]
+        lineStyle: { color: theme.color[3], type: 'dashed', width: 1 },
+        label: { fontSize: 10, color: theme.color[3], formatter: '均 {c}%' },
+      },
+    }],
   }
 })
 

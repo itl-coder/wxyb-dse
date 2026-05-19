@@ -33,7 +33,9 @@ const routes = [
       { path: 'physics', name: 'Physics', component: () => import('@/views/subjects/Physics.vue') },
       { path: 'chemistry', name: 'Chemistry', component: () => import('@/views/subjects/Chemistry.vue') },
       // 早晚班交接 (前台)
-      { path: 'handover', name: 'HandoverPublic', component: () => import('@/views/ShiftHandoverPublic.vue') }
+      { path: 'handover', name: 'HandoverPublic', component: () => import('@/views/ShiftHandoverPublic.vue') },
+      // 考试座位安排 (前台预览)
+      { path: 'exam-seat', name: 'ExamSeatPublic', component: () => import('@/views/ExamSeatPublic.vue') }
     ]
   },
 
@@ -52,7 +54,6 @@ const routes = [
       { path: 'timetable', name: 'Timetable', component: () => import('@/views/admin/Timetable.vue') },
       { path: 'behavior', name: 'Behavior', component: () => import('@/views/admin/Behavior.vue') },
       { path: 'homework', name: 'Homework', component: () => import('@/views/admin/Homework.vue') },
-      { path: 'homework-assign', name: 'HomeworkAssign', component: () => import('@/views/admin/HomeworkAssign.vue'), meta: { permission: 'homework.assign' } },
       { path: 'handover', name: 'ShiftHandover', component: () => import('@/views/admin/ShiftHandover.vue'), meta: { menuKey: 'handover' } },
       { path: 'discipline', name: 'Discipline', component: () => import('@/views/admin/Discipline.vue') },
       { path: 'phone', name: 'Phone', component: () => import('@/views/admin/Phone.vue') },
@@ -77,7 +78,8 @@ const routes = [
       { path: 'ai-excel', name: 'AIFunctions', component: () => import('@/views/admin/AIFunctions.vue'), meta: { menuKey: 'ai-excel', permission: 'aiData.excel.view' } },
       { path: 'ai-tools', name: 'AITools', component: () => import('@/views/admin/AITools.vue'), meta: { menuKey: 'ai-tools', permission: 'aiData.tools.view' } },
       { path: 'ai-quotes', name: 'AIQuotes', component: () => import('@/views/admin/AIQuotes.vue'), meta: { menuKey: 'ai-quotes', permission: 'aiData.quotes.view' } },
-      { path: 'ai-prompts', name: 'AIPrompts', component: () => import('@/views/admin/AIPrompts.vue'), meta: { menuKey: 'ai-prompts', permission: 'aiData.prompts.view' } }
+      { path: 'ai-prompts', name: 'AIPrompts', component: () => import('@/views/admin/AIPrompts.vue'), meta: { menuKey: 'ai-prompts', permission: 'aiData.prompts.view' } },
+      { path: 'exam-seat', name: 'ExamSeat', component: () => import('@/views/admin/exam-seat/index.vue'), meta: { menuKey: 'exam-seat' } }
     ]
   },
 

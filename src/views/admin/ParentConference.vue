@@ -26,7 +26,8 @@
 
       <!-- Timeline -->
       <div class="pc-timeline" v-if="activeTab !== 'calendar' && filteredList.length">
-        <div v-for="(conf, idx) in filteredList" :key="conf.id" class="pc-timeline-item" :class="{ completed: conf.status === 'completed' }">
+        <div v-for="(conf, idx) in filteredList" :key="conf.id" class="pc-timeline-item"
+          :class="{ completed: conf.status === 'completed' }">
           <div class="pc-timeline-dot"></div>
           <div v-if="idx < filteredList.length - 1" class="pc-timeline-line"></div>
           <div class="pc-booking-card">
@@ -46,14 +47,16 @@
               <span>👥 {{ conf.parentCount }}位家长</span>
               <span v-if="conf.mode === 'online'" class="pc-mode-badge online">💻 线上</span>
               <span v-else class="pc-mode-badge offline">🏫 {{ conf.room || '线下' }}</span>
-              <span v-if="conf.meetingId" style="font-size:10px;color:var(--admin-text-muted)">🆔 {{ conf.meetingId }}</span>
+              <span v-if="conf.meetingId" style="font-size:10px;color:var(--admin-text-muted)">🆔 {{ conf.meetingId
+                }}</span>
               <span v-if="conf.saName" class="pc-role-badge">SA {{ conf.saName }}</span>
               <span v-if="conf.ccName" class="pc-role-badge cc">CC {{ conf.ccName }}</span>
             </div>
             <div v-if="conf.notes" class="pc-notes">{{ conf.notes }}</div>
             <div class="pc-card-actions">
               <el-button size="small" text @click="openBookingDialog(conf)">编辑</el-button>
-              <el-button v-if="conf.status === 'pending'" size="small" text type="success" @click="markComplete(conf)">标记完成</el-button>
+              <el-button v-if="conf.status === 'pending'" size="small" text type="success"
+                @click="markComplete(conf)">标记完成</el-button>
               <el-button size="small" text @click="exportBookingImage(conf)">📷 导出</el-button>
               <el-button size="small" text type="danger" @click="deleteBooking(conf)">删除</el-button>
             </div>
@@ -68,24 +71,27 @@
           <el-button size="small" @click="calMonth++">▶</el-button>
         </div>
         <div class="pc-cal-grid">
-          <div class="pc-cal-day-header" v-for="d in ['日','一','二','三','四','五','六']" :key="d">{{ d }}</div>
-          <div v-for="(day, i) in calDays" :key="i" class="pc-cal-day" :class="{ 'has-booking': day.bookings.length, 'is-today': day.isToday, 'is-other-month': !day.inMonth }" @click="day.bookings.length && showDayBookings(day)">
+          <div class="pc-cal-day-header" v-for="d in ['日', '一', '二', '三', '四', '五', '六']" :key="d">{{ d }}</div>
+          <div v-for="(day, i) in calDays" :key="i" class="pc-cal-day"
+            :class="{ 'has-booking': day.bookings.length, 'is-today': day.isToday, 'is-other-month': !day.inMonth }"
+            @click="day.bookings.length && showDayBookings(day)">
             <span class="pc-cal-num">{{ day.num }}</span>
             <div v-if="day.bookings.length" class="pc-cal-blocks">
-              <div v-for="b in day.bookings.slice(0, 3)" :key="b.id"
-                class="pc-cal-block"
+              <div v-for="b in day.bookings.slice(0, 3)" :key="b.id" class="pc-cal-block"
                 :class="{ completed: b.status === 'completed', online: b.mode === 'online' }"
-                :title="`${b.studentName} · ${b.time?.slice(11,16)} · ${b.parentCount}位家长`"
+                :title="`${b.studentName} · ${b.time?.slice(11, 16)} · ${b.parentCount}位家长`"
                 @click.stop="openBookingDialog(b)">
-                {{ b.studentName?.charAt(0) }}{{ b.time?.slice(11,13) }}
+                {{ b.studentName?.charAt(0) }}{{ b.time?.slice(11, 13) }}
               </div>
-              <div v-if="day.bookings.length > 3" class="pc-cal-more" @click.stop="showDayBookings(day)">+{{ day.bookings.length - 3 }}</div>
+              <div v-if="day.bookings.length > 3" class="pc-cal-more" @click.stop="showDayBookings(day)">+{{
+                day.bookings.length - 3 }}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div v-else-if="activeTab !== 'calendar' && !filteredList.length" class="ph-empty">{{ activeTab === 'pending' ? '暂无待进行的家长会预约' : '暂无已完成的家长会记录' }}</div>
+      <div v-else-if="activeTab !== 'calendar' && !filteredList.length" class="ph-empty">{{ activeTab === 'pending' ?
+        '暂无待进行的家长会预约' : '暂无已完成的家长会记录' }}</div>
     </div>
 
     <!-- Booking Dialog -->
@@ -99,7 +105,8 @@
       <div class="admin-three-col" style="margin-bottom:0">
         <div class="admin-form-group">
           <label>日期时间 <span style="color:var(--admin-danger)">*</span></label>
-          <el-date-picker v-model="form.time" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="选择日期时间" style="width:100%" />
+          <el-date-picker v-model="form.time" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="选择日期时间"
+            style="width:100%" />
         </div>
         <div class="admin-form-group">
           <label>家长人数</label>
@@ -235,7 +242,7 @@ async function deleteBooking(conf) {
     parentConferenceService.delete(conf.id)
     bookings.value = parentConferenceService.getAll()
     ElMessage.success('已删除')
-  } catch {}
+  } catch { }
 }
 
 // Calendar
@@ -256,7 +263,7 @@ const calDays = computed(() => {
     days.push({ num: daysInPrevMonth - i, inMonth: false, isToday: false, bookings: [] })
   }
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`
     const dayBookings = bookings.value.filter(b => b.time && b.time.startsWith(dateStr))
     days.push({ num: d, inMonth: true, isToday: dateStr === today, bookings: dayBookings })
   }
@@ -303,7 +310,7 @@ function exportBookingImage(conf) {
       ${ccLabel ? `<p><b>CC：</b>${conf.ccName}</p>` : ''}
       ${conf.notes ? `<p><b>备注：</b>${conf.notes}</p>` : ''}
     </div>
-    <div class="footer">威学一百 DSE 教务管理系统 · ${new Date().toISOString().split('T')[0]}</div>
+    <div class="footer">威学一百 DSE AI 智能学情分析 · ${new Date().toISOString().split('T')[0]}</div>
   </div>
   ${getPrintWatermarkHTML()}
   </body></html>`
@@ -315,59 +322,303 @@ function exportBookingImage(conf) {
 </script>
 
 <style scoped>
-.pc-tab { padding: 5px 16px; border: 1px solid var(--admin-border); background: var(--admin-surface); border-radius: 20px; font-size: 12px; cursor: pointer; color: var(--admin-text-muted); transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
-.pc-tab.active { background: var(--admin-primary); color: #fff; border-color: var(--admin-primary); }
-.pc-tab-count { font-size: 10px; opacity: 0.7; }
-.ph-empty { font-size: 12px; color: var(--admin-text-muted); padding: 30px 0; text-align: center; }
+.pc-tab {
+  padding: 5px 16px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--admin-text-muted);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
-.pc-timeline { position: relative; padding-left: 28px; }
-.pc-timeline-item { position: relative; padding-bottom: 20px; }
-.pc-timeline-dot { position: absolute; left: -28px; top: 20px; width: 12px; height: 12px; border-radius: 50%; background: var(--admin-primary); border: 2px solid var(--admin-bg); z-index: 1; }
-.pc-timeline-item.completed .pc-timeline-dot { background: var(--admin-text-muted); }
-.pc-timeline-line { position: absolute; left: -23px; top: 32px; bottom: 0; width: 2px; background: var(--admin-border); }
+.pc-tab.active {
+  background: var(--admin-primary);
+  color: #fff;
+  border-color: var(--admin-primary);
+}
 
-.pc-booking-card { background: var(--admin-bg); border-radius: 10px; padding: 14px; border: 1px solid var(--admin-border); }
-.pc-timeline-item.completed .pc-booking-card { opacity: 0.6; filter: grayscale(30%); }
-.pc-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-.pc-student-info { display: flex; align-items: center; gap: 10px; }
-.pc-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--admin-accent); color: #1a2e3c; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
-.pc-name { font-size: 14px; font-weight: 600; color: var(--text); }
-.pc-class { font-size: 11px; color: var(--admin-text-muted); }
-.pc-time-badge { font-size: 12px; padding: 4px 12px; border-radius: 6px; background: var(--admin-bg); color: var(--admin-text-muted); white-space: nowrap; }
-.pc-time-badge.upcoming { background: #e8f5e9; color: #2e7d32; font-weight: 500; }
-.pc-card-meta { display: flex; gap: 10px; font-size: 11px; color: var(--admin-text-muted); margin-bottom: 6px; align-items: center; }
-.pc-mode-badge { padding: 1px 8px; border-radius: 4px; font-size: 10px; }
-.pc-mode-badge.online { background: #e3f2fd; color: #1565c0; }
-.pc-mode-badge.offline { background: #fff3e0; color: #e65100; }
-.pc-role-badge { padding: 1px 6px; border-radius: 4px; font-size: 10px; background: var(--admin-primary); color: #fff; }
-.pc-role-badge.cc { background: var(--admin-accent); color: #1a2e3c; }
-.pc-notes { font-size: 11px; color: var(--admin-text-muted); line-height: 1.5; margin-bottom: 6px; }
-.pc-card-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.pc-tab-count {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.ph-empty {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+  padding: 30px 0;
+  text-align: center;
+}
+
+.pc-timeline {
+  position: relative;
+  padding-left: 28px;
+}
+
+.pc-timeline-item {
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.pc-timeline-dot {
+  position: absolute;
+  left: -28px;
+  top: 20px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--admin-primary);
+  border: 2px solid var(--admin-bg);
+  z-index: 1;
+}
+
+.pc-timeline-item.completed .pc-timeline-dot {
+  background: var(--admin-text-muted);
+}
+
+.pc-timeline-line {
+  position: absolute;
+  left: -23px;
+  top: 32px;
+  bottom: 0;
+  width: 2px;
+  background: var(--admin-border);
+}
+
+.pc-booking-card {
+  background: var(--admin-bg);
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid var(--admin-border);
+}
+
+.pc-timeline-item.completed .pc-booking-card {
+  opacity: 0.6;
+  filter: grayscale(30%);
+}
+
+.pc-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.pc-student-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pc-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--admin-accent);
+  color: #1a2e3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pc-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pc-class {
+  font-size: 11px;
+  color: var(--admin-text-muted);
+}
+
+.pc-time-badge {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: var(--admin-bg);
+  color: var(--admin-text-muted);
+  white-space: nowrap;
+}
+
+.pc-time-badge.upcoming {
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.pc-card-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--admin-text-muted);
+  margin-bottom: 6px;
+  align-items: center;
+}
+
+.pc-mode-badge {
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.pc-mode-badge.online {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.pc-mode-badge.offline {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.pc-role-badge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  background: var(--admin-primary);
+  color: #fff;
+}
+
+.pc-role-badge.cc {
+  background: var(--admin-accent);
+  color: #1a2e3c;
+}
+
+.pc-notes {
+  font-size: 11px;
+  color: var(--admin-text-muted);
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.pc-card-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
 
 /* Calendar */
-.pc-calendar { margin-top: 8px; }
-.pc-cal-header { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 14px; }
-.pc-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.pc-cal-day-header { text-align: center; font-size: 11px; color: var(--admin-text-muted); font-weight: 600; padding: 8px 0; }
-.pc-cal-day { border-radius: 8px; background: var(--admin-bg); padding: 6px; cursor: default; position: relative; display: flex; flex-direction: column; align-items: center; border: 1px solid transparent; transition: all 0.2s; min-height: 80px; }
-.pc-cal-day:hover { border-color: var(--admin-border); }
-.pc-cal-day.is-other-month { opacity: 0.35; }
-.pc-cal-day.is-today { border-color: var(--admin-accent); background: var(--admin-surface-hover); }
-.pc-cal-day.has-booking { background: rgba(59,130,246,0.05); }
-.pc-cal-num { font-size: 13px; color: var(--admin-text-secondary); font-weight: 500; margin-bottom: 4px; align-self: flex-start; }
-.pc-cal-day.is-today .pc-cal-num { color: var(--admin-accent); font-weight: 700; }
+.pc-calendar {
+  margin-top: 8px;
+}
 
-.pc-cal-blocks { display: flex; flex-direction: column; gap: 2px; width: 100%; }
+.pc-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.pc-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.pc-cal-day-header {
+  text-align: center;
+  font-size: 11px;
+  color: var(--admin-text-muted);
+  font-weight: 600;
+  padding: 8px 0;
+}
+
+.pc-cal-day {
+  border-radius: 8px;
+  background: var(--admin-bg);
+  padding: 6px;
+  cursor: default;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  min-height: 80px;
+}
+
+.pc-cal-day:hover {
+  border-color: var(--admin-border);
+}
+
+.pc-cal-day.is-other-month {
+  opacity: 0.35;
+}
+
+.pc-cal-day.is-today {
+  border-color: var(--admin-accent);
+  background: var(--admin-surface-hover);
+}
+
+.pc-cal-day.has-booking {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.pc-cal-num {
+  font-size: 13px;
+  color: var(--admin-text-secondary);
+  font-weight: 500;
+  margin-bottom: 4px;
+  align-self: flex-start;
+}
+
+.pc-cal-day.is-today .pc-cal-num {
+  color: var(--admin-accent);
+  font-weight: 700;
+}
+
+.pc-cal-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
 .pc-cal-block {
-  font-size: 9px; padding: 1px 4px; border-radius: 3px; cursor: pointer;
-  background: rgba(59,130,246,0.15); color: var(--admin-primary);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--admin-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-weight: 500;
   transition: background 0.15s;
 }
-.pc-cal-block:hover { background: rgba(59,130,246,0.3); }
-.pc-cal-block.completed { background: rgba(100,180,100,0.15); color: var(--admin-success); }
-.pc-cal-block.online { background: rgba(6,182,212,0.15); color: var(--admin-info); }
-.pc-cal-more { font-size: 8px; color: var(--admin-text-muted); cursor: pointer; text-align: center; padding: 1px 0; }
-.pc-cal-more:hover { color: var(--admin-accent); }
+
+.pc-cal-block:hover {
+  background: rgba(59, 130, 246, 0.3);
+}
+
+.pc-cal-block.completed {
+  background: rgba(100, 180, 100, 0.15);
+  color: var(--admin-success);
+}
+
+.pc-cal-block.online {
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--admin-info);
+}
+
+.pc-cal-more {
+  font-size: 8px;
+  color: var(--admin-text-muted);
+  cursor: pointer;
+  text-align: center;
+  padding: 1px 0;
+}
+
+.pc-cal-more:hover {
+  color: var(--admin-accent);
+}
 </style>

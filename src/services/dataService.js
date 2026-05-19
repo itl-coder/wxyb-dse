@@ -109,6 +109,8 @@ export const PERMISSIONS = [
   { key: 'exam.qbank.delete', label: '删除试题', category: 'exam', categoryLabel: '试卷与题库' },
   { key: 'exam.tips.view', label: '查看做题技巧', category: 'exam', categoryLabel: '试卷与题库' },
   { key: 'exam.tips.manage', label: '管理做题技巧', category: 'exam', categoryLabel: '试卷与题库' },
+  { key: 'exam.seat.view', label: '查看考试座位安排', category: 'exam', categoryLabel: '考试与题库' },
+  { key: 'exam.seat.manage', label: '管理考试座位安排', category: 'exam', categoryLabel: '考试与题库' },
 
   { key: 'ai.view', label: '查看AI系统', category: 'ai', categoryLabel: 'AI智能系统' },
   { key: 'ai.feedback.view', label: '查看课堂反馈', category: 'ai', categoryLabel: 'AI智能系统' },
@@ -173,8 +175,7 @@ export const MENU_DEFINITIONS = [
   { menuKey: 'dashboard', route: '/admin', icon: '📊', label: '数据看板', group: '常用功能', priority: 1, tags: ['daily'] },
   { menuKey: 'behavior', route: '/admin/behavior', icon: '👥', label: '课堂表现', group: '常用功能', priority: 2, tags: ['daily'] },
   { menuKey: 'attendance', route: '/admin/attendance', icon: '✓', label: '考勤请假', group: '常用功能', priority: 3, tags: ['daily'] },
-  { menuKey: 'homework-assign', route: '/admin/homework-assign', icon: '📝', label: '布置作业', group: '常用功能', priority: 4, tags: ['daily'] },
-  { menuKey: 'homework', route: '/admin/homework', icon: '📋', label: '作业追踪', group: '常用功能', priority: 5, tags: ['daily'] },
+  { menuKey: 'homework', route: '/admin/homework', icon: '📝', label: '作业管理', group: '常用功能', priority: 4, tags: ['daily'] },
   { menuKey: 'handover', route: '/admin/handover', icon: '🤝', label: '早晚班交接', group: '常用功能', priority: 6, tags: ['daily'] },
   // 2. 教学管理
   { menuKey: 'timetable', route: '/admin/timetable', icon: '📅', label: '课表管理', group: '教学管理', priority: 6 },
@@ -188,6 +189,7 @@ export const MENU_DEFINITIONS = [
   { menuKey: 'exam', route: '/admin/exam', icon: '📄', label: '试卷错题', group: '考试与题库', priority: 12 },
   { menuKey: 'question-bank', route: '/admin/question-bank', icon: '📚', label: '题库中心', group: '考试与题库', priority: 13 },
   { menuKey: 'exam-tips', route: '/admin/exam-tips', icon: '💡', label: '做题技巧', group: '考试与题库', priority: 14 },
+  { menuKey: 'exam-seat', route: '/admin/exam-seat', icon: '🪑', label: '考试座位安排', group: '考试与题库', priority: 15 },
   // 5. 家校沟通
   { menuKey: 'parent-conference', route: '/admin/parent-conference', icon: '👨‍👩‍👧', label: '家长会预约', group: '家校沟通', priority: 15 },
   { menuKey: 'conference', route: '/admin/conference', icon: '📋', label: '家长会准备', group: '家校沟通', priority: 16 },
@@ -203,16 +205,11 @@ export const MENU_DEFINITIONS = [
   { menuKey: 'users', route: '/admin/users', icon: '👤', label: '用户管理', group: '系统设置', priority: 23 },
   { menuKey: 'roles', route: '/admin/roles', icon: '🛡️', label: '角色管理', group: '系统设置', priority: 24 },
   // 9. AI数据收录中心
-  {
-    menuKey: 'ai-data-center', icon: '🤖', label: 'AI数据收录中心', group: 'AI数据收录', priority: 25,
-    children: [
-      { menuKey: 'ai-skills', route: '/admin/ai-skills', icon: '🛠️', label: 'Skills技能收录', group: 'AI数据收录', priority: 251 },
-      { menuKey: 'ai-excel', route: '/admin/ai-excel', icon: '📊', label: 'Excel公式收录', group: 'AI数据收录', priority: 252 },
-      { menuKey: 'ai-tools', route: '/admin/ai-tools', icon: '💻', label: '软件工具收录', group: 'AI数据收录', priority: 253 },
-      { menuKey: 'ai-quotes', route: '/admin/ai-quotes', icon: '💬', label: '名言语录收录', group: 'AI数据收录', priority: 254 },
-      { menuKey: 'ai-prompts', route: '/admin/ai-prompts', icon: '📝', label: 'Prompt收录', group: 'AI数据收录', priority: 255 }
-    ]
-  }
+  { menuKey: 'ai-skills', route: '/admin/ai-skills', icon: '🛠️', label: 'Skills技能收录', group: 'AI数据收录', priority: 25 },
+  { menuKey: 'ai-excel', route: '/admin/ai-excel', icon: '📊', label: 'Excel公式收录', group: 'AI数据收录', priority: 26 },
+  { menuKey: 'ai-tools', route: '/admin/ai-tools', icon: '💻', label: '软件工具收录', group: 'AI数据收录', priority: 27 },
+  { menuKey: 'ai-quotes', route: '/admin/ai-quotes', icon: '💬', label: '名言语录收录', group: 'AI数据收录', priority: 28 },
+  { menuKey: 'ai-prompts', route: '/admin/ai-prompts', icon: '📝', label: 'Prompt收录', group: 'AI数据收录', priority: 29 }
 ]
 
 // Menu group display order
@@ -245,13 +242,13 @@ const defaultRoles = [
       'timetable.view', 'timetable.courses.view',
       'homework.view', 'homework.assign',
       'conference.view', 'conference.parent.view', 'conference.edit',
-      'exam.view', 'exam.qbank.view', 'exam.tips.view',
+      'exam.view', 'exam.qbank.view', 'exam.tips.view', 'exam.seat.view',
       'ai.view', 'ai.feedback.view', 'ai.feedback.create',
       'ai.questions.view', 'ai.questions.create',
       'ai.voice.view', 'ai.voice.create',
       'settings.view'
     ],
-    menuIds: ['dashboard', 'behavior', 'homework-assign', 'homework', 'handover', 'discipline', 'phone', 'attendance', 'students', 'reports', 'counseling', 'timetable', 'courses', 'parent-conference', 'conference', 'exam', 'question-bank', 'exam-tips', 'course-feedback', 'questions', 'voice', 'ai-data-center', 'settings'],
+    menuIds: ['dashboard', 'behavior', 'homework', 'handover', 'discipline', 'phone', 'attendance', 'students', 'reports', 'counseling', 'timetable', 'courses', 'parent-conference', 'conference', 'exam', 'question-bank', 'exam-tips', 'exam-seat', 'course-feedback', 'questions', 'voice', 'ai-skills', 'ai-excel', 'ai-tools', 'ai-quotes', 'ai-prompts', 'settings'],
     dataScope: 'class', isSystem: true,
     createdAt: '2025-09-01'
   },
@@ -270,11 +267,11 @@ const defaultRoles = [
       'homework.view', 'homework.assign', 'homework.delete',
       'conference.view', 'conference.parent.view', 'conference.parent.manage', 'conference.edit',
       'exam.view', 'exam.create', 'exam.qbank.view', 'exam.qbank.create',
-      'exam.tips.view', 'exam.tips.manage',
+      'exam.tips.view', 'exam.tips.manage', 'exam.seat.view', 'exam.seat.manage',
       'ai.view', 'ai.feedback.view', 'ai.questions.view', 'ai.voice.view',
       'settings.view', 'settings.config.view'
     ],
-    menuIds: ['dashboard', 'behavior', 'homework-assign', 'homework', 'handover', 'discipline', 'phone', 'attendance', 'students', 'reports', 'counseling', 'timetable', 'courses', 'parent-conference', 'conference', 'exam', 'question-bank', 'exam-tips', 'course-feedback', 'questions', 'voice', 'ai-data-center', 'settings', 'config'],
+    menuIds: ['dashboard', 'behavior', 'homework', 'handover', 'discipline', 'phone', 'attendance', 'students', 'reports', 'counseling', 'timetable', 'courses', 'parent-conference', 'conference', 'exam', 'question-bank', 'exam-tips', 'exam-seat', 'course-feedback', 'questions', 'voice', 'ai-skills', 'ai-excel', 'ai-tools', 'ai-quotes', 'ai-prompts', 'settings', 'config'],
     dataScope: 'campus', isSystem: true,
     createdAt: '2025-09-01'
   }
@@ -425,7 +422,9 @@ const defaultSchoolSettings = {
   watermarkShowTimestamp: true,
   previewTheme: 'default',
   showTeacherSign: true,
-  showParentSign: true
+  showParentSign: true,
+  seatShowClass: true,
+  seatShowElectives: true
 }
 
 const defaultQuickActions = [
@@ -603,6 +602,7 @@ const defaultPortalConfig = {
   showTimetable: true,
   showExamTips: true,
   handoverEnabled: true,
+  examSeatEnabled: true,
   examVisibility: {
     monthly: { 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true, 9: true, 10: true, 11: true, 12: true },
     midterm: { s5: true, s6: true },
@@ -1338,6 +1338,71 @@ export const roleService = {
   getUserCount: (roleId) => readEntities('users').filter(u => u.roleId === roleId).length
 }
 
+// -- Exam Seat Arrangement (考试座位安排) --
+export const examRoomService = {
+  getAll: () => readEntities('exam_rooms'),
+  getById: (id) => readEntity('exam_rooms', id),
+  create: (data) => createEntity('exam_rooms', data),
+  update: (id, data) => updateEntity('exam_rooms', id, data),
+  delete: (id) => deleteEntity('exam_rooms', id),
+  saveAll: (data) => save('exam_rooms', data)
+}
+
+export const examSeatService = {
+  getAllStudents: () => readEntities('exam_students'),
+  getStudentById: (id) => readEntity('exam_students', id),
+  importStudents: (data) => {
+    const existing = readEntities('exam_students')
+    let nextId = existing.reduce((max, s) => Math.max(max, s.id), 0)
+    const added = []
+    data.forEach(s => {
+      const dup = existing.find(e => e.classNo === s.classNo && e.className === s.className)
+      if (dup) { Object.assign(dup, s); return }
+      const student = { ...s, id: ++nextId, imported: Date.now() }
+      existing.push(student)
+      added.push(student)
+    })
+    save('exam_students', existing)
+    return { added, total: existing.length, all: existing }
+  },
+  addStudent: (data) => createEntity('exam_students', data),
+  updateStudent: (id, data) => updateEntity('exam_students', id, data),
+  deleteStudent: (id) => deleteEntity('exam_students', id),
+  clearAll: () => save('exam_students', []),
+
+  getAssignments: () => readEntities('exam_assignments'),
+  saveAssignments: (data) => save('exam_assignments', data),
+  clearAssignments: () => save('exam_assignments', [])
+}
+
 // -- RBAC Init --
-export function initRoles() { return initIfEmpty('roles', defaultRoles) }
+export function initRoles() {
+  const stored = load('roles')
+  // 首次使用：写入默认角色
+  if (!stored || stored.length === 0) {
+    save('roles', defaultRoles)
+    return JSON.parse(JSON.stringify(defaultRoles))
+  }
+  // 每次启动：用最新默认值同步系统角色（保留自定义角色不变）
+  let changed = false
+  const merged = stored.map(role => {
+    if (!role.isSystem) return role
+    const def = defaultRoles.find(d => d.id === role.id)
+    if (!def) return role
+    // 检查是否有需要合并的字段
+    const needMenuMerge = Array.isArray(def.menuIds) && def.menuIds.some(m => !(role.menuIds || []).includes(m))
+    const needPermMerge = Array.isArray(def.permissions) && def.permissions.some(p => !(role.permissions || []).includes(p))
+    if (!needMenuMerge && !needPermMerge) return role
+    changed = true
+    return {
+      ...role,
+      menuIds: [...new Set([...(role.menuIds || []), ...(def.menuIds || [])])],
+      permissions: [...new Set([...(role.permissions || []), ...(def.permissions || [])])]
+    }
+  })
+  if (changed) {
+    save('roles', merged)
+  }
+  return merged
+}
 export function initUsers() { return initIfEmpty('users', defaultUsers) }

@@ -148,12 +148,12 @@ export const useAppStore = defineStore('app', () => {
     if (!currentRole.value) return []
     const menuIds = currentRole.value.menuIds
     if (!menuIds || menuIds.length === 0) return MENU_DEFINITIONS
-    // Flatten: if a parent menuKey is in menuIds, include it and all its children
     const result = []
     MENU_DEFINITIONS.forEach(m => {
       if (menuIds.includes(m.menuKey)) {
         result.push(m)
-        if (m.children) result.push(...m.children)
+        // Children are rendered by AdminLayout from the parent's children array;
+        // do NOT push them as flat items (would cause duplicates)
       }
     })
     return result
@@ -176,7 +176,7 @@ export const useAppStore = defineStore('app', () => {
   // Named page -> menuKey mapping for recent access tracking
   const pageToMenuKey = {
     'Dashboard': 'dashboard', 'Timetable': 'timetable', 'Behavior': 'behavior',
-    'Homework': 'homework', 'HomeworkAssign': 'homework-assign', 'ShiftHandover': 'handover',
+    'Homework': 'homework', 'ShiftHandover': 'handover',
     'Discipline': 'discipline', 'Phone': 'phone',
     'Attendance': 'attendance', 'Reports': 'reports', 'Exam': 'exam',
     'Questions': 'questions', 'QuestionBank': 'question-bank', 'ExamTips': 'exam-tips',
@@ -186,7 +186,8 @@ export const useAppStore = defineStore('app', () => {
     'Settings': 'settings', 'ConfigCenter': 'config',
     'UserManagement': 'users', 'RoleManagement': 'roles',
     'AISkills': 'ai-skills', 'AIFunctions': 'ai-excel', 'AITools': 'ai-tools',
-    'AIQuotes': 'ai-quotes', 'AIPrompts': 'ai-prompts'
+    'AIQuotes': 'ai-quotes', 'AIPrompts': 'ai-prompts',
+    'ExamSeat': 'exam-seat'
   }
 
   function trackPageAccess(pageName) {
