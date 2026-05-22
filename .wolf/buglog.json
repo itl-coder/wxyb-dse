@@ -85,6 +85,18 @@
       "last_seen": "2026-05-10"
     },
     {
+      "id": "bug-007",
+      "timestamp": "2026-05-20T00:00:00+08:00",
+      "error_message": "后台系统折叠导航部署后无法复原，一直处于折叠状态 — 用户反馈",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "屏幕宽度≤1200px时CSS强制侧边栏折叠，但header中切换按钮只调用store.toggleSidebar()改变sidebarCollapsed状态，不触发sidebarOpen overlay状态，导致中等屏幕点击切换按钮无效。",
+      "fix": "新增handleSidebarToggle()函数，根据window.innerWidth判断：≤1200px时切换sidebarOpen（移动端overlay），>1200px时切换store.sidebarCollapsed（桌面端折叠）。",
+      "tags": ["sidebar", "collapse", "responsive", "toggle", "overlay"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-20"
+    },
+    {
       "id": "bug-006",
       "timestamp": "2026-05-10T18:00:00+08:00",
       "error_message": "管理后台/学生门户页面切换卡住，网页崩溃 — 无限重定向循环",

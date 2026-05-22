@@ -117,7 +117,7 @@
     <div class="admin-main" :class="{ 'sidebar-collapsed': store.sidebarCollapsed }">
       <header class="admin-header">
         <div class="admin-header-left">
-          <button class="admin-sidebar-toggle" @click="store.toggleSidebar()">
+          <button class="admin-sidebar-toggle" @click="handleSidebarToggle()">
             ☰
           </button>
           <div class="breadcrumb">
@@ -271,6 +271,14 @@ const pageTitle = computed(() => pageTitles[route.name] || '数据看板')
 
 function isActive(path) {
   return route.path === path || (path !== '/admin' && route.path.startsWith(path))
+}
+
+function handleSidebarToggle() {
+  if (window.innerWidth <= 1200) {
+    sidebarOpen.value = !sidebarOpen.value
+  } else {
+    store.toggleSidebar()
+  }
 }
 
 function closeSidebar() {

@@ -97,10 +97,12 @@
     <!-- Booking Dialog -->
     <el-dialog v-model="dialogVisible" :title="editingId ? '编辑预约' : '新建家长会预约'" width="520px">
       <div class="admin-form-group">
-        <label>学生 <span style="color:var(--admin-danger)">*</span></label>
-        <el-select v-model="form.studentId" style="width:100%" filterable @change="onStudentSelect">
-          <el-option v-for="s in studentList" :key="s.id" :label="`${s.name} · ${s.class}`" :value="s.id" />
-        </el-select>
+        <label>学生姓名 <span style="color:var(--admin-danger)">*</span></label>
+        <el-input v-model="form.studentName" placeholder="请输入学生姓名" />
+      </div>
+      <div class="admin-form-group">
+        <label>班级</label>
+        <el-input v-model="form.class" placeholder="如：5D" />
       </div>
       <div class="admin-three-col" style="margin-bottom:0">
         <div class="admin-form-group">
@@ -165,11 +167,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { parentConferenceService, studentService } from '@/services/dataService'
+import { parentConferenceService } from '@/services/dataService'
 import { getPrintWatermarkHTML, getPrintWatermarkStyle } from '@/utils/printTemplate'
 
 const bookings = ref([])
-const studentList = ref([])
 const dialogVisible = ref(false)
 const editingId = ref(null)
 const activeTab = ref('pending')
@@ -177,13 +178,12 @@ const activeTab = ref('pending')
 const roomOptions = ['教学楼302会议室', '教学楼305小会议室', '行政楼101接待室', '在线会议室']
 
 const form = ref({
-  studentId: null, studentName: '', class: '', time: '', parentCount: 2,
+  studentName: '', class: '', time: '', parentCount: 2,
   saAttend: false, ccAttend: false, mode: 'offline', room: '教学楼302会议室',
   meetingId: '', saName: '', ccName: '', notes: ''
 })
 
 onMounted(() => {
-  studentList.value = studentService.getAll()
   bookings.value = parentConferenceService.getAll()
 })
 
@@ -195,24 +195,19 @@ function isUpcoming(conf) {
   return conf.status === 'pending' && new Date(conf.time) > new Date()
 }
 
-function onStudentSelect() {
-  const s = studentList.value.find(s => s.id === form.value.studentId)
-  if (s) { form.value.studentName = s.name; form.value.class = s.class }
-}
-
 function openBookingDialog(conf) {
   if (conf) {
     editingId.value = conf.id
-    form.value = { ...conf, studentId: conf.studentId, meetingId: conf.meetingId || '', saName: conf.saName || '', ccName: conf.ccName || '' }
+    form.value = { ...conf, meetingId: conf.meetingId || '', saName: conf.saName || '', ccName: conf.ccName || '' }
   } else {
     editingId.value = null
-    form.value = { studentId: null, studentName: '', class: '', time: '', parentCount: 2, saAttend: false, ccAttend: false, mode: 'offline', room: '教学楼302会议室', meetingId: '', saName: '', ccName: '', notes: '' }
+    form.value = { studentName: '', class: '', time: '', parentCount: 2, saAttend: false, ccAttend: false, mode: 'offline', room: '教学楼302会议室', meetingId: '', saName: '', ccName: '', notes: '' }
   }
   dialogVisible.value = true
 }
 
 function saveBooking() {
-  if (!form.value.studentId) { ElMessage.warning('请选择学生'); return }
+  if (!form.value.studentName) { ElMessage.warning('请输入学生姓名'); return }
   if (!form.value.time) { ElMessage.warning('请选择日期时间'); return }
   const data = {
     ...form.value,
