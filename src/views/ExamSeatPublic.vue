@@ -1,7 +1,7 @@
 <template>
   <div class="esp-page">
     <!-- 空状态 -->
-    <div v-if="rooms.length === 0" class="esp-empty">
+    <div v-if="store.rooms.length === 0" class="esp-empty">
       <div class="esp-empty-icon">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
       </div>
@@ -18,9 +18,9 @@
           </button>
           <span class="esp-nav-label">
             <strong>{{ currentRoom.name }}</strong>
-            <span class="esp-nav-hint" v-if="rooms.length > 1">{{ currentIdx + 1 }} / {{ rooms.length }}</span>
+            <span class="esp-nav-hint" v-if="store.rooms.length > 1">{{ currentIdx + 1 }} / {{ store.rooms.length }}</span>
           </span>
-          <button class="esp-nav-btn" :disabled="currentIdx === rooms.length - 1" @click="currentIdx++">
+          <button class="esp-nav-btn" :disabled="currentIdx === store.rooms.length - 1" @click="currentIdx++">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
@@ -52,11 +52,11 @@
 
       <!-- 考试信息 + 发卷图例 -->
       <div class="esp-info">
-        <span class="esp-info-item"><b>{{ examTitle || currentRoom.examSubject || '考试座位表' }}</b></span>
+        <span class="esp-info-item"><b>{{ store.examName || currentRoom.examSubject || '考试座位表' }}</b></span>
         <span class="esp-info-sep">|</span>
         <span class="esp-info-item">监考：{{ currentRoom.proctor || '—' }}</span>
         <span class="esp-info-sep">|</span>
-        <span class="esp-info-door">{{ doorDir === 'left' ? '←' : '→' }} 前门进场</span>
+        <span class="esp-info-door">{{ (store.doorDirection || 'left') === 'left' ? '←' : '→' }} 前门进场</span>
         <span class="esp-info-sep" v-if="distMode !== 'off'">|</span>
         <span class="esp-dist-legend" v-if="distMode !== 'off'">
           发卷顺序 · 共 {{ distTotalSteps }} 份
@@ -129,6 +129,7 @@
 import { ref, computed } from 'vue'
 import { useExamSeat2Store } from '@/views/admin/exams/exam-seat2/store/examSeat2Store'
 import { downloadRoomImageSVG, printRoomSVG } from '@/views/admin/exams/exam-seat2/utils/exportPipeline'
+import { getMShapeOrder, getRowOrder } from '@/views/admin/exams/exam-seat2/utils/seatAllocator'
 import { ElMessage } from 'element-plus'
 
 const store = useExamSeat2Store()
@@ -136,14 +137,7 @@ const exporting = ref(false)
 const currentIdx = ref(0)
 const distMode = ref('off') // 'off' | 's' | 'row'
 
-const rooms = computed(() => store.rooms)
-const students = computed(() => store.students)
-const assignments = computed(() => store.assignments)
-const blockedSeats = computed(() => store.blockedSeats)
-const examTitle = computed(() => store.examName)
-const doorDir = computed(() => store.doorDirection || 'left')
-
-const currentRoom = computed(() => rooms.value[currentIdx.value] || rooms.value[0] || {})
+const currentRoom = computed(() => store.rooms[currentIdx.value] || store.rooms[0] || {})
 
 const dateStr = new Date().toLocaleDateString('zh-CN', {
   year: 'numeric', month: 'long', day: 'numeric'
@@ -152,19 +146,19 @@ const dateStr = new Date().toLocaleDateString('zh-CN', {
 // ---- 查找表 ----
 const studentMap = computed(() => {
   const m = {}
-  students.value.forEach(s => { m[s.id] = s })
+  store.students.forEach(s => { m[s.id] = s })
   return m
 })
 
 const seatLookup = computed(() => {
   const l = {}
-  assignments.value.forEach(a => { l[`${a.roomId}_${a.seatIndex}`] = a })
+  store.assignments.forEach(a => { l[`${a.roomId}_${a.seatIndex}`] = a })
   return l
 })
 
 const blockedLookup = computed(() => {
   const l = {}
-  blockedSeats.value.forEach(b => {
+  store.blockedSeats.forEach(b => {
     if (!l[b.roomId]) l[b.roomId] = new Set()
     l[b.roomId].add(b.seatIndex)
   })
@@ -176,66 +170,13 @@ const distOrder = computed(() => {
   const room = currentRoom.value
   if (!room || distMode.value === 'off') return { lookup: {}, order: [], totalSteps: 0 }
 
-  const doorRight = doorDir.value === 'right'
-  const order = []
+  const blocked = blockedLookup.value[room.id] || null
+  const doorDir = store.doorDirection || 'left'
 
   if (distMode.value === 's') {
-    // M型发卷：列向蛇形，从门口座位开始向后走到底，换列折返。1号位在门口座位
-    const doorSi = store.getDoorSeatIndex(room.id)
-    let doorR = 1
-    if (doorSi !== null && doorSi !== undefined) {
-      doorR = Math.floor((doorSi - 1) / room.cols) + 1
-    }
-
-    const startCol = doorRight ? room.cols : 1
-    const endCol = doorRight ? 1 : room.cols
-    const colStep = doorRight ? -1 : 1
-
-    let forward = true
-    let isFirstCol = true
-    const doorColRemaining = [] // 门口列中 doorR 以上的行，最后走
-
-    for (let c = startCol; doorRight ? c >= endCol : c <= endCol; c += colStep) {
-      const rows = []
-      if (isFirstCol) {
-        for (let r = doorR; r <= room.rows; r++) rows.push(r)
-        for (let r = doorR - 1; r >= 1; r--) doorColRemaining.push({ r, c })
-        isFirstCol = false
-      } else {
-        for (let r = 1; r <= room.rows; r++) rows.push(r)
-        if (!forward) rows.reverse()
-      }
-
-      for (const r of rows) {
-        const si = (r - 1) * room.cols + c
-        const blocked = blockedLookup.value[room.id]?.has(si)
-        if (!blocked) order.push({ r, c, si })
-      }
-      forward = !forward
-    }
-
-    // 门口列剩余行（门口座位前方的行，最后走）
-    for (const item of doorColRemaining) {
-      const si = (item.r - 1) * room.cols + item.c
-      const blocked = blockedLookup.value[room.id]?.has(si)
-      if (!blocked) order.push({ r: item.r, c: item.c, si })
-    }
-  } else {
-    // 逐行：从上到下，每行从左到右
-    for (let r = 1; r <= room.rows; r++) {
-      for (let c = 1; c <= room.cols; c++) {
-        const si = (r - 1) * room.cols + c
-        const blocked = blockedLookup.value[room.id]?.has(si)
-        if (!blocked) order.push({ r, c, si })
-      }
-    }
+    return getMShapeOrder(room.rows, room.cols, doorDir, store.getDoorSeatIndex(room.id), blocked)
   }
-
-  const lookup = {}
-  order.forEach((item, i) => {
-    lookup[`${item.r}_${item.c}`] = i + 1
-  })
-  return { order, lookup, totalSteps: order.length }
+  return getRowOrder(room.rows, room.cols, blocked)
 })
 
 const distTotalSteps = computed(() => distOrder.value.totalSteps)
@@ -278,7 +219,7 @@ function isBlocked(room, r, c) {
 }
 
 function getRoomCount(roomId) {
-  return new Set(assignments.value.filter(a => a.roomId === roomId).map(a => a.studentId)).size
+  return new Set(store.assignments.filter(a => a.roomId === roomId).map(a => a.studentId)).size
 }
 
 function reversedRows(room) {
@@ -297,7 +238,7 @@ function isDoorCell(room, r, c) {
     return seatIdx(room, r, c) === customDoor
   }
   if (r !== 1) return false
-  if (doorDir.value === 'left') return c === 1
+  if ((store.doorDirection || 'left') === 'left') return c === 1
   return c === room.cols
 }
 
@@ -315,9 +256,9 @@ async function exportRoomImage(room) {
   if (exporting.value || !room?.id) return
   exporting.value = true
   try {
-    await downloadRoomImageSVG(room, students.value, assignments.value, blockedSeats.value, 'png', {
-      examName: examTitle.value,
-      doorDirection: doorDir.value,
+    await downloadRoomImageSVG(room, store.students, store.assignments, store.blockedSeats, 'png', {
+      examName: store.examName,
+      doorDirection: store.doorDirection || 'left',
       doorSeatIndex: store.getDoorSeatIndex(room.id)
     })
     ElMessage.success(`${room.name} 座位表已导出`)
@@ -330,9 +271,9 @@ async function exportRoomImage(room) {
 
 function doPrint(room) {
   if (!room?.id) return
-  printRoomSVG(room, students.value, assignments.value, blockedSeats.value, {
-    examName: examTitle.value,
-    doorDirection: doorDir.value,
+  printRoomSVG(room, store.students, store.assignments, store.blockedSeats, {
+    examName: store.examName,
+    doorDirection: store.doorDirection || 'left',
     doorSeatIndex: store.getDoorSeatIndex(room.id)
   })
 }

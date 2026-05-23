@@ -31,6 +31,73 @@ export function getSnakeOrder(rows, cols, doorDirection = 'left') {
   return order
 }
 
+// ==================== M型 / 逐行 发卷顺序 ====================
+
+/**
+ * M型发卷顺序：列向蛇形，从门口座位开始向后走到底，换列折返
+ * 返回 { order: [{r,c,si}], lookup: {r_c: step}, totalSteps }
+ */
+export function getMShapeOrder(rows, cols, doorDirection = 'left', doorSeatIndex = null, blockedSet = null) {
+	const order = []
+	const doorRight = doorDirection === 'right'
+
+	let doorR = 1
+	if (doorSeatIndex !== null && doorSeatIndex !== undefined) {
+		doorR = Math.floor((doorSeatIndex - 1) / cols) + 1
+	}
+
+	const startCol = doorRight ? cols : 1
+	const endCol = doorRight ? 1 : cols
+	const colStep = doorRight ? -1 : 1
+
+	let forward = true
+	let isFirstCol = true
+	const doorColRemaining = []
+
+	for (let c = startCol; doorRight ? c >= endCol : c <= endCol; c += colStep) {
+		const rowsArr = []
+		if (isFirstCol) {
+			for (let r = doorR; r <= rows; r++) rowsArr.push(r)
+			for (let r = doorR - 1; r >= 1; r--) doorColRemaining.push({ r, c })
+			isFirstCol = false
+		} else {
+			for (let r = 1; r <= rows; r++) rowsArr.push(r)
+			if (!forward) rowsArr.reverse()
+		}
+
+		for (const r of rowsArr) {
+			const si = (r - 1) * cols + c
+			if (!blockedSet || !blockedSet.has(si)) order.push({ r, c, si })
+		}
+		forward = !forward
+	}
+
+	for (const item of doorColRemaining) {
+		const si = (item.r - 1) * cols + item.c
+		if (!blockedSet || !blockedSet.has(si)) order.push({ r: item.r, c: item.c, si })
+	}
+
+	const lookup = {}
+	order.forEach((item, i) => { lookup[`${item.r}_${item.c}`] = i + 1 })
+	return { order, lookup, totalSteps: order.length }
+}
+
+/**
+ * 逐行发卷顺序：从上到下，每行从左到右
+ */
+export function getRowOrder(rows, cols, blockedSet = null) {
+	const order = []
+	for (let r = 1; r <= rows; r++) {
+		for (let c = 1; c <= cols; c++) {
+			const si = (r - 1) * cols + c
+			if (!blockedSet || !blockedSet.has(si)) order.push({ r, c, si })
+		}
+	}
+	const lookup = {}
+	order.forEach((item, i) => { lookup[`${item.r}_${item.c}`] = i + 1 })
+	return { order, lookup, totalSteps: order.length }
+}
+
 // ==================== 相邻座位计算 ====================
 
 export function getAdjacentPositions(seatIndex, rows, cols) {
