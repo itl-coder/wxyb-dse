@@ -129,6 +129,11 @@
 </template>
 
 <script setup>
+/**
+ * 页面：学生门户首页
+ * 功能：展示学生个人仪表盘，包含今日课表、待完成作业、近期成绩和老师反馈
+ * 路由：/portal
+ */
 import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { timetableService, homeworkService, examService, behaviorService, attendanceService, portalConfigService } from '@/services/dataService'

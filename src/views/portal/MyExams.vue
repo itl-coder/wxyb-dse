@@ -159,6 +159,11 @@
 </template>
 
 <script setup>
+/**
+ * 页面：我的考试
+ * 功能：查看考试记录、成绩详情、科目能力雷达图及成绩趋势
+ * 路由：/portal/my-exams
+ */
 import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { examService, portalConfigService } from '@/services/dataService'

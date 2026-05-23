@@ -46,6 +46,11 @@
 </template>
 
 <script setup>
+/**
+ * 模块：TeachingLayout
+ * 功能：教学页面布局，包含学习目标、核心概念与公式、常见误区、DSE 应考策略、探索指南和相关资源链接等模块
+ * 使用位置：各知识点教学页面（如三角函数、对数指数等）
+ */
 import { computed, useSlots } from 'vue'
 
 const props = defineProps({

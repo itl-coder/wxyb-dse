@@ -1,14 +1,16 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-10
-> Files: 121 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-23
+> Files: 135 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
 - `CLAUDE.md` — OpenWolf (~57 tok)
+- `useOCR.js` — Exports performOCR, extractQuestionNumbers, extractFormulas, tesseract.js动态import+降级方案 (~180 tok)
+- `MistakeOcrUpload.vue` — Vue: setup, 错题OCR上传3步组件(上传→识别→校正), 支持题号/公式提取+科目来源知识点元信息 (~270 tok)
 - `index.html` — DSE 智能学习系统 (~122 tok)
 - `package-lock.json` — npm lock file (~16860 tok)
-- `package.json` — Node.js package manifest (~165 tok)
+- `package.json` — Node.js package manifest, includes vue-draggable-plus (~165 tok)
 - `vite.config.js` — Vite build configuration (~80 tok)
 
 ## .claude/
@@ -95,9 +97,67 @@
 - `FormulaPageLayout.vue` — Vue: setup, 三栏可缩放布局(拖拽分栏/响应式折叠) (~220 tok)
 - `FormulaSidebar.vue` — Vue: setup, 公式详情栏(例题/相关公式/常见错误/应用场景) (~230 tok)
 - `KatexDisplay.vue` — Vue: setup, markdown-it-katex渲染器, 支持行内/块级/错误边界 (~200 tok)
+- `DraggableContainer.vue` — Vue: setup, vue-draggable-plus wrapper with touch/mobile support + auto-scroll (~80 tok)
 - `P5Canvas.vue` — Vue: setup, emits (~321 tok)
 - `TeachingLayout.vue` — Vue: setup (~477 tok)
+- `TableDensityController.vue` — Vue: setup, 表格密度3态切换按钮组(紧凑/默认/宽松), 全局useTableDensity (~50 tok)
+
+## src/views/admin/exams/exam-seat2/
+
+- `index.vue` — 考场座位2.0模块入口, 3栏可缩放面板(教室列表+座位表+学生池)+统计栏+工具栏+键盘快捷键 (~300 tok)
+
+## src/views/admin/exams/exam-seat2/components/
+
+- `ExamSeatCell.vue` — 单个座位格, 姓名/班级选修/座号, 10种状态颜色(含预留/外班预留/锁定/批量选中), CSS变量驱动 (~180 tok)
+- `ExamSeatGrid.vue` — 原生table座位表, 反转行, 门口标记, 行/列批量选择, Ctrl多选, 框选, 增强右键菜单(预留/锁定/门口) (~300 tok)
+- `ExamSeatHeader.vue` — 考试标题区(名称/日期/时间/教室信息), 门口方向/排列方式全局切换 (~230 tok)
+- `ExamSeatLegend.vue` — 10色图例(已占/空位/锁定/预留/外班预留/屏蔽/缺考/特殊/专属/冲突) (~40 tok)
+- `ExamSeatStudentPool.vue` — 学生池(vue-draggable-plus), 搜索/筛选/拖拽入座/多选批量放入教室 (~150 tok)
+- `ExamSeatRoomSidebar.vue` — 教室列表(CRUD+容量进度条+快速操作)+配置对话框 (~200 tok)
+- `ExamSeatPrint.vue` — 打印/导出对话框(3Tab:座位表PNG/JPG/PDF+门贴预览打印+Excel汇总名单统计) (~250 tok)
+- `ExamRulePanel.vue` — 可折叠排座规则说明面板, 9条规则标签+冲突评分颜色指示 (~80 tok)
+- `ExamConflictPanel.vue` — 冲突检测面板, 评分概览+分类冲突列表(同班相邻/同选相邻/跨室重复/专属违规) (~120 tok)
+- `ExamDistributionAssist.vue` — 发卷辅助视图, 按科目/选修高亮座位, 方便监考分发试卷 (~100 tok)
+- `ExamPaperStatistics.vue` — 考生画像Dashboard, 概览卡片+班级分布条+选修标签云+教室使用率+状态标签 (~200 tok)
+- `ExamPaperPrintPreview.vue` — 试卷分发清单打印预览, A4排版+科目汇总 (~120 tok)
+- `ExamElectiveProfile.vue` — 选修画像弹窗, 科目分布条形图+热门选修组合+班级×选修矩阵热力图 (~150 tok)
+- `ExamSeatLockToolbar.vue` — 锁定/解锁工具栏(全部锁定/解锁+选中区域锁定/解锁) (~60 tok)
+
+## src/views/admin/exams/exam-seat2/store/
+
+- `examSeat2Store.js` — Pinia Store, 教室CRUD+学生管理+座位分配/交换/锁定/屏蔽+冲突检测+撤销+localStorage持久化 (~350 tok)
 - `TopicCard.vue` — Vue: setup (~280 tok)
+
+## src/views/admin/exams/exam-seat2/utils/
+
+- `exportPipeline.js` — 统一导出管线(buildSeatChartHTML+buildDoorTagHTML+captureHTML离屏渲染+Canvas水印+PNG/JPG/PDF下载+打印+Excel导出) (~480 tok)
+
+## src/components/student/
+
+- `ImportPreviewDialog.vue` — 增强学生导入预览（异常检测/筛选/勾选/分页） (~300 tok)
+
+## src/components/examtips/
+
+- `TipReviewHistory.vue` — Vue: setup, 审核记录时间轴(提交/通过/驳回/重新提交), 彩色圆点+连线+驳回原因展示 (~90 tok)
+- `TipReviewPanel.vue` — Vue: setup, 审核抽屉(el-drawer), 技巧只读预览+审核操作(通过/驳回+原因)+审核历史 (~180 tok)
+
+## src/components/mistake/
+
+- `MistakeOcrUpload.vue` — Vue: setup, 错题OCR上传3步组件(上传→识别→校正), 支持题号/公式提取+科目来源知识点元信息 (~270 tok)
+
+## src/views/admin/homework/
+
+- `Homework.vue` — Vue: setup, 作业管理2栏布局（顶部水平筛选栏+表格/卡片+右侧数据总览），支持内联标题编辑、按作业筛选、密度/列配置、卡片模式 (~700 tok)
+
+## src/views/admin/homework/components/
+
+- `HomeworkDetail.vue` — 作业详情视图（提交统计+学生明细表格） (~150 tok)
+- `HomeworkStatsPanel.vue` — ECharts统计面板,2列布局,5图(科目提交堆叠柱状图+提交率+正确率分布+分段饼图+预警),按科目分类 (~330 tok)
+
+## src/views/admin/homework/composables/
+
+- `useHomeworkShared.js` — 共享常量/工具函数（核心科目/选修/状态/颜色映射） (~100 tok)
+- `useHomeworkTable.js` — 表格配置（密度/列可见性/卡片模式）+ localStorage持久化 (~120 tok)
 
 ## src/composables/
 
@@ -105,6 +165,9 @@
 - `useExcel.js` — Exports useExcel, SheetJS xlsx import/export/template download composable (~180 tok)
 - `useKatex.js` — Exports useKatex, markdown-it-katex引擎(renderMarkdown/renderInline/renderBlock/validateLatex/extractFormulas) (~350 tok)
 - `useScopedData.js` — Data scope filter composable — filters lists by campus/class/self based on user role (~40 tok)
+- `useExamSeatPreview.js` — 考场座位预览逻辑（A4横版HTML生成+Canvas水印+html2canvas导出PNG/JPG+打印+配置持久化） (~250 tok)
+- `useDraggablePlus.js` — vue-draggable-plus薄封装, 统一group/sort/animation配置, 供StudentPool和SeatGrid使用 (~45 tok)
+- `useTableDensity.js` — 表格密度控制(compact/comfortable/loose), 全局singleton+localStorage持久化 (~50 tok)
 
 ## src/data/
 
@@ -140,12 +203,14 @@
 
 ## src/utils/
 
+- `colorHash.js` — 确定性班级颜色哈希(16色调色板)+SEAT_STATUS_COLORS常量 (~30 tok)
 - `printTemplate.js` — Print/PDF HTML document builder — "Scholarly Refinement" aesthetic for parent conference export (~1200 tok)
 - `renderContent.js` — Rich content renderer — markdown-it + KaTeX渲染, 支持完整Markdown语法+LaTeX (~100 tok)
 - `watermark.js` — Watermark utility — tiled scattered pattern for print/export (~805 tok)
 
 ## src/views/
 
+- `ExamSeatPublic.vue` — 考场座位公开视图(原生table+反转行+门口标记+讲台+统一导出管线, 数据源examSeat2Store) (~350 tok)
 - `HomePage.vue` — Vue: setup (~520 tok)
 - `Knowledge.vue` — Vue: setup (~312 tok)
 - `Mistakes.vue` — Vue: setup, 错题整理(硬编码色→CSS变量+dark mode适配) (~550 tok)
@@ -167,7 +232,16 @@
 - `HomeworkAssign.vue` — Vue: setup, 布置作业系统(自动分发:必修→全班/选修→选课学生)+科目分组+合并单元格+分发预览 (~4200 tok)
 - `Login.vue` — Vue: setup, 管理后台登录页, AI科技感品牌重设计(TechParticles+AnimatedBorder+FloatingInput+GlowButton) (~5000 tok)
 - `ParentConference.vue` — Vue: setup (~5011 tok)
-- `Phone.vue` — Vue component (~9341 tok)
+- `Phone.vue` — Vue: setup, 手机管理重构版（日期切换+手机柜可视化网格+今日统计卡片+一键复制昨日配置+批量操作+快速状态切换） (~700 tok)
+
+## src/views/admin/teaching/phone/
+
+- `usePhoneData.js` — 手机管理数据层composable(学生/登记/记录加载/状态切换/扣留字段/统计/批量操作) (~300 tok)
+
+## src/views/admin/teaching/phone/components/
+
+- `PhoneCabinet.vue` — 手机柜网格组件(班级Tab+8列网格+5色状态+图例) (~120 tok)
+- `PhoneStudentDetail.vue` — 学生详情面板(登记信息+快速状态切换+扣留追溯表单+家长通知+存取记录时间轴) (~280 tok)
 - `QuestionBank.vue` — Vue component (~7664 tok)
 - `Questions.vue` — Vue component (~10434 tok)
 - `Reports.vue` — Vue: setup, 成长周报(Markdown编辑/分屏预览/html2canvas导出) (~7200 tok)
@@ -205,7 +279,9 @@
 
 - `MyExams.vue` — Vue: setup (~2618 tok)
 - `MyHomework.vue` — Vue: setup (~1676 tok)
-- `MyMistakes.vue` — Vue: setup, 错题本门户页, editorial notebook aesthetic, 响应式grid+统计栏+干净打印样式 (~3800 tok)
+- `MyMistakes.vue` — Vue: setup, 错题本门户页（分组折叠视图+flat列表+打印选题+checkbox+答案对比+KATEX公式渲染） (~4100 tok)
+- `MyExamSeat.vue` — Vue: setup, 门户端考场座位预览（教室Tab切换+可配置信息+水印+导出PNG/JPG+打印） (~150 tok)
+- `MyTips.vue` — Vue: setup, 做题技巧门户页 (~500 tok)
 - `MyPerformance.vue` — Vue: setup (~1772 tok)
 - `PortalHome.vue` — Vue: setup (~2590 tok)
 - `PortalLogin.vue` — Vue: setup, 门户登录页, 温暖品牌风+AI宠物英雄+学生/家长Tab+手机验证码登录+学习报告预览 (~2400 tok)
@@ -215,3 +291,15 @@
 - `Chemistry.vue` — Vue component (~80 tok)
 - `Chinese.vue` — Vue: setup, brown/amber Chinese-culture theme (hardcoded colors, frozen from global vars) (~9452 tok)
 - `Physics.vue` — Vue component (~77 tok)
+
+## src/views/exam/
+
+- `ExamSeatViewer.vue` — Vue: setup, A4考试座位查看器, vue3-print-nb打印, 黑白教务风格, 每教室一个A4卡片预览 (~200 tok)
+
+## src/components/exam/viewer/
+
+- `ExamViewerHeader.vue` — Vue: setup, 座位表标题头（考试名/教室/人数/序号） (~30 tok)
+- `ExamViewerInfo.vue` — Vue: setup, 考试信息行（科目/日期/时间/监考/类型） (~50 tok)
+- `ExamViewerSeatTable.vue` — Vue: setup, 原生table座位网格, 支持屏蔽/缺考/特殊状态 (~150 tok)
+- `ExamViewerRules.vue` — Vue: setup, 考场规则文本条 (~30 tok)
+- `ExamViewerFooter.vue` — Vue: setup, 页脚日期+总座数 (~30 tok)

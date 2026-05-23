@@ -13,6 +13,7 @@
           <router-link to="/portal/my-exams" class="portal-nav-item" :class="{ active: $route.path === '/portal/my-exams' }" @click="navOpen = false">我的考试</router-link>
           <router-link to="/portal/my-mistakes" class="portal-nav-item" :class="{ active: $route.path === '/portal/my-mistakes' }" @click="navOpen = false">错题本</router-link>
           <router-link to="/portal/my-tips" class="portal-nav-item" :class="{ active: $route.path === '/portal/my-tips' }" @click="navOpen = false">做题技巧</router-link>
+          <router-link to="/portal/my-exam-seat" class="portal-nav-item" :class="{ active: $route.path === '/portal/my-exam-seat' }" @click="navOpen = false">考场座位</router-link>
         </nav>
       </div>
       <div class="portal-header-right">
@@ -35,6 +36,11 @@
 </template>
 
 <script setup>
+/**
+ * 模块：PortalLayout
+ * 功能：学生端门户布局，含顶部导航（我的学情/作业/考试/错题本/技巧）、学生切换器、退出登录
+ * 使用位置：router 中 /portal 相关路由的父级布局组件
+ */
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'

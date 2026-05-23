@@ -13,6 +13,11 @@
 </template>
 
 <script setup>
+/**
+ * 模块：DefaultLayout
+ * 功能：主应用默认布局，含顶部导航栏（支持数学/语文/物理/化学学科切换）、数学页面底部导航栏、keep-alive 页面缓存及滚动动效
+ * 使用位置：router 中主页及各学科页面的父级布局组件
+ */
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@/components/common/AppHeader.vue'

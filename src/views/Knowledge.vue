@@ -25,6 +25,11 @@
 </template>
 
 <script setup>
+/**
+ * 页面：知识体系总结
+ * 功能：按模块浏览核心知识点，标注 DSE 高频考点与常见陷阱
+ * 路由：/knowledge
+ */
 import { ref, computed } from 'vue'
 import { knowledgeData } from '@/data/knowledgeData.js'
 import { allMods } from '@/data/examProblems.js'

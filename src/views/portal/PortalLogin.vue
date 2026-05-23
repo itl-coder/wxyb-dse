@@ -98,6 +98,11 @@
 </template>
 
 <script setup>
+/**
+ * 页面：门户登录页
+ * 功能：学生/家长双角色登录，支持手机号加验证码方式
+ * 路由：/portal/login
+ */
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import ParallaxParticles from '@/components/login/ParallaxParticles.vue'

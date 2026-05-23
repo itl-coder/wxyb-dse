@@ -1,3 +1,8 @@
+/**
+ * 模块：useScopedData
+ * 功能：按校区/班级/个人三个维度过滤数据，实现数据权限范围隔离
+ * 依赖：@/stores/app (useAppStore)
+ */
 import { useAppStore } from '@/stores/app'
 
 export function useScopedData() {

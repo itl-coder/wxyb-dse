@@ -1,4 +1,8 @@
-// DSE 知识总结数据 — 来源: dse-data.js
+/**
+ * 模块：knowledgeData
+ * 功能：DSE 数学各模块知识点总结，含公式汇总、高频考点和常见陷阱
+ * 依赖：无
+ */
 export const knowledgeData = {
   '3d': {
     title: '立体几何',

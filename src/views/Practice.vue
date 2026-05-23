@@ -44,6 +44,11 @@
 </template>
 
 <script setup>
+/**
+ * 页面：练习系统
+ * 功能：按考试类型、模块和难度筛选题目，支持逐步提示与自评检验
+ * 路由：/practice
+ */
 import { ref, computed } from 'vue'
 import { examTypes, examProblems, allMods } from '@/data/examProblems.js'
 

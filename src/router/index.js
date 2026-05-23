@@ -1,3 +1,16 @@
+/**
+ * 路由配置 — 全部路由定义 + 权限守卫
+ *
+ * 三大路由组：
+ *   /       公共学习系统（DefaultLayout）— 数学专题、练习、首页
+ *   /admin  管理后台（AdminLayout）— 27 个教务模块，含 RBAC 权限守卫
+ *   /portal 学生/家长门户（PortalLayout）— 成绩、作业、错题本
+ *
+ * 守卫逻辑：
+ *   - 管理后台：检查 admin_token + store.isAuthenticated + hasMenuAccess/hasPermission
+ *   - 门户：检查 portal_token
+ *   - 已登录用户访问登录页自动重定向
+ */
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 
@@ -35,7 +48,9 @@ const routes = [
       // 早晚班交接 (前台)
       { path: 'handover', name: 'HandoverPublic', component: () => import('@/views/ShiftHandoverPublic.vue') },
       // 考试座位安排 (前台预览)
-      { path: 'exam-seat', name: 'ExamSeatPublic', component: () => import('@/views/ExamSeatPublic.vue') }
+      { path: 'exam-seat', name: 'ExamSeatPublic', component: () => import('@/views/ExamSeatPublic.vue') },
+      // 考试座位 A4 查看器 (vue3-print-nb)
+      { path: 'exam-seat-viewer', name: 'ExamSeatViewer', component: () => import('@/views/exam/ExamSeatViewer.vue') }
     ]
   },
 
@@ -43,43 +58,43 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/views/admin/Login.vue')
+    component: () => import('@/views/admin/auth/Login.vue')
   },
   {
     path: '/admin',
     component: () => import('@/layouts/AdminLayout.vue'),
     meta: { requiresAuth: true },
     children: [
-      { path: '', name: 'Dashboard', component: () => import('@/views/admin/Dashboard.vue') },
-      { path: 'timetable', name: 'Timetable', component: () => import('@/views/admin/Timetable.vue') },
-      { path: 'behavior', name: 'Behavior', component: () => import('@/views/admin/Behavior.vue') },
-      { path: 'homework', name: 'Homework', component: () => import('@/views/admin/Homework.vue') },
-      { path: 'handover', name: 'ShiftHandover', component: () => import('@/views/admin/ShiftHandover.vue'), meta: { menuKey: 'handover' } },
-      { path: 'discipline', name: 'Discipline', component: () => import('@/views/admin/Discipline.vue') },
-      { path: 'phone', name: 'Phone', component: () => import('@/views/admin/Phone.vue') },
-      { path: 'attendance', name: 'Attendance', component: () => import('@/views/admin/Attendance.vue') },
-      { path: 'reports', name: 'Reports', component: () => import('@/views/admin/Reports.vue') },
-      { path: 'exam', name: 'Exam', component: () => import('@/views/admin/Exam.vue') },
-      { path: 'questions', name: 'Questions', component: () => import('@/views/admin/Questions.vue') },
-      { path: 'question-bank', name: 'QuestionBank', component: () => import('@/views/admin/QuestionBank.vue') },
-      { path: 'exam-tips', name: 'ExamTips', component: () => import('@/views/admin/ExamTips.vue') },
-      { path: 'counseling', name: 'Counseling', component: () => import('@/views/admin/Counseling.vue') },
-      { path: 'conference', name: 'Conference', component: () => import('@/views/admin/Conference.vue') },
-      { path: 'course-feedback', name: 'CourseFeedback', component: () => import('@/views/admin/CourseFeedback.vue') },
-      { path: 'parent-conference', name: 'ParentConference', component: () => import('@/views/admin/ParentConference.vue') },
-      { path: 'voice', name: 'Voice', component: () => import('@/views/admin/Voice.vue') },
-      { path: 'students', name: 'StudentManagement', component: () => import('@/views/admin/StudentManagement.vue') },
-      { path: 'courses', name: 'CourseManagement', component: () => import('@/views/admin/CourseManagement.vue') },
-      { path: 'settings', name: 'Settings', component: () => import('@/views/admin/Settings.vue') },
-      { path: 'config', name: 'ConfigCenter', component: () => import('@/views/admin/ConfigCenter.vue') },
-      { path: 'users', name: 'UserManagement', component: () => import('@/views/admin/UserManagement.vue') },
-      { path: 'roles', name: 'RoleManagement', component: () => import('@/views/admin/RoleManagement.vue') },
-      { path: 'ai-skills', name: 'AISkills', component: () => import('@/views/admin/AISkills.vue'), meta: { menuKey: 'ai-skills', permission: 'aiData.skills.view' } },
-      { path: 'ai-excel', name: 'AIFunctions', component: () => import('@/views/admin/AIFunctions.vue'), meta: { menuKey: 'ai-excel', permission: 'aiData.excel.view' } },
-      { path: 'ai-tools', name: 'AITools', component: () => import('@/views/admin/AITools.vue'), meta: { menuKey: 'ai-tools', permission: 'aiData.tools.view' } },
-      { path: 'ai-quotes', name: 'AIQuotes', component: () => import('@/views/admin/AIQuotes.vue'), meta: { menuKey: 'ai-quotes', permission: 'aiData.quotes.view' } },
-      { path: 'ai-prompts', name: 'AIPrompts', component: () => import('@/views/admin/AIPrompts.vue'), meta: { menuKey: 'ai-prompts', permission: 'aiData.prompts.view' } },
-      { path: 'exam-seat', name: 'ExamSeat', component: () => import('@/views/admin/exam-seat/index.vue'), meta: { menuKey: 'exam-seat' } }
+      { path: '', name: 'Dashboard', component: () => import('@/views/admin/dashboard/Dashboard.vue') },
+      { path: 'timetable', name: 'Timetable', component: () => import('@/views/admin/timetable/Timetable.vue') },
+      { path: 'behavior', name: 'Behavior', component: () => import('@/views/admin/teaching/Behavior.vue') },
+      { path: 'homework', name: 'Homework', component: () => import('@/views/admin/homework/Homework.vue') },
+      { path: 'handover', name: 'ShiftHandover', component: () => import('@/views/admin/handover/ShiftHandover.vue'), meta: { menuKey: 'handover' } },
+      { path: 'discipline', name: 'Discipline', component: () => import('@/views/admin/teaching/Discipline.vue') },
+      { path: 'phone', name: 'Phone', component: () => import('@/views/admin/teaching/Phone.vue') },
+      { path: 'attendance', name: 'Attendance', component: () => import('@/views/admin/teaching/Attendance.vue') },
+      { path: 'reports', name: 'Reports', component: () => import('@/views/admin/students/Reports.vue') },
+      { path: 'exam', name: 'Exam', component: () => import('@/views/admin/exams/Exam.vue') },
+      { path: 'questions', name: 'Questions', component: () => import('@/views/admin/exams/Questions.vue') },
+      { path: 'question-bank', name: 'QuestionBank', component: () => import('@/views/admin/exams/QuestionBank.vue') },
+      { path: 'exam-tips', name: 'ExamTips', component: () => import('@/views/admin/exams/ExamTips.vue') },
+      { path: 'counseling', name: 'Counseling', component: () => import('@/views/admin/students/Counseling.vue') },
+      { path: 'conference', name: 'Conference', component: () => import('@/views/admin/communication/Conference.vue') },
+      { path: 'course-feedback', name: 'CourseFeedback', component: () => import('@/views/admin/communication/CourseFeedback.vue') },
+      { path: 'parent-conference', name: 'ParentConference', component: () => import('@/views/admin/communication/ParentConference.vue') },
+      { path: 'voice', name: 'Voice', component: () => import('@/views/admin/communication/Voice.vue') },
+      { path: 'students', name: 'StudentManagement', component: () => import('@/views/admin/students/StudentManagement.vue') },
+      { path: 'courses', name: 'CourseManagement', component: () => import('@/views/admin/system/CourseManagement.vue') },
+      { path: 'settings', name: 'Settings', component: () => import('@/views/admin/settings/Settings.vue') },
+      { path: 'config', name: 'ConfigCenter', component: () => import('@/views/admin/settings/ConfigCenter.vue') },
+      { path: 'users', name: 'UserManagement', component: () => import('@/views/admin/system/UserManagement.vue') },
+      { path: 'roles', name: 'RoleManagement', component: () => import('@/views/admin/system/RoleManagement.vue') },
+      { path: 'ai-skills', name: 'AISkills', component: () => import('@/views/admin/ai-data/AISkills.vue'), meta: { menuKey: 'ai-skills', permission: 'aiData.skills.view' } },
+      { path: 'ai-excel', name: 'AIFunctions', component: () => import('@/views/admin/ai-data/AIFunctions.vue'), meta: { menuKey: 'ai-excel', permission: 'aiData.excel.view' } },
+      { path: 'ai-tools', name: 'AITools', component: () => import('@/views/admin/ai-data/AITools.vue'), meta: { menuKey: 'ai-tools', permission: 'aiData.tools.view' } },
+      { path: 'ai-quotes', name: 'AIQuotes', component: () => import('@/views/admin/ai-data/AIQuotes.vue'), meta: { menuKey: 'ai-quotes', permission: 'aiData.quotes.view' } },
+      { path: 'ai-prompts', name: 'AIPrompts', component: () => import('@/views/admin/ai-data/AIPrompts.vue'), meta: { menuKey: 'ai-prompts', permission: 'aiData.prompts.view' } },
+      { path: 'exam-seat', name: 'ExamSeat', component: () => import('@/views/admin/exams/exam-seat2/index.vue'), meta: { menuKey: 'exam-seat' } }
     ]
   },
 
@@ -99,7 +114,8 @@ const routes = [
       { path: 'my-homework', name: 'MyHomework', component: () => import('@/views/portal/MyHomework.vue') },
       { path: 'my-exams', name: 'MyExams', component: () => import('@/views/portal/MyExams.vue') },
       { path: 'my-mistakes', name: 'MyMistakes', component: () => import('@/views/portal/MyMistakes.vue') },
-      { path: 'my-tips', name: 'MyTips', component: () => import('@/views/portal/MyTips.vue') }
+      { path: 'my-tips', name: 'MyTips', component: () => import('@/views/portal/MyTips.vue') },
+      { path: 'my-exam-seat', name: 'MyExamSeat', component: () => import('@/views/portal/MyExamSeat.vue') }
     ]
   }
 ]

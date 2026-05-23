@@ -7,6 +7,70 @@
   color: var(--admin-text);
 }
 
+/* ==================== Page Transitions ==================== */
+@keyframes adminFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes adminSlideInRight {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes adminScaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.admin-layout .el-main > div {
+  animation: adminFadeIn 0.35s var(--ease-out, ease-out);
+}
+
+/* Stagger child animations for cards */
+.admin-stats-grid > *:nth-child(1) { animation: adminFadeIn 0.35s 0.05s both var(--ease-out, ease-out); }
+.admin-stats-grid > *:nth-child(2) { animation: adminFadeIn 0.35s 0.10s both var(--ease-out, ease-out); }
+.admin-stats-grid > *:nth-child(3) { animation: adminFadeIn 0.35s 0.15s both var(--ease-out, ease-out); }
+.admin-stats-grid > *:nth-child(4) { animation: adminFadeIn 0.35s 0.20s both var(--ease-out, ease-out); }
+
+/* Dialog open animation */
+.admin-layout .el-dialog {
+  animation: adminScaleIn 0.25s var(--ease-out, ease-out);
+}
+.admin-layout .el-dialog .el-overlay-dialog {
+  animation: adminScaleIn 0.25s var(--ease-out, ease-out);
+}
+
+/* ==================== Improved Empty States ==================== */
+.admin-empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--admin-text-muted);
+}
+.admin-empty-state .empty-icon {
+  width: 64px; height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--admin-surface-hover);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.admin-empty-state .empty-title {
+  font-size: 15px; font-weight: 600; color: var(--admin-text-secondary);
+  margin-bottom: 6px;
+}
+.admin-empty-state .empty-hint {
+  font-size: 12px; color: var(--admin-text-muted);
+  max-width: 320px; margin: 0 auto;
+}
+
+/* ==================== Adjusted Two-Column ==================== */
+.admin-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 768px) {
+  .admin-two-col { grid-template-columns: 1fr; }
+}
+
 /* ==================== Layout Base ==================== */
 .admin-layout {
   min-height: 100vh;
@@ -329,9 +393,29 @@
   padding: 20px;
   margin-bottom: 16px;
   box-shadow: var(--admin-shadow-sm);
-  transition: box-shadow 0.25s ease;
+  transition: box-shadow var(--duration-normal, 0.25s) var(--ease-out, ease-out),
+              border-color var(--duration-normal, 0.25s) var(--ease-out, ease-out),
+              transform var(--duration-normal, 0.25s) var(--ease-out, ease-out);
+  position: relative;
 }
-.admin-card:hover { box-shadow: var(--admin-shadow); }
+.admin-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 14px; bottom: 14px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: transparent;
+  transition: background var(--duration-slow, 0.3s) var(--ease-out, ease-out);
+}
+.admin-card:hover {
+  box-shadow: var(--admin-shadow);
+  border-color: var(--admin-border-hover, var(--admin-border));
+  transform: translateY(-1px);
+}
+.admin-card:hover::before {
+  background: var(--admin-accent-light);
+  opacity: 0.5;
+}
 
 .admin-card-header {
   display: flex;
@@ -821,19 +905,35 @@
 .admin-layout .el-input__wrapper {
   background: var(--admin-surface);
   border-color: var(--admin-border);
-  box-shadow: none;
+  box-shadow: 0 0 0 1px var(--admin-border);
 }
 .admin-layout .el-input__inner { color: var(--admin-text); }
 .admin-layout .el-select .el-input__wrapper { background: var(--admin-surface); }
 .admin-layout .el-input-number .el-input__wrapper { background: var(--admin-surface); }
 
-/* Focus ring */
+/* Focus ring — 2px accent glow, unified across all form components */
 .admin-layout .el-input__wrapper.is-focus,
 .admin-layout .el-select .el-input__wrapper.is-focus,
 .admin-layout .el-select .el-input.is-focus .el-input__wrapper,
-.admin-layout .el-input-number.is-focus .el-input__wrapper {
-  box-shadow: 0 0 0 1px var(--admin-accent-light) !important;
+.admin-layout .el-input-number.is-focus .el-input__wrapper,
+.admin-layout .el-textarea__inner:focus,
+.admin-layout .el-date-editor .el-input__wrapper.is-focus,
+.admin-layout .el-cascader .el-input__wrapper.is-focus,
+.admin-layout .el-cascader.is-focus .el-input__wrapper {
+  box-shadow: 0 0 0 2px var(--admin-accent-light) !important;
   border-color: var(--admin-accent-light) !important;
+}
+
+.admin-layout .el-textarea__inner {
+  background: var(--admin-surface);
+  border-color: var(--admin-border);
+  color: var(--admin-text);
+  box-shadow: 0 0 0 1px var(--admin-border);
+}
+
+.admin-layout .el-date-editor .el-input__wrapper {
+  background: var(--admin-surface);
+  box-shadow: 0 0 0 1px var(--admin-border);
 }
 
 /* ---- Select Dropdown / Popper ---- */
@@ -860,9 +960,33 @@
 .admin-layout .el-dialog {
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-lg, 14px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
-.admin-layout .el-dialog__title { color: var(--admin-text); }
-.admin-layout .el-dialog__body { color: var(--admin-text-secondary); }
+.admin-layout .el-dialog__header {
+  padding: 20px 24px 14px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.admin-layout .el-dialog__title {
+  color: var(--admin-text);
+  font-weight: 700;
+  font-size: 16px;
+}
+.admin-layout .el-dialog__body {
+  color: var(--admin-text-secondary);
+  padding: 20px 24px;
+}
+.admin-layout .el-dialog__footer {
+  padding: 14px 24px 20px;
+  border-top: 1px solid var(--admin-border);
+}
+.admin-layout .el-dialog__headerbtn {
+  width: 32px; height: 32px;
+  font-size: 16px;
+  color: var(--admin-text-muted);
+  transition: color 0.15s;
+}
+.admin-layout .el-dialog__headerbtn:hover { color: var(--admin-accent-light); }
 
 /* ---- Table ---- */
 .admin-layout .el-table {

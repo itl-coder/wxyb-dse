@@ -1,4 +1,8 @@
-// DSE 经典错题数据 — 来源: dse-data.js
+/**
+ * 模块：mistakeData
+ * 功能：DSE 数学经典错题集，归纳常见错误类型、正解思路和解题步骤
+ * 依赖：无
+ */
 export const mistakeData = {
   '3d': [
     { title: '混淆线面角与二面角', wrong: '求二面角时忘记找交线的垂线', correct: '二面角=交线的垂线与另一平面的夹角', tip: '线面角找投影，二面角找交线垂线', tag: '立体几何',

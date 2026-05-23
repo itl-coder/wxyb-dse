@@ -9,6 +9,11 @@
 </template>
 
 <script setup>
+/**
+ * 模块：KatexDisplay
+ * 功能：MathRenderer 的轻量封装，提供更简洁的 text + inline 属性接口，用于页面中快速嵌入 LaTeX 公式
+ * 使用位置：各页面中需要展示行内或块级公式的位置
+ */
 import MathRenderer from '@/components/common/MathRenderer.vue'
 
 defineProps({

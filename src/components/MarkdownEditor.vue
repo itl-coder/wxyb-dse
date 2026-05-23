@@ -28,6 +28,11 @@
 </template>
 
 <script setup>
+/**
+ * 模块：MarkdownEditor
+ * 功能：Markdown 编辑器，支持编辑/分屏/预览三种模式，提供加粗、斜体、代码块、列表、LaTeX 公式等工具栏按钮
+ * 使用位置：管理后台中需要编辑富文本内容（含公式）的页面
+ */
 import { ref, computed } from 'vue'
 import { renderRichContent } from '@/utils/renderContent'
 

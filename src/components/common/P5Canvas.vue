@@ -3,6 +3,11 @@
 </template>
 
 <script setup>
+/**
+ * 模块：P5Canvas
+ * 功能：P5.js 画布容器，管理 p5 实例的创建/销毁生命周期，支持动态重绘和 ready 事件通知
+ * 使用位置：数学可视化页面（如几何、函数图像等需要动态绘图的场景）
+ */
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import p5 from 'p5'
 

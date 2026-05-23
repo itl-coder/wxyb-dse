@@ -131,6 +131,11 @@
 </template>
 
 <script setup>
+/**
+ * 页面：我的表现
+ * 功能：展示学习习惯总览、老师分类反馈及课堂表现记录
+ * 路由：/portal/my-performance
+ */
 import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { examService, behaviorService, homeworkService, attendanceService, portalConfigService } from '@/services/dataService'

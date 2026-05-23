@@ -113,6 +113,11 @@
 </template>
 
 <script setup>
+/**
+ * 页面：我的作业
+ * 功能：查看作业列表、跟踪提交状态、标记作业完成
+ * 路由：/portal/my-homework
+ */
 import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { homeworkService, portalConfigService } from '@/services/dataService'

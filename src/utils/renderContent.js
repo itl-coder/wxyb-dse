@@ -1,5 +1,8 @@
-// Rich content renderer using markdown-it + KaTeX
-// Supports full Markdown + LaTeX (inline $...$, display $$...$$, \(...\), \[...\])
+/**
+ * 模块：renderContent
+ * 功能：富文本渲染工具，支持 Markdown + LaTeX 数学公式（行内/块级）
+ * 依赖：markdown-it, markdown-it-katex
+ */
 
 import MarkdownIt from 'markdown-it'
 import markdownItKatex from 'markdown-it-katex'

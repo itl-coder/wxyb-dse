@@ -99,6 +99,11 @@
 </template>
 
 <script setup>
+/**
+ * 页面：做题技巧
+ * 功能：按科目和题型筛选查看考试技巧，支持 Markdown 渲染的详细内容展开
+ * 路由：/portal/my-tips
+ */
 import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { examTipService, portalConfigService } from '@/services/dataService'

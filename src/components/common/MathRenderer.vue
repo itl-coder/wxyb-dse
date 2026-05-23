@@ -30,6 +30,11 @@
 </template>
 
 <script setup>
+/**
+ * 模块：MathRenderer
+ * 功能：LaTeX 公式渲染组件，使用 KaTeX 渲染并支持 MathJax 降级，含加载态/错误态/防抖处理
+ * 使用位置：各页面中需要渲染数学公式的位置，被 KatexDisplay 等组件封装调用
+ */
 import { ref, computed, watch, onBeforeUnmount, nextTick } from 'vue'
 import katex from 'katex'
 import { sanitizeLatex } from '@/utils/latexSanitizer'

@@ -61,6 +61,11 @@
 </template>
 
 <script setup>
+/**
+ * 页面：公共首页
+ * 功能：DSE 数学专题总览入口，提供各系统模块导航及快速链接
+ * 路由：/
+ */
 import { ref, onMounted } from 'vue'
 import TopicCard from '@/components/common/TopicCard.vue'
 import { mathModules } from '@/data/moduleMeta.js'

@@ -1,3 +1,14 @@
+/**
+ * 全局状态管理 — Pinia Store
+ *
+ * 管理内容：
+ *   - 主题切换（浅色/深色，Admin/Portal 双场景）
+ *   - 侧边栏折叠状态（localStorage 持久化）
+ *   - 用户认证（登录/登出/RBAC 权限检查）
+ *   - 学校设置（水印、学期、签名等 12 项配置）
+ *   - 收藏菜单 & 最近访问菜单
+ *   - 当前学生上下文（门户端）
+ */
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { studentService, userService, roleService, MENU_DEFINITIONS, MENU_GROUP_ORDER } from '@/services/dataService'

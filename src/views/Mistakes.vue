@@ -35,6 +35,11 @@
 </template>
 
 <script setup>
+/**
+ * 页面：经典错题整理
+ * 功能：按模块查看常见易错点，对比错误与正确做法，理解错因
+ * 路由：/mistakes
+ */
 import { ref, computed } from 'vue'
 import { mistakeData } from '@/data/mistakeData.js'
 import { allMods } from '@/data/examProblems.js'

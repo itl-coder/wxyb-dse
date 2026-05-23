@@ -1,4 +1,8 @@
-// 模块元数据 — 用于 Dashboard 卡片和导航
+/**
+ * 模块：moduleMeta
+ * 功能：数学模块元数据定义，用于仪表盘卡片展示和导航配置
+ * 依赖：无
+ */
 export const mathModules = [
   { id: '3d', icon: '📦', name: '立体几何',
     desc: '3D几何体可视化 · 线面角/二面角 · 坐标法 · 轴截面技巧',

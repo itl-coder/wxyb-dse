@@ -172,6 +172,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { handoverService, shiftConfigService, portalConfigService } from '@/services/dataService'
 import html2canvas from 'html2canvas'
+import { drawWatermarkOnCanvas } from '@/composables/useWatermark'
 
 const router = useRouter()
 
@@ -233,6 +234,7 @@ async function exportImage() {
       useCORS: true,
       logging: false
     })
+    drawWatermarkOnCanvas(canvas)
     const link = document.createElement('a')
     link.download = `早晚班交接_${weekLabel.value.replace(/[–\s]/g, '_')}.png`
     link.href = canvas.toDataURL('image/png')

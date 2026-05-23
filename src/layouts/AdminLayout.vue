@@ -178,6 +178,11 @@
 </template>
 
 <script setup>
+/**
+ * 模块：AdminLayout
+ * 功能：管理后台整体布局，包含可折叠侧边栏菜单、自动展开当前路由所属菜单组、移动端适配
+ * 使用位置：router 中 admin 相关路由的父级布局组件
+ */
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'

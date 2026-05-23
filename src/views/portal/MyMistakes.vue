@@ -47,10 +47,21 @@
             @click="filterErrorType = filterErrorType === e.value ? '' : e.value"
           >{{ e.label }}</button>
         </div>
-        <button class="print-btn" @click="printMistakes">
+        <button class="fl-chip mode-chip" :class="{ on: groupMode }" @click="groupMode = !groupMode" title="切换分组视图">
+          <span v-if="groupMode">▾ 分组</span><span v-else>▸ 列表</span>
+        </button>
+        <button v-if="!printMode" class="print-btn" @click="enterPrintMode">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 12H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           打印错题卷
         </button>
+        <template v-else>
+          <button class="print-btn" style="background:var(--primary);color:#fff" @click="printSelected">
+            打印已选 ({{ selectedForPrint.length }})
+          </button>
+          <button class="fl-chip" style="font-size:11px" @click="selectAllForPrint">全选</button>
+          <button class="fl-chip" style="font-size:11px" @click="selectedForPrint = []">取消全选</button>
+          <button class="fl-chip" style="font-size:11px;color:var(--danger)" @click="printMode = false">退出</button>
+        </template>
       </div>
       <div v-if="filterSubject || filterErrorType" class="filter-active-tag">
         当前筛选：{{ filterSubject || '全部科目' }} · {{ filterErrorType ? errorTypeLabel(filterErrorType) : '全部错因' }}
@@ -67,9 +78,125 @@
       <p class="empty-desc">{{ allMistakes.length === 0 ? '继续保持！每道错题都会被记录在这里，帮助你针对性提升。' : '调整筛选条件查看其他错题。' }}</p>
     </div>
 
-    <!-- Ledger -->
+    <!-- Grouped View -->
+    <div v-else-if="groupMode" class="grouped-wrap">
+      <div
+        v-for="group in groupedMistakes"
+        :key="group.key"
+        class="gm-group"
+      >
+        <!-- Subject level -->
+        <div class="gm-subject" @click="toggleGroupOpen(group)">
+          <span class="gm-caret">{{ group._open ? '▾' : '▸' }}</span>
+          <span class="gm-subject-name">{{ group.subject }}</span>
+          <span class="gm-count">{{ group.items.length }} 题</span>
+        </div>
+
+        <div v-if="group._open" class="gm-topics">
+          <div
+            v-for="topic in group.topics"
+            :key="topic.key"
+            class="gm-topic-block"
+          >
+            <div class="gm-topic" @click="toggleTopicOpen(topic)">
+              <span class="gm-caret">{{ topic._open ? '▾' : '▸' }}</span>
+              <span class="gm-topic-name">{{ topic.topic }}</span>
+              <span class="gm-count">{{ topic.items.length }} 题</span>
+            </div>
+
+            <div v-if="topic._open" class="gm-items">
+              <div
+                v-for="(item, idx) in topic.items"
+                :key="item.id"
+                class="ledger-item"
+                :class="{ open: item._expanded, 'print-selected': printMode && selectedForPrint.some(s => s.id === item.id) }"
+              >
+                <div class="li-row" @click="printMode ? togglePrintSelect(item) : item._expanded = !item._expanded">
+                  <span v-if="printMode" class="li-chk">
+                    <input type="checkbox" :checked="selectedForPrint.some(s => s.id === item.id)" @click.stop @change="togglePrintSelect(item)" />
+                  </span>
+                  <span class="li-num">{{ idx + 1 }}</span>
+                  <span class="li-content">
+                    <span class="li-tags">
+                      <span class="tag-subject">{{ item.subject }}</span>
+                      <span class="tag-topic">{{ item.topic }}</span>
+                      <span v-if="item.count > 1" class="tag-repeat">错{{ item.count }}次</span>
+                    </span>
+                    <span class="li-text" v-html="renderQuestion(item.question)"></span>
+                  </span>
+                  <span class="li-err"><span class="err-badge" :class="'e-' + errorColorClass(item.errorType)">{{ errorTypeLabel(item.errorType) }}</span></span>
+                  <span class="li-date">{{ item.lastDate }}</span>
+                  <span class="li-caret">{{ item._expanded ? '▾' : '▸' }}</span>
+                </div>
+
+                <!-- Expanded Detail (same as flat view) -->
+                <transition name="expand">
+                  <div v-if="item._expanded" class="li-detail">
+                    <div class="detail-body">
+                      <div class="detail-main">
+                        <div class="d-section">
+                          <div class="d-sec-label">完整题目</div>
+                          <div class="d-sec-question" v-html="renderQuestion(item.question)"></div>
+                        </div>
+                        <!-- Images -->
+                        <div v-if="item.images && item.images.length" class="d-section">
+                          <div class="d-sec-label">题目附件（{{ item.images.length }}张）</div>
+                          <div class="d-images-grid">
+                            <img
+                              v-for="(img, iidx) in item.images" :key="iidx"
+                              :src="img" class="d-image"
+                              @click="previewImage = img"
+                              loading="lazy"
+                            />
+                          </div>
+                        </div>
+                        <div class="d-section">
+                          <div class="d-sec-label">重新作答</div>
+                          <textarea v-model="item._draftAnswer" class="d-textarea" rows="3" placeholder="在此写下你的答案……" @click.stop></textarea>
+                          <button class="d-compare-btn" @click.stop="item._showCompare = !item._showCompare; if (item._showCompare) submitInlineRedo(item)">{{ item._showCompare ? '刷新对比' : '提交并查看答案对比' }}</button>
+                        </div>
+                        <div v-if="item._showCompare" class="d-compare">
+                          <div class="dc-col dc-you">
+                            <div class="dc-label">你的答案</div>
+                            <p>{{ item._draftAnswer || '（未填写）' }}</p>
+                          </div>
+                          <div class="dc-col dc-std">
+                            <div class="dc-label">标准答案</div>
+                            <p>{{ item.correctAnswer || '请参阅教师提供的标准答案' }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="detail-side">
+                        <div class="ds-card">
+                          <div class="ds-row"><span>科目</span><span>{{ item.subject }}</span></div>
+                          <div class="ds-row"><span>知识点</span><span>{{ item.topic }}</span></div>
+                          <div class="ds-row" v-if="item.chapter"><span>章节</span><span>{{ item.chapter }}</span></div>
+                          <div class="ds-row" v-if="item.difficulty"><span>难度</span><span>{{ '★'.repeat(item.difficulty) }}</span></div>
+                          <div class="ds-row" v-if="item.knowledgePoint"><span>考点</span><span>{{ item.knowledgePoint }}</span></div>
+                          <div class="ds-row"><span>错因</span><span class="e-txt" :class="'e-' + errorColorClass(item.errorType)">{{ errorTypeLabel(item.errorType) }}</span></div>
+                          <div class="ds-row"><span>错误次数</span><span>{{ item.count }} 次</span></div>
+                          <div class="ds-row"><span>最近记录</span><span>{{ item.lastDate }}</span></div>
+                        </div>
+                        <div class="ds-hint">
+                          <div class="d-sec-label">提升建议</div>
+                          <p v-if="item.solution">{{ item.solution }}</p>
+                          <p v-else>回顾「{{ item.topic }}」相关概念，重点排查「{{ errorTypeLabel(item.errorType) }}」类错误。同类题目再练2-3道巩固。</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </transition>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flat Ledger -->
     <div v-else class="ledger-wrap">
       <div class="ledger-head">
+        <span v-if="printMode" class="col-chk"></span>
         <span class="col-num">#</span>
         <span class="col-q">题目内容</span>
         <span class="col-e">错因</span>
@@ -80,10 +207,12 @@
         v-for="(e, idx) in filteredMistakes"
         :key="e.id"
         class="ledger-item"
-        :class="{ open: e._expanded }"
+        :class="{ open: e._expanded, 'print-selected': printMode && selectedForPrint.some(s => s.id === e.id) }"
       >
-        <!-- Row -->
-        <div class="li-row" @click="e._expanded = !e._expanded">
+        <div class="li-row" @click="printMode ? togglePrintSelect(e) : e._expanded = !e._expanded">
+          <span v-if="printMode" class="li-chk">
+            <input type="checkbox" :checked="selectedForPrint.some(s => s.id === e.id)" @click.stop @change="togglePrintSelect(e)" />
+          </span>
           <span class="li-num">{{ idx + 1 }}</span>
           <span class="li-content">
             <span class="li-tags">
@@ -91,35 +220,38 @@
               <span class="tag-topic">{{ e.topic }}</span>
               <span v-if="e.count > 1" class="tag-repeat">错{{ e.count }}次</span>
             </span>
-            <span class="li-text">{{ e.question }}</span>
+            <span class="li-text"><span v-html="renderQuestion(e.question)"></span></span>
           </span>
           <span class="li-err"><span class="err-badge" :class="'e-' + errorColorClass(e.errorType)">{{ errorTypeLabel(e.errorType) }}</span></span>
           <span class="li-date">{{ e.lastDate }}</span>
           <span class="li-caret">{{ e._expanded ? '▾' : '▸' }}</span>
         </div>
 
-        <!-- Expanded -->
         <transition name="expand">
           <div v-if="e._expanded" class="li-detail">
             <div class="detail-body">
               <div class="detail-main">
-                <!-- Full Question -->
                 <div class="d-section">
                   <div class="d-sec-label">完整题目</div>
-                  <div class="d-sec-question">{{ e.question }}</div>
+                  <div class="d-sec-question"><span v-html="renderQuestion(e.question)"></span></div>
                 </div>
-
-                <!-- Inline redo -->
+                <!-- Images -->
+                <div v-if="e.images && e.images.length" class="d-section">
+                  <div class="d-sec-label">题目附件（{{ e.images.length }}张）</div>
+                  <div class="d-images-grid">
+                    <img
+                      v-for="(img, iidx) in e.images" :key="iidx"
+                      :src="img" class="d-image"
+                      @click="previewImage = img"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
                 <div class="d-section">
                   <div class="d-sec-label">重新作答</div>
                   <textarea v-model="e._draftAnswer" class="d-textarea" rows="3" placeholder="在此写下你的答案……" @click.stop></textarea>
-                  <button
-                    class="d-compare-btn"
-                    @click.stop="e._showCompare = !e._showCompare; if (e._showCompare) submitInlineRedo(e)"
-                  >{{ e._showCompare ? '刷新对比' : '提交并查看答案对比' }}</button>
+                  <button class="d-compare-btn" @click.stop="e._showCompare = !e._showCompare; if (e._showCompare) submitInlineRedo(e)">{{ e._showCompare ? '刷新对比' : '提交并查看答案对比' }}</button>
                 </div>
-
-                <!-- Compare result -->
                 <div v-if="e._showCompare" class="d-compare">
                   <div class="dc-col dc-you">
                     <div class="dc-label">你的答案</div>
@@ -132,11 +264,13 @@
                 </div>
               </div>
 
-              <!-- Sidebar -->
               <div class="detail-side">
                 <div class="ds-card">
                   <div class="ds-row"><span>科目</span><span>{{ e.subject }}</span></div>
                   <div class="ds-row"><span>知识点</span><span>{{ e.topic }}</span></div>
+                  <div class="ds-row" v-if="e.chapter"><span>章节</span><span>{{ e.chapter }}</span></div>
+                  <div class="ds-row" v-if="e.difficulty"><span>难度</span><span>{{ '★'.repeat(e.difficulty) }}</span></div>
+                  <div class="ds-row" v-if="e.knowledgePoint"><span>考点</span><span>{{ e.knowledgePoint }}</span></div>
                   <div class="ds-row"><span>错因</span><span class="e-txt" :class="'e-' + errorColorClass(e.errorType)">{{ errorTypeLabel(e.errorType) }}</span></div>
                   <div class="ds-row"><span>错误次数</span><span>{{ e.count }} 次</span></div>
                   <div class="ds-row"><span>最近记录</span><span>{{ e.lastDate }}</span></div>
@@ -166,7 +300,7 @@
           <span>{{ redoItem.topic }}</span><span class="rd-dot">·</span>
           <span class="rd-err">{{ errorTypeLabel(redoItem.errorType) }}</span>
         </div>
-        <div class="rd-qcard"><p>{{ redoItem.question }}</p></div>
+        <div class="rd-qcard" v-html="renderQuestion(redoItem.question)"></div>
         <div class="rd-input">
           <label class="rd-label">你的答案</label>
           <textarea v-model="redoAnswer" class="rd-textarea" rows="4" placeholder="请在此重新作答……"></textarea>
@@ -183,6 +317,13 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- Image Lightbox -->
+    <el-dialog :model-value="!!previewImage" title="题目附件预览" width="80%" top="3vh" :close-on-click-modal="true" @close="previewImage = null">
+      <div style="text-align:center">
+        <img :src="previewImage" style="max-width:100%;max-height:75vh;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.12)" />
+      </div>
+    </el-dialog>
   </div>
 
   <div v-else class="loading-state">
@@ -192,21 +333,40 @@
 </template>
 
 <script setup>
+/**
+ * 页面：我的错题本
+ * 功能：查看、筛选和重做错题，支持按科目与错因分类，可打印错题卷
+ * 路由：/portal/my-mistakes
+ * 新增：四级分组视图（学科→章节→难度→知识点）、打印净化（仅保留题目+答案+解析）
+ */
 import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { errorBookService } from '@/services/dataService'
 import { settingsService } from '@/services/dataService'
+import { renderRichContent } from '@/utils/renderContent'
 import { ElMessage } from 'element-plus'
 
 const store = useAppStore()
 const student = computed(() => store.currentStudent)
+
+function renderQuestion(text) {
+  if (!text) return ''
+  return renderRichContent(text)
+}
 const allMistakes = ref([])
 const filterSubject = ref('')
 const filterErrorType = ref('')
+const groupMode = ref(false)
 const redoVisible = ref(false)
 const redoItem = ref(null)
 const redoAnswer = ref('')
 const redoSubmitted = ref(false)
+const printMode = ref(false)
+const selectedForPrint = ref([])
+const previewImage = ref(null)
+
+const COLLAPSE_KEY = 'dse_mistakes_collapse'
+const collapseState = ref(loadCollapseState())
 
 const errorTypeMap = {
   calc: '计算失误', concept: '概念不清', reading: '审题偏差',
@@ -245,14 +405,100 @@ const topErrorType = computed(() => {
   return sorted.length > 0 ? sorted[0][0] : '—'
 })
 
+// 分组视图：subject → topic → items
+const groupedMistakes = computed(() => {
+  const subjectMap = {}
+  filteredMistakes.value.forEach(e => {
+    const subj = e.subject || '未分类'
+    if (!subjectMap[subj]) subjectMap[subj] = {}
+    const topic = e.topic || e.chapter || '其他'
+    if (!subjectMap[subj][topic]) subjectMap[subj][topic] = []
+    subjectMap[subj][topic].push(e)
+  })
+  return Object.entries(subjectMap).map(([subject, topicMap]) => ({
+    key: subject,
+    subject,
+    _open: collapseState.value[subject] !== false, // 默认展开
+    items: Object.values(topicMap).flat(),
+    topics: Object.entries(topicMap).map(([topic, items]) => ({
+      key: `${subject}/${topic}`,
+      topic,
+      _open: collapseState.value[`${subject}/${topic}`] === true, // 默认折叠
+      items
+    }))
+  })).sort((a, b) => a.subject.localeCompare(b.subject))
+})
+
 onMounted(() => {
   if (!store.currentStudentId) return
   allMistakes.value = errorBookService.getByStudent(store.currentStudentId).map(e => ({
-    ...e, _expanded: false, _draftAnswer: '', _showCompare: false
+    ...e,
+    chapter: e.chapter || '',
+    difficulty: e.difficulty || 0,
+    knowledgePoint: e.knowledgePoint || '',
+    formulas: e.formulas || [],
+    solutionImage: e.solutionImage || '',
+    images: e.images || [],
+    _expanded: false, _draftAnswer: '', _showCompare: false
   }))
 })
 
 function clearFilters() { filterSubject.value = ''; filterErrorType.value = '' }
+
+// ====== Print Selection ======
+function enterPrintMode() {
+  printMode.value = true
+  selectedForPrint.value = []
+}
+
+function togglePrintSelect(item) {
+  const idx = selectedForPrint.value.findIndex(s => s.id === item.id)
+  if (idx >= 0) selectedForPrint.value.splice(idx, 1)
+  else selectedForPrint.value.push(item)
+}
+
+function selectAllForPrint() {
+  selectedForPrint.value = [...filteredMistakes.value]
+}
+
+function printSelected() {
+  const items = selectedForPrint.value.length ? selectedForPrint.value : filteredMistakes.value
+  if (items.length === 0) { ElMessage.warning('没有错题可打印'); return }
+  doPrint(items)
+  printMode.value = false
+  selectedForPrint.value = []
+}
+
+// ====== Collapse State Persistence ======
+function loadCollapseState() {
+  try {
+    const raw = sessionStorage.getItem(COLLAPSE_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch { return {} }
+}
+
+function persistCollapse() {
+  const state = {}
+  for (const g of groupedMistakes.value) {
+    if (!g._open) state[g.key] = false
+    for (const t of g.topics) {
+      if (t._open) state[t.key] = true
+    }
+  }
+  sessionStorage.setItem(COLLAPSE_KEY, JSON.stringify(state))
+}
+
+function toggleGroupOpen(group) {
+  group._open = !group._open
+  collapseState.value[group.key] = group._open
+  persistCollapse()
+}
+
+function toggleTopicOpen(topic) {
+  topic._open = !topic._open
+  collapseState.value[topic.key] = topic._open
+  persistCollapse()
+}
 
 function openRedo(e) {
   redoItem.value = e; redoAnswer.value = e._draftAnswer || ''
@@ -274,34 +520,39 @@ function submitInlineRedo(e) {
 function printMistakes() {
   const items = filteredMistakes.value
   if (items.length === 0) { ElMessage.warning('当前筛选条件下没有错题可打印'); return }
+  doPrint(items)
+}
+
+function doPrint(items) {
+  if (items.length === 0) { ElMessage.warning('没有错题可打印'); return }
 
   const now = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
-  const sname = student.value?.name || '________'
-  const sclass = student.value?.class || '________'
   const subjects = [...new Set(items.map(e => e.subject))].join('、')
   const wmConfig = settingsService.get()
   const wmOn = wmConfig.watermarkEnabled !== false
   const wmText = wmConfig.watermarkText || '内部资料·仅供学生使用'
-  const wmCells = Array.from({ length: 20 }, () => `<div class="wm-cell"><span>${wmText}</span></div>`).join('')
+  const wmCells = Array.from({ length: 20 }, () => `<div class="wmc"><span>${wmText}</span></div>`).join('')
 
+  // Print cleanup: only question + answer + analysis, no student info
   const qItems = items.map((e, i) => `
     <div class="ei">
       <div class="ei-head">
         <span class="ei-num">${i + 1}.</span>
         <span class="ei-subj">${e.subject}</span>
         <span class="ei-topic">${e.topic}</span>
-        <span class="ei-err">错因：${errorTypeLabel(e.errorType)}</span>
-        <span class="ei-cnt">（错${e.count}次）</span>
+        <span class="ei-err">${errorTypeLabel(e.errorType)}</span>
       </div>
-      <div class="ei-q">${e.question}</div>
-      <div class="ei-ans"><span>作答：</span><span class="ei-dots">${'...................................................................................................................................................'}</span></div>
+      <div class="ei-q">${renderRichContent(e.question)}</div>
+      ${e.correctAnswer ? `<div class="ei-ans-key"><span class="ei-ans-label">参考答案：</span>${e.correctAnswer}</div>` : ''}
+      ${e.analysis ? `<div class="ei-analysis"><span class="ei-ans-label">解析：</span>${e.analysis}</div>` : ''}
+      <div class="ei-redo"><span>作答：</span><span class="ei-dots">${'...................................................................................................................................................'}</span></div>
     </div>`).join('\n')
 
   const html = `<!DOCTYPE html>
 <html lang="zh-HK">
 <head>
 <meta charset="utf-8">
-<title>错题巩固练习卷 — ${sname}</title>
+<title>错题巩固练习卷</title>
 <style>
   @page { size: A4; margin: 16mm 18mm 18mm 18mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -314,26 +565,24 @@ function printMistakes() {
   .wmc { display: flex; align-items: center; justify-content: center; opacity: 0.05; }
   .wmc span { font-size: 16px; color: rgba(0,0,0,0.06); font-weight: 500; white-space: nowrap; }
   .ph { text-align: center; border-bottom: 2px solid #1a2e3c; padding-bottom: 16px; margin-bottom: 14px; }
-  .ph-school { font-size: 11px; color: #666; letter-spacing: 0.3em; margin-bottom: 8px; }
   .ph-title { font-size: 22px; font-weight: 700; letter-spacing: 0.15em; color: #1a2e3c; }
-  .ph-sub { font-size: 10px; color: #888; margin-top: 4px; letter-spacing: 0.1em; }
+  .ph-sub { font-size: 10px; color: #888; margin-top: 4px; }
   .pi { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #444; margin-bottom: 10px; padding: 0 4px; }
-  .pif { display: inline-flex; align-items: center; gap: 4px; }
-  .blank { display: inline-block; min-width: 64px; border-bottom: 1px solid #333; }
-  .blank.w { min-width: 100px; }
   .pscore { font-weight: 700; font-size: 14px; color: #1a2e3c; border: 1px solid #1a2e3c; padding: 3px 16px; border-radius: 2px; }
   hr.pdiv { border: none; border-top: 1px dashed #ccc; margin: 10px 0 14px; }
   .eis { display: flex; flex-direction: column; gap: 10px; }
-  .ei { padding: 10px 0; border-bottom: 1px dotted #e0e0e0; break-inside: avoid; page-break-inside: avoid; }
+  .ei { padding: 12px 0; border-bottom: 1px dotted #e0e0e0; break-inside: avoid; page-break-inside: avoid; }
   .ei-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
   .ei-num { font-weight: 700; font-size: 14px; color: #1a2e3c; min-width: 24px; }
   .ei-subj { font-size: 10px; color: #666; border: 1px solid #ccc; padding: 1px 8px; border-radius: 3px; }
   .ei-topic { font-size: 10px; color: #888; background: #f5f5f5; padding: 1px 8px; border-radius: 3px; }
   .ei-err { font-size: 10px; color: #c47a5a; }
-  .ei-cnt { font-size: 10px; color: #aaa; }
-  .ei-q { font-size: 13px; line-height: 1.8; padding: 4px 0 6px 28px; }
-  .ei-ans { padding-left: 28px; font-size: 12px; line-height: 2.2; }
-  .ei-ans span { color: #999; font-size: 11px; }
+  .ei-q { font-size: 14px; line-height: 1.8; padding: 4px 0 6px 0; font-weight: 500; }
+  .ei-ans-key { font-size: 12px; color: #047857; padding: 6px 0; line-height: 1.6; }
+  .ei-ans-label { font-weight: 600; font-size: 11px; }
+  .ei-analysis { font-size: 12px; color: #555; padding: 4px 0; line-height: 1.6; font-style: italic; }
+  .ei-redo { padding-top: 8px; font-size: 12px; line-height: 2.2; }
+  .ei-redo span { color: #999; font-size: 11px; }
   .ei-dots { color: #d0d0d0; letter-spacing: -1px; }
   .pf { text-align: center; margin-top: 24px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 10px; color: #aaa; letter-spacing: 0.1em; }
   @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
@@ -341,38 +590,26 @@ function printMistakes() {
 </head>
 <body>
 <div class="wmo"><div class="wmg">${wmCells}</div></div>
-<div class="ph"><div class="ph-school">DSE 学情问诊系统</div><div class="ph-title">错 题 巩 固 练 习 卷</div><div class="ph-sub">针对个人薄弱环节 · 精准巩固提升</div></div>
+<div class="ph"><div class="ph-title">错 题 巩 固 练 习 卷</div><div class="ph-sub">针对薄弱环节 · 精准巩固提升</div></div>
 <div class="pi">
-  <span>
-    <span class="pif">姓名：<span class="blank">${sname}</span></span>
-    <span class="pif" style="margin-left:24px">班级：<span class="blank">${sclass}</span></span>
-    <span class="pif" style="margin-left:24px">日期：<span class="blank w">${now}</span></span>
-  </span>
+  <span>日期：${now} · 涵盖：${subjects}</span>
   <span class="pscore">共 ${items.length} 题</span>
 </div>
-<div class="pi" style="font-size:11px;color:#888;margin-bottom:4px"><span>涵盖科目：${subjects}</span></div>
 <hr class="pdiv">
 <div class="eis">${qItems}</div>
 <div class="pf">认真订正每道错题 · 把薄弱点变成得分点</div>
 </body>
 </html>`
 
-  // CRITICAL: set onload BEFORE write/close so it fires reliably
   const w = window.open('', '_blank', 'width=900,height=700')
   if (!w) { ElMessage.error('打印窗口被浏览器拦截，请允许弹窗后重试'); return }
   w.document.open()
   w.document.write(html)
   w.document.close()
-  // Use requestAnimationFrame to ensure rendering completes before printing
   w.focus()
-  const doPrint = () => {
-    try { w.print() } catch (_) { /* ok */ }
-  }
-  // Both onload and a backup setTimeout for reliability
+  const doPrint = () => { try { w.print() } catch (_) { /* ok */ } }
   w.onload = () => { setTimeout(doPrint, 200) }
-  setTimeout(() => {
-    if (w.document.readyState === 'complete') doPrint()
-  }, 600)
+  setTimeout(() => { if (w.document.readyState === 'complete') doPrint() }, 600)
 }
 </script>
 
@@ -499,6 +736,10 @@ function printMistakes() {
 .fl-chip i { font-style: normal; opacity: 0.5; font-size: 10px; }
 .fl-chip.on i { opacity: 0.75; }
 
+/* mode chip */
+.mode-chip { font-size: 11px; font-weight: 500; margin-left: 4px; }
+.mode-chip.on { background: var(--accent-d); border-color: var(--accent-d); }
+
 /* error dot chips */
 .err-dot::before { content: ''; width: 7px; height: 7px; border-radius: 50%; margin-right: 2px; flex-shrink: 0; }
 .dot-calc::before    { background: #f59e0b; }
@@ -540,8 +781,44 @@ function printMistakes() {
 .empty-title { font-size: 15px; font-weight: 600; color: var(--text-secondary); margin: 0 0 4px; }
 .empty-desc { font-size: 12px; color: var(--text-muted); margin: 0; }
 
+/* ---- Grouped View ---- */
+.grouped-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  margin-bottom: 20px;
+}
+.gm-group { border-bottom: 1px solid var(--border-light); }
+.gm-group:last-child { border-bottom: none; }
+.gm-subject {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 20px; cursor: pointer; user-select: none;
+  background: linear-gradient(180deg, var(--bg-warm), var(--card-bg-warm));
+  font-weight: 700; font-size: 14px; color: var(--primary);
+  transition: background 0.15s;
+}
+.gm-subject:hover { background: rgba(196,122,90,0.06); }
+.gm-caret { font-size: 10px; color: var(--text-muted); width: 14px; flex-shrink: 0; }
+.gm-subject-name { flex: 1; }
+.gm-count { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+.gm-topics { border-top: 1px solid var(--border-lighter); }
+.gm-topic-block { border-bottom: 1px solid var(--border-lighter); }
+.gm-topic-block:last-child { border-bottom: none; }
+.gm-topic {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 20px 9px 32px; cursor: pointer; user-select: none;
+  font-size: 12px; font-weight: 600; color: var(--text-primary);
+  transition: background 0.12s;
+}
+.gm-topic:hover { background: rgba(196,122,90,0.025); }
+.gm-topic-name { flex: 1; }
+
+.gm-items { padding: 0; }
+
 /* ========================================
-   Ledger
+   Ledger (flat view)
    ======================================== */
 
 .ledger-wrap {
@@ -553,7 +830,6 @@ function printMistakes() {
   margin-bottom: 20px;
 }
 
-/* leder header */
 .ledger-head {
   display: flex;
   align-items: center;
@@ -568,12 +844,20 @@ function printMistakes() {
   text-transform: uppercase;
 }
 
+.col-chk { width: 28px; flex-shrink: 0; }
 .col-num { width: 32px; flex-shrink: 0; }
 .col-q   { flex: 1; min-width: 0; }
 .col-e   { width: 88px; flex-shrink: 0; }
 .col-d   { width: 60px; flex-shrink: 0; text-align: right; }
 
-/* ledger item */
+/* Print selection */
+.li-chk { flex-shrink: 0; display: flex; align-items: center; padding: 0 2px; }
+.li-chk input[type="checkbox"] {
+  width: 15px; height: 15px; cursor: pointer; accent-color: var(--primary);
+}
+.ledger-item.print-selected { background: rgba(196,122,90,0.06); }
+.gm-items .ledger-item.print-selected { background: rgba(196,122,90,0.06); }
+
 .ledger-item {
   border-bottom: 1px solid var(--border-lighter);
   transition: background 0.15s;
@@ -582,7 +866,6 @@ function printMistakes() {
 .ledger-item:hover { background: rgba(196,122,90,0.025); }
 .ledger-item.open { background: rgba(196,122,90,0.04); }
 
-/* row */
 .li-row {
   display: flex;
   align-items: center;
@@ -679,6 +962,18 @@ function printMistakes() {
   border: 1px solid var(--border-lighter);
 }
 
+/* Image grid */
+.d-images-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+.d-image {
+  width: 100%; aspect-ratio: 4/3; object-fit: cover;
+  border-radius: 6px; border: 1px solid var(--border-lighter);
+  cursor: pointer; transition: transform 0.18s, box-shadow 0.18s;
+}
+.d-image:hover { transform: scale(1.04); box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
+
 .d-textarea {
   width: 100%; padding: 10px 14px;
   border: 1px solid var(--border-base); border-radius: 8px;
@@ -712,7 +1007,6 @@ function printMistakes() {
 .dc-std .dc-label { color: #047857; }
 .dc-col p { margin: 0; }
 
-/* detail sidebar */
 .detail-side { min-width: 0; }
 
 .ds-card {
@@ -745,12 +1039,10 @@ function printMistakes() {
   overflow: hidden;
 }
 .expand-enter-from, .expand-leave-to {
-  opacity: 0;
-  max-height: 0;
+  opacity: 0; max-height: 0;
 }
 .expand-enter-to, .expand-leave-from {
-  opacity: 1;
-  max-height: 600px;
+  opacity: 1; max-height: 600px;
 }
 
 /* ---- Page Foot ---- */

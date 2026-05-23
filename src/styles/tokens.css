@@ -263,6 +263,15 @@
   --admin-shadow-sm:       0 1px 3px rgba(0, 0, 0, 0.4);
   --admin-shadow:          0 4px 16px rgba(0, 0, 0, 0.5);
   --admin-shadow-lg:       0 8px 32px rgba(0, 0, 0, 0.6);
+ 
+	/* 座位状态颜色（暗色主题 — 深色底 + 微弱色彩区分，不刺眼） */
+	--seat-color-normal:    #162040;
+	--seat-color-empty:     #0d1525;
+	--seat-color-blocked:   #2d3548;
+	--seat-color-absent:    #3d1f1f;
+	--seat-color-special:   #2d2a10;
+	--seat-color-exclusive: #1a2d20;
+	--seat-color-reserved:  #201e35;
 }
 
 /* ============================================================
@@ -303,6 +312,34 @@
   --admin-shadow-sm:        0 1px 3px rgba(49, 46, 129, 0.05);
   --admin-shadow:           0 4px 16px rgba(49, 46, 129, 0.07);
   --admin-shadow-lg:        0 8px 32px rgba(49, 46, 129, 0.1);
+}
+
+/* ============================================================
+   表格密度控制变量
+   ============================================================ */
+:root {
+  --table-density-compact-row:  28px;
+  --table-density-default-row:  40px;
+  --table-density-loose-row:    52px;
+  --table-density-compact-font: 10px;
+  --table-density-default-font: 12px;
+  --table-density-loose-font:   13px;
+  --table-density-compact-pad:  4px 8px;
+  --table-density-default-pad:  6px 10px;
+  --table-density-loose-pad:    8px 14px;
+}
+
+/* ============================================================
+   考场座位状态颜色（统一色板）
+   ============================================================ */
+:root {
+  --seat-color-normal:    #ffffff;
+  --seat-color-empty:     #f0f0f0;
+  --seat-color-blocked:   #6e7a8a;
+  --seat-color-absent:    #ffcccc;
+  --seat-color-special:   #ffffcc;
+  --seat-color-exclusive: #ccffcc;
+  --seat-color-reserved:  #f0e6ff;
 }
 
 /* ============================================================

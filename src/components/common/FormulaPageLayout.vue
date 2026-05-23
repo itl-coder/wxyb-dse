@@ -37,6 +37,11 @@
 </template>
 
 <script setup>
+/**
+ * 模块：FormulaPageLayout
+ * 功能：公式页面三段式布局（左导航 / 中主内容 / 右详情），支持拖拽调整面板宽度和移动端折叠适配
+ * 使用位置：公式库、知识点等需要左侧导航 + 右侧详情辅助的内容展示页面
+ */
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({

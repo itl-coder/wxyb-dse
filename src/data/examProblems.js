@@ -1,4 +1,8 @@
-// DSE 练习题库数据 — 来源: dse-data.js
+/**
+ * 模块：examProblems
+ * 功能：DSE 数学练习题库，包含各模块练习题及其解题步骤和评分要点
+ * 依赖：无
+ */
 export const examTypes = ['基础', '月考', '期中', '期末', '一模', '二模', '三模', '四模', 'DSE真题']
 
 export const examModuleTags = {

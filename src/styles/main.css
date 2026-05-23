@@ -1311,6 +1311,19 @@ body {
   border-radius: var(--radius);
 }
 
+/* Global el-input focus ring — catches teleported dialogs & portal pages outside .admin-layout */
+.el-input__wrapper:focus,
+.el-input__wrapper.is-focus,
+.el-select .el-input__wrapper.is-focus,
+.el-select .el-input.is-focus .el-input__wrapper,
+.el-input-number.is-focus .el-input__wrapper,
+.el-textarea__inner:focus,
+.el-date-editor .el-input__wrapper.is-focus,
+.el-cascader .el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 2px var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .system-entries.has-handover {

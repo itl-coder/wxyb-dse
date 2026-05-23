@@ -107,6 +107,30 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-10"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-05-22T00:00:00+08:00",
+      "error_message": "StudentPool drag-to-grid target detection always fails — uses outdated CSS class selectors .sg-cell / .sg-grid",
+      "file": "src/views/admin/exams/exam-seat/components/StudentPool.vue",
+      "root_cause": "The onEnd drag handler used document.elementFromPoint() with .closest('.sg-cell') and .closest('.sg-grid'), but SeatGrid.vue uses .sg-td-seat for cells and .sg-table for the grid. These class selectors were never updated when SeatGrid was refactored.",
+      "fix": "Updated selectors to .sg-td-seat (cell) and .sg-table (grid), matching the current SeatGrid markup. Also extracted findDropTarget() helper for clarity and added touch event support via changedTouches fallback.",
+      "tags": ["drag", "sortablejs", "class-selectors", "seat-grid", "student-pool"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-05-23T00:00:00+08:00",
+      "error_message": "seatAllocator.js exclusive classroom constraint incomplete — 4 defects: (1) warnings.push() called before const warnings declaration, (2) groupByClass dead code referencing undefined variable, (3) fallback retry loop missing exclusiveClassId checks, (4) greedy loop allowed exclusive-class students into non-exclusive rooms",
+      "file": "src/views/admin/exams/exam-seat/utils/seatAllocator.js, src/views/admin/exams/exam-seat/store/examSeatStore.js, src/views/admin/exams/exam-seat/components/ImportExcelDialog.vue",
+      "root_cause": "Exclusive classroom feature was partially implemented. The store-level validateExclusiveRules() gate existed but the seat allocator algorithm had no exclusive constraint awareness — no pre-computed class→room mapping, no constraint in greedy/fallback loops. groupByClass option was removed from destructure but its 56-line code branch remained as dead code. warnings array was used before declaration.",
+      "fix": "1) Moved warnings declaration before capacity check, changed to fail-fast error return 2) Removed groupByClass dead code block (~56 lines) 3) Added exclusiveClassRoomMap pre-computation 4) Added exclusive constraint to greedy loop (Bug B) 5) Added exclusive constraint to fallback retry loop (Bug A) 6) Removed groupByClass checkbox/ref/logic from ImportExcelDialog.vue",
+      "tags": ["exclusive-classroom", "seat-allocator", "constraint", "dead-code", "reference-error"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-23"
     }
   ]
 }
