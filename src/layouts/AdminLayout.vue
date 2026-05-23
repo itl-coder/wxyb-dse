@@ -5,7 +5,7 @@
 
     <!-- Sidebar -->
     <aside class="admin-sidebar" :class="{ open: sidebarOpen, collapsed: store.sidebarCollapsed }">
-      <div class="admin-sidebar-logo">
+      <div class="admin-sidebar-logo" @click="$router.push('/admin')" style="cursor:pointer" title="返回管理后台首页">
         <div class="logo-icon">学</div>
         <div>
           <div class="logo-text">DSE AI 学情问诊</div>
@@ -155,6 +155,9 @@
           </button>
           <button class="header-btn" title="切换至学生端" @click="$router.push('/portal')">
             👁️
+          </button>
+          <button class="header-btn" title="返回前台首页" @click="$router.push('/')">
+            🏠
           </button>
           <button class="header-btn header-btn-logout" title="退出登录" @click="handleLogout">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
