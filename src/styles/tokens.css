@@ -40,7 +40,7 @@
   --color-gray-100: #F5F2ED;
   --color-gray-200: #EDEAE6;
   --color-gray-300: #E0DDD8;
-  --color-gray-400: #C0BDB;
+  --color-gray-400: #C0BDB8;
   --color-gray-500: #A0A0B0;
   --color-gray-600: #78788E;
   --color-gray-700: #4A4A5E;
@@ -216,6 +216,15 @@
   --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.25);
   --shadow-dark:  0 8px 32px rgba(0, 0, 0, 0.5);
   --shadow-warm:  0 4px 20px rgba(99, 102, 241, 0.08);
+
+  /* 座位状态颜色（暗色主题 — 深色底 + 微弱色彩区分） */
+  --seat-color-normal:    #1a2040;
+  --seat-color-empty:     #0f1528;
+  --seat-color-blocked:   #2a3048;
+  --seat-color-absent:    #3d1f1f;
+  --seat-color-special:   #2d2a10;
+  --seat-color-exclusive: #1a2d20;
+  --seat-color-reserved:  #201e35;
 }
 
 /* ============================================================
@@ -312,6 +321,15 @@
   --admin-shadow-sm:        0 1px 3px rgba(49, 46, 129, 0.05);
   --admin-shadow:           0 4px 16px rgba(49, 46, 129, 0.07);
   --admin-shadow-lg:        0 8px 32px rgba(49, 46, 129, 0.1);
+
+  /* 座位状态颜色（浅色主题） */
+  --seat-color-normal:    #ffffff;
+  --seat-color-empty:     #f0f0f0;
+  --seat-color-blocked:   #6e7a8a;
+  --seat-color-absent:    #ffcccc;
+  --seat-color-special:   #ffffcc;
+  --seat-color-exclusive: #ccffcc;
+  --seat-color-reserved:  #f0e6ff;
 }
 
 /* ============================================================

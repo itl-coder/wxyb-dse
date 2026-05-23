@@ -34,9 +34,9 @@
         >{{ r.name }}<small>{{ r.rows }}×{{ r.cols }} · {{ r.rows * r.cols }}座</small></button>
       </nav>
 
-      <!-- 座位表主体 -->
-      <div v-if="currentRoom" class="mes-body" :class="'mes-' + orientation" :style="bodyStyle">
-        <!-- 信息栏 + 图例（同一行） -->
+      <!-- 教室场景主体 -->
+      <div v-if="currentRoom" class="mes-body" :class="'mes-' + orientation">
+        <!-- 信息栏 + 图例 -->
         <div class="mes-topbar">
           <div class="mes-info">
             <span v-if="currentRoom.examSubject" class="mes-tag">{{ currentRoom.examSubject }}</span>
@@ -53,45 +53,117 @@
 
         <!-- 门口指示 -->
         <div class="mes-door-bar">
-          <span class="mes-door-arrow">→</span> 前门 · 进场方向
+          <span class="mes-door-arrow">→</span> 前门进场方向
           <span class="mes-door-dot-hint">● 第一位考生</span>
         </div>
 
-        <!-- 座位表 -->
-        <div class="mes-grid-wrap">
-          <table class="mes-grid">
-            <colgroup>
-              <col v-if="cfg.showRowColLabels" class="mes-col-rowlabel">
-              <col v-for="c in currentRoom.cols" :key="c" class="mes-col-seat">
-            </colgroup>
-            <thead v-if="cfg.showRowColLabels">
-              <tr>
-                <th class="mes-th-corner"></th>
-                <th v-for="c in currentRoom.cols" :key="c" class="mes-th-col">{{ colLabel(c) }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="r in displayRows" :key="r">
-                <td v-if="cfg.showRowColLabels" class="mes-td-row">{{ r }}</td>
-                <td
-                  v-for="c in currentRoom.cols" :key="c"
-                  class="mes-td-seat"
-                  :class="seatCellClass(r, c)"
-                  :style="cellStyle"
+        <!-- ======== 教室场景 ======== -->
+        <div class="mes-classroom">
+          <!-- 天花板灯光 -->
+          <div class="mes-ceiling">
+            <div class="mes-light-fixture" v-for="i in lightCount" :key="i">
+              <div class="mes-light-tube"></div>
+              <div class="mes-light-glow"></div>
+            </div>
+          </div>
+
+          <div class="mes-room-interior">
+            <!-- 左墙窗户 -->
+            <div class="mes-wall-left">
+              <div class="mes-wall-window" v-for="i in windowCount" :key="i">
+                <div class="mes-window-pane"></div>
+              </div>
+            </div>
+
+            <!-- 右墙 -->
+            <div class="mes-wall-right">
+              <span class="mes-wall-notice">考场</span>
+            </div>
+
+            <!-- 前墙黑板 -->
+            <div class="mes-wall-front">
+              <div class="mes-blackboard-frame">
+                <div class="mes-blackboard">
+                  <div class="mes-blackboard-inner">
+                    <span class="mes-bb-title">{{ currentRoom.examSubject || '考试座位表' }}</span>
+                    <span class="mes-bb-sub">{{ currentRoom.name }} · {{ currentRoom.rows }}×{{ currentRoom.cols }}</span>
+                    <div class="mes-bb-line"></div>
+                    <span class="mes-bb-rule">诚信考试 · 冷静作答</span>
+                  </div>
+                </div>
+                <!-- 粉笔槽 -->
+                <div class="mes-chalk-tray">
+                  <div class="mes-chalk-stick" v-for="i in 4" :key="i" :style="{ background: ['#f5f0e8','#e8d8c0','#f0d8d0','#d8e8f0'][i-1] }"></div>
+                  <div class="mes-eraser-box"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 地板 + 座位 -->
+            <div class="mes-floor">
+              <!-- 课桌阵列 -->
+              <div class="mes-desks-area">
+                <div
+                  v-for="r in displayRows"
+                  :key="r"
+                  class="mes-desk-row"
+                  :class="{ 'mes-row-front': r === 1 }"
                 >
-                  <span v-if="isFirstSeat(r, c)" class="mes-door-dot">●</span>
-                  <template v-if="isBlocked(r, c)">
-                    <span class="mes-seat-blocked">—</span>
-                  </template>
-                  <template v-else-if="getStudent(r, c)">
-                    <span class="mes-seat-name">{{ getStudent(r, c).name }}</span>
-                    <span class="mes-seat-class" v-if="getStudent(r, c).className">{{ getStudent(r, c).className }}</span>
-                    <span class="mes-seat-elective" v-if="seatElectiveText(r, c)">{{ seatElectiveText(r, c) }}</span>
-                  </template>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <div
+                    v-for="c in currentRoom.cols"
+                    :key="c"
+                    class="mes-desk-cell"
+                    :class="[seatDeskClass(r, c)]"
+                  >
+                    <!-- 门口标记 -->
+                    <span v-if="isFirstSeat(r, c)" class="mes-door-marker">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </span>
+
+                    <!-- 屏蔽 -->
+                    <template v-if="isBlocked(r, c)">
+                      <div class="mes-desk-blocked-box">
+                        <span class="mes-desk-blocked-x"></span>
+                      </div>
+                    </template>
+
+                    <!-- 已安排 -->
+                    <template v-else-if="getStudent(r, c)">
+                      <div class="mes-desk-real">
+                        <div class="mes-desk-surface">
+                          <span class="mes-desk-name">{{ getStudent(r, c).name }}</span>
+                          <span class="mes-desk-class" v-if="getStudent(r, c).className">{{ getStudent(r, c).className }}</span>
+                          <span class="mes-desk-elective" v-if="seatElectiveText(r, c)">{{ seatElectiveText(r, c) }}</span>
+                        </div>
+                        <div class="mes-chair">
+                          <div class="mes-chair-seat"></div>
+                          <div class="mes-chair-back"></div>
+                        </div>
+                      </div>
+                    </template>
+
+                    <!-- 空位 -->
+                    <template v-else>
+                      <div class="mes-desk-empty-box">
+                        <div class="mes-desk-surface-empty"></div>
+                        <div class="mes-chair-empty"></div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 讲台（课桌与黑板之间） -->
+              <div class="mes-podium-area">
+                <div class="mes-podium-desk">
+                  <div class="mes-podium-top"></div>
+                  <div class="mes-podium-body">
+                    <span class="mes-podium-label">讲 台</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- 底部 -->
@@ -126,6 +198,11 @@ const seatStore = useExamSeat2Store()
 const dl = ref(null)
 const orientation = ref('landscape')
 
+// 照明灯具数量
+const lightCount = computed(() => Math.max(2, Math.ceil((currentRoom.value?.cols || 5) / 2)))
+// 窗户数量
+const windowCount = computed(() => Math.max(1, Math.ceil((currentRoom.value?.rows || 5) / 3)))
+
 // ---- 座位索引 ----
 const seatMap = computed(() => {
   const m = {}
@@ -148,7 +225,6 @@ const roomAssigned = computed(() => {
   return seatStore.assignments.filter(a => a.roomId === currentRoom.value.id).length
 })
 
-// 反转行：第1行在底部（靠近讲台）
 const displayRows = computed(() => {
   if (!currentRoom.value) return []
   const rows = []
@@ -162,9 +238,9 @@ function getStudent(r, c) {
   return a ? studentMap.value[a.studentId] : null
 }
 function isBlocked(r, c) { return blockedSet.value.has(seatIdx(r, c)) }
-function seatCellClass(r, c) {
-  if (isBlocked(r, c)) return 'seat-blocked'
-  return getStudent(r, c) ? 'seat-occupied' : 'seat-empty'
+function seatDeskClass(r, c) {
+  if (isBlocked(r, c)) return 'mes-cell-blocked'
+  return getStudent(r, c) ? 'mes-cell-occupied' : 'mes-cell-empty'
 }
 function seatElectiveText(r, c) {
   if (isBlocked(r, c)) return ''
@@ -172,7 +248,6 @@ function seatElectiveText(r, c) {
   return s?.electives?.length ? s.electives.slice(0, 2).join(' / ') : ''
 }
 
-// 门口：优先使用教室指定门口座位，否则第一个有学生的非屏蔽座位
 const firstSeatIndex = computed(() => {
   if (!currentRoom.value) return -1
   const rid = currentRoom.value.id
@@ -184,32 +259,6 @@ const firstSeatIndex = computed(() => {
   return -1
 })
 function isFirstSeat(r, c) { return seatIdx(r, c) === firstSeatIndex.value }
-function colLabel(n) { return String.fromCharCode(64 + n) }
-
-// ---- 格子尺寸（填满可用宽度，限制最大尺寸防止大屏过大） ----
-const A4_USABLE_W = 1060
-const ROW_LABEL_W = 30
-const CELL_MAX_W = 110 // 单格最大宽度
-const CELL_MAX_H = 86  // 单格最大高度
-
-const bodyStyle = computed(() => {
-  if (!currentRoom.value) return {}
-  const cols = currentRoom.value.cols
-  const isPortrait = orientation.value === 'portrait'
-  const maxW = isPortrait ? 740 : A4_USABLE_W
-  const rawW = Math.floor((maxW - (cfg.showRowColLabels ? ROW_LABEL_W : 0)) / cols)
-  const cellW = Math.min(rawW, CELL_MAX_W)
-  const cellH = Math.floor(Math.min(cellW * 0.78, CELL_MAX_H))
-  return {
-    '--cell-w': cellW + 'px',
-    '--cell-h': cellH + 'px'
-  }
-})
-
-const cellStyle = computed(() => ({
-  width: 'var(--cell-w)',
-  height: 'var(--cell-h)'
-}))
 
 // ---- 导出 ----
 async function doExport(format) {
@@ -283,13 +332,13 @@ function doPrint() {
 /* ====== Body ====== */
 .mes-body {
   background: var(--card-bg); border: 1px solid var(--border-base);
-  border-radius: 10px; padding: 14px 20px 12px;
+  border-radius: 12px; padding: 14px 20px 12px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 .mes-landscape { max-width: 1060px; }
 .mes-portrait { max-width: 760px; margin: 0 auto; }
 
-/* ====== Top Bar (info + legend) ====== */
+/* ====== Top Bar ====== */
 .mes-topbar {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 6px; gap: 12px; flex-wrap: wrap;
@@ -304,83 +353,430 @@ function doPrint() {
 .mes-legend { display: flex; gap: 14px; font-size: 10px; color: var(--text-muted); }
 .mes-legend-item { display: flex; align-items: center; gap: 4px; }
 .mes-ldot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-.mes-ldot.occ { background: #fff; border: 2px solid #6366f1; border-left-width: 4px; }
-.mes-ldot.empty { background: #fafbfd; border: 1px solid #dde1ea; }
-.mes-ldot.blocked { background: #f4f5f7; border: 1px solid #c8cdd8; border-left: 3px solid #6e7a8a; }
-.mes-ldot.door { background: #e85d75; border-radius: 50%; width: 6px; height: 6px; }
+.mes-ldot.occ { background: #f5ecd8; border: 1.5px solid #c8b898; border-left: 3px solid #6366f1; }
+.mes-ldot.empty { background: #f8f4ec; border: 1px dashed #d5c8b0; }
+.mes-ldot.blocked { background: #e8e0d8; border: 1.5px solid #d0c8c0; }
+.mes-ldot.door { background: #6366f1; border-radius: 50%; width: 6px; height: 6px; }
 
 /* ====== Door Bar ====== */
 .mes-door-bar {
   display: flex; align-items: center; gap: 6px;
-  font-size: 10px; color: var(--text-muted); padding: 0 2px 6px;
+  font-size: 10px; color: var(--text-muted); padding: 0 2px 8px;
 }
 .mes-door-arrow { font-size: 14px; font-weight: 700; color: var(--accent); }
 .mes-door-dot-hint { margin-left: auto; opacity: 0.6; }
 
-/* ====== Grid ====== */
-.mes-grid-wrap { overflow-x: auto; margin-bottom: 8px; }
-.mes-grid { margin: 0 auto; border-collapse: collapse; }
-.mes-col-rowlabel { width: 28px; }
-.mes-col-seat { width: var(--cell-w); }
-
-.mes-th-corner { background: none; border: none; }
-.mes-th-col {
-  background: #f8f9fb; font-size: 10px; font-weight: 600; color: var(--text-muted);
-  text-align: center; padding: 2px 0; font-family: "SF Mono", "Consolas", monospace;
-  border: 1px solid #e8ecf2;
-}
-.mes-td-row {
-  background: #f8f9fb; font-size: 10px; font-weight: 600; color: var(--text-muted);
-  text-align: center; font-family: "SF Mono", "Consolas", monospace;
-  border: 1px solid #e8ecf2;
+/* ============================================
+   真实教室场景
+   ============================================ */
+.mes-classroom {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.05),
+    0 6px 24px rgba(0,0,0,0.06),
+    inset 0 0 0 1px rgba(0,0,0,0.03);
+  margin-bottom: 10px;
 }
 
-/* 座位格（尺寸由CSS变量控制，自适应A4比例） */
-.mes-td-seat {
-  border: 1px solid #dde1ea;
-  text-align: center; vertical-align: middle;
-  padding: 4px 6px; position: relative;
-  transition: background 0.12s;
-  width: var(--cell-w);
-  height: var(--cell-h);
-  min-width: var(--cell-w);
-  min-height: var(--cell-h);
+/* ---- 天花板 ---- */
+.mes-ceiling {
+  height: 34px;
+  background: linear-gradient(180deg, #e8e0d5 0%, #f0ebe2 40%, #f5f1ea 100%);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 50px;
+  border-bottom: 1px solid #e0d8cc;
 }
-.mes-td-seat:hover { background: #f8f9ff; }
-
-.seat-empty { background: #fafbfd; }
-.seat-occupied {
-  background: #fff;
-  border-left: 3px solid #6366f1;
+.mes-light-fixture {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.seat-blocked { background: #f4f5f7; }
-
-.mes-seat-name {
-  font-size: 13px; font-weight: 700; color: var(--text-primary);
-  display: block; line-height: 1.3;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  margin-bottom: 3px;
+.mes-light-tube {
+  width: 48px; height: 7px;
+  background: linear-gradient(180deg, #fffef9 0%, #f8f3e8 40%, #e8dcc8 100%);
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(255,248,230,0.8), 0 1px 2px rgba(0,0,0,0.1);
 }
-.mes-seat-class {
-  font-size: 9px; color: var(--text-secondary);
-  display: block; line-height: 1.25;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.mes-seat-elective {
-  font-size: 8px; color: var(--text-muted);
-  display: block; line-height: 1.2;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.mes-seat-blocked { font-size: 13px; color: #c0c8d8; }
-
-.mes-door-dot {
-  position: absolute; top: 2px; right: 3px;
-  font-size: 7px; color: #e85d75; line-height: 1;
+.mes-light-glow {
+  width: 66px; height: 16px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,248,225,0.6) 0%, transparent 70%);
+  margin-top: -2px;
 }
 
-/* 座位格微立体 */
-.mes-td-seat.seat-occupied {
-  box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset, 1px 2px 0 #e8ecf2, 1px 2px 3px rgba(0,0,0,0.04);
+/* ---- 教室内部 ---- */
+.mes-room-interior {
+  display: flex;
+  flex-wrap: wrap;
+  background: #faf6ef;
+}
+
+/* ---- 左墙 ---- */
+.mes-wall-left {
+  width: 28px;
+  background: linear-gradient(90deg, #e8ddd0 0%, #f0e8db 30%, #f5efe4 100%);
+  border-right: 1px solid #e0d6c8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 3px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.mes-wall-window {
+  width: 20px; height: 40px;
+  background: linear-gradient(180deg, #c8dcf0 0%, #dce8f5 30%, #e8f0f8 50%, #dce8f5 70%, #c8dcf0 100%);
+  border-radius: 3px;
+  border: 2px solid #d5cec4;
+  box-shadow: inset 0 0 6px rgba(180,200,230,0.4);
+}
+.mes-window-pane {
+  display: block;
+  width: 100%; height: 1px;
+  background: #c8bfb0;
+  margin-top: 50%;
+}
+
+/* ---- 右墙 ---- */
+.mes-wall-right {
+  width: 28px;
+  background: linear-gradient(270deg, #e8ddd0 0%, #f0e8db 30%, #f5efe4 100%);
+  border-left: 1px solid #e0d6c8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mes-wall-notice {
+  writing-mode: vertical-rl;
+  font-size: 9px;
+  color: #b8a890;
+  letter-spacing: 3px;
+  font-weight: 600;
+}
+
+/* ---- 前墙黑板 ---- */
+.mes-wall-front {
+  width: 100%;
+  padding: 14px 32px 16px;
+  background: linear-gradient(180deg, #f5efe4 0%, #f8f4ed 40%, #faf6ef 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid #e8e0d4;
+  order: 10;
+}
+.mes-blackboard-frame {
+  flex: 1;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+}
+.mes-blackboard {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(60,100,50,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(40,70,30,0.3) 0%, transparent 50%),
+    linear-gradient(175deg, #2d5a27 0%, #265022 25%, #2a5425 50%, #234a20 75%, #1f4520 100%);
+  border-radius: 4px 4px 0 0;
+  padding: 12px 8px 10px;
+  border: 5px solid #b8956e;
+  border-bottom: none;
+  position: relative;
+  box-shadow:
+    inset 0 0 24px rgba(0,0,0,0.15),
+    inset 0 2px 4px rgba(255,255,255,0.03);
+}
+.mes-blackboard::before {
+  content: '';
+  position: absolute;
+  top: -8px; left: -5px; right: -5px;
+  height: 5px;
+  background: linear-gradient(180deg, #c4a078 0%, #b08860 100%);
+  border-radius: 2px 2px 0 0;
+}
+.mes-blackboard-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px;
+  position: relative;
+  z-index: 1;
+}
+.mes-bb-title {
+  font-size: 18px; font-weight: 700; color: #fff;
+  letter-spacing: 5px;
+  font-family: "Noto Serif SC", "STSong", "KaiTi", serif;
+  text-shadow: 0 0 5px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.2);
+}
+.mes-bb-sub {
+  font-size: 11px; color: rgba(255,255,255,0.7);
+  letter-spacing: 2px;
+}
+.mes-bb-line {
+  width: 60px; height: 1px;
+  background: rgba(255,255,255,0.2);
+  margin: 2px 0;
+}
+.mes-bb-rule {
+  font-size: 12px; color: rgba(255,255,200,0.8);
+  letter-spacing: 7px;
+  font-family: "Noto Serif SC", "STSong", "KaiTi", serif;
+  text-shadow: 0 0 3px rgba(255,255,200,0.15);
+}
+/* 粉笔槽 */
+.mes-chalk-tray {
+  height: 20px;
+  background: linear-gradient(180deg, #c4a078 0%, #b08860 30%, #a07850 100%);
+  border-radius: 0 0 6px 6px;
+  border: 4px solid #b8956e;
+  border-top: 2px solid #d4b898;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15);
+  position: relative;
+}
+.mes-chalk-tray::before {
+  content: '';
+  position: absolute;
+  inset: 4px 6px 3px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+}
+.mes-chalk-stick {
+  width: 22px; height: 6px;
+  border-radius: 3px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.mes-eraser-box {
+  width: 30px; height: 9px;
+  background: linear-gradient(180deg, #e8d8c0 0%, #d4c0a0 100%);
+  border-radius: 2px;
+  margin-left: auto;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.mes-eraser-box::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; left: 2px; right: 2px;
+  height: 3px;
+  background: #c8c0b8;
+  border-radius: 0 0 1px 1px;
+}
+
+/* ---- 地板 ---- */
+.mes-floor {
+  flex: 1;
+  min-width: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 69px,
+      rgba(180,160,130,0.1) 69px,
+      rgba(180,160,130,0.1) 70px
+    ),
+    linear-gradient(185deg, #ede4d4 0%, #e8ddcb 30%, #e4d8c4 60%, #e8ddcb 100%);
+  padding: 10px 16px 16px;
+}
+
+/* ---- 讲台 ---- */
+.mes-podium-area {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+.mes-podium-desk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.1));
+}
+.mes-podium-top {
+  width: 200px; height: 12px;
+  background: linear-gradient(180deg, #d4c0a0 0%, #c8b088 40%, #c0a878 100%);
+  border-radius: 3px 3px 0 0;
+  border: 1px solid #b8a078;
+  border-bottom: none;
+}
+.mes-podium-body {
+  width: 184px; height: 26px;
+  background: linear-gradient(180deg, #c8b488 0%, #bfa878 50%, #b8a070 100%);
+  border-radius: 0 0 3px 3px;
+  border: 1px solid #b09870;
+  border-top: 1px solid #d4c4a0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mes-podium-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 6px;
+  color: #6b5c45;
+  font-family: "Noto Serif SC", serif;
+}
+
+/* ---- 课桌阵列 ---- */
+.mes-desks-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.mes-desk-row {
+  display: flex;
+  gap: 12px;
+}
+.mes-row-front {
+  margin-top: 2px;
+}
+
+/* ---- 单个课桌单元 ---- */
+.mes-desk-cell {
+  width: 94px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* ---- 课桌（真实3D风格） ---- */
+.mes-desk-real {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mes-desk-surface {
+  width: 86px; min-height: 60px;
+  background: linear-gradient(175deg, #f5ecd8 0%, #efe4cc 30%, #e8d8b8 70%, #e0d0b0 100%);
+  border-radius: 4px 4px 2px 2px;
+  border: 1.5px solid #c8b898;
+  border-bottom: 2.5px solid #bfa878;
+  box-shadow:
+    0 2.5px 0 #c0a878,
+    0 3px 5px rgba(0,0,0,0.07),
+    inset 0 1px 0 rgba(255,255,255,0.45);
+  padding: 10px 7px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  transition: transform 0.12s, box-shadow 0.12s;
+  cursor: default;
+}
+.mes-desk-surface:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 3px 0 #c0a878,
+    0 4px 6px rgba(0,0,0,0.09),
+    inset 0 1px 0 rgba(255,255,255,0.45);
+}
+.mes-desk-name {
+  font-size: 14px; font-weight: 700; color: #3d3226;
+  line-height: 1.3; text-align: center;
+  overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; max-width: 76px;
+}
+.mes-desk-class {
+  font-size: 9px; color: #8b7e6a; line-height: 1.2;
+  text-align: center;
+  overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; max-width: 76px;
+}
+.mes-desk-elective {
+  font-size: 8px; color: #a09880; line-height: 1.15;
+  text-align: center;
+  overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; max-width: 76px;
+}
+
+/* 椅子 */
+.mes-chair {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -1px;
+}
+.mes-chair-seat {
+  width: 30px; height: 10px;
+  background: linear-gradient(180deg, #d4c0a0 0%, #c8b090 100%);
+  border-radius: 2px 2px 0 0;
+  border: 1px solid #b8a080;
+}
+.mes-chair-back {
+  width: 26px; height: 8px;
+  background: linear-gradient(180deg, #c8b090 0%, #bfa880 100%);
+  border-radius: 0 0 2px 2px;
+  border: 1px solid #b09878;
+  border-top: none;
+}
+
+/* ---- 空课桌 ---- */
+.mes-desk-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.5;
+}
+.mes-desk-surface-empty {
+  width: 86px; height: 52px;
+  background: linear-gradient(175deg, #f8f4ec 0%, #f0ebe0 50%, #ebe4d6 100%);
+  border-radius: 4px 4px 2px 2px;
+  border: 1.5px dashed #d5c8b0;
+}
+.mes-chair-empty {
+  width: 30px; height: 10px;
+  background: #e8ddd0;
+  border-radius: 2px 2px 0 0;
+  border: 1px dashed #d5c8b0;
+  margin-top: -1px;
+}
+
+/* ---- 屏蔽座位 ---- */
+.mes-desk-blocked-box {
+  width: 86px; height: 60px;
+  background: linear-gradient(175deg, #e8e0d8 0%, #e0d8d0 100%);
+  border-radius: 4px;
+  border: 1.5px solid #d0c8c0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mes-desk-blocked-x {
+  display: block;
+  width: 18px; height: 18px;
+  position: relative;
+  opacity: 0.25;
+}
+.mes-desk-blocked-x::before,
+.mes-desk-blocked-x::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 16px; height: 2px;
+  background: #a09080;
+  border-radius: 1px;
+}
+.mes-desk-blocked-x::before { transform: translate(-50%, -50%) rotate(45deg); }
+.mes-desk-blocked-x::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* 状态变体 */
+.mes-cell-occupied .mes-desk-surface { border-left: 3px solid #6366f1; }
+
+/* ---- 门口标记 ---- */
+.mes-door-marker {
+  position: absolute; top: -7px; right: -2px;
+  z-index: 10;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
 }
 
 /* ====== Footer ====== */
@@ -399,10 +795,21 @@ function doPrint() {
 
 /* ====== Print ====== */
 @media print {
-  .mes-header, .mes-rooms, .mes-topbar, .mes-footer { display: none; }
+  .mes-header, .mes-rooms, .mes-topbar, .mes-footer,
+  .mes-ceiling, .mes-wall-left, .mes-wall-right, .mes-door-bar { display: none; }
   .mes-body { border: none; box-shadow: none; padding: 0; max-width: 100%; }
   .mes-page { max-width: 100%; padding: 0; }
-  .mes-grid-wrap { overflow: visible; }
+  .mes-classroom { box-shadow: none; }
+  .mes-wall-front { background: #fff; border: none; }
+  .mes-blackboard-frame { max-width: 100%; }
+  .mes-blackboard { border-color: #999; box-shadow: none; }
+  .mes-blackboard::before { display: none; }
+  .mes-chalk-tray { display: none; }
+  .mes-floor { background: #fff; }
+  .mes-desk-surface { background: #fff; border-color: #999; box-shadow: none; }
+  .mes-desk-surface-empty { background: #fafafa; border-color: #ccc; }
+  .mes-podium-top, .mes-podium-body { background: #f8f8f8; border-color: #ccc; }
+  .mes-chair, .mes-chair-empty { display: none; }
   @page { size: A4 landscape; margin: 8mm; }
 }
 
@@ -412,5 +819,61 @@ function doPrint() {
   .mes-header-actions { width: 100%; flex-wrap: wrap; }
   .mes-body { padding: 8px 6px 8px; }
   .mes-landscape, .mes-portrait { max-width: 100%; }
+  .mes-wall-left, .mes-wall-right { width: 18px; }
+  .mes-wall-window { width: 12px; height: 28px; }
+  .mes-wall-front { padding: 8px 12px 10px; }
+  .mes-blackboard-frame { max-width: 100%; }
+  .mes-blackboard { padding: 8px 4px 6px; border-width: 4px; }
+  .mes-blackboard::before { top: -6px; height: 3px; }
+  .mes-bb-title { font-size: 13px; letter-spacing: 3px; }
+  .mes-bb-sub { font-size: 8px; }
+  .mes-bb-rule { font-size: 8px; letter-spacing: 4px; }
+  .mes-chalk-tray { height: 14px; padding: 0 6px; }
+  .mes-chalk-stick { width: 14px; height: 4px; }
+  .mes-eraser-box { width: 20px; height: 6px; }
+  .mes-podium-top { width: 140px; }
+  .mes-podium-body { width: 128px; height: 20px; }
+  .mes-podium-label { font-size: 9px; letter-spacing: 3px; }
+  .mes-desk-cell { width: 58px; }
+  .mes-desk-surface, .mes-desk-surface-empty, .mes-desk-blocked-box { width: 52px; min-height: 40px; }
+  .mes-desk-surface-empty { height: 32px; }
+  .mes-desk-name { font-size: 10px; max-width: 44px; }
+  .mes-desk-class { font-size: 7px; max-width: 44px; }
+  .mes-desk-elective { font-size: 6px; max-width: 44px; }
+  .mes-desk-row { gap: 5px; }
+  .mes-desks-area { gap: 10px; }
+  .mes-floor { padding: 6px 8px 12px; }
+  .mes-ceiling { height: 24px; padding: 0 20px; }
+  .mes-light-tube { width: 30px; height: 5px; }
+  .mes-light-glow { width: 40px; height: 10px; }
+  .mes-chair-seat { width: 18px; height: 7px; }
+  .mes-chair-back { width: 14px; height: 5px; }
+  .mes-chair-empty { width: 18px; height: 7px; }
+}
+
+@media (max-width: 480px) {
+  .mes-wall-left, .mes-wall-right { display: none; }
+  .mes-wall-front { padding: 4px 6px 6px; }
+  .mes-blackboard { padding: 4px 2px; border-width: 3px; }
+  .mes-bb-title { font-size: 10px; letter-spacing: 2px; }
+  .mes-bb-sub { font-size: 7px; }
+  .mes-bb-rule { font-size: 7px; letter-spacing: 2px; }
+  .mes-chalk-tray { height: 10px; }
+  .mes-chalk-stick { width: 10px; height: 3px; }
+  .mes-eraser-box { display: none; }
+  .mes-desk-cell { width: 44px; }
+  .mes-desk-surface, .mes-desk-surface-empty, .mes-desk-blocked-box { width: 40px; min-height: 34px; }
+  .mes-desk-surface-empty { height: 26px; }
+  .mes-desk-name { font-size: 9px; max-width: 34px; }
+  .mes-desk-class { font-size: 6px; max-width: 34px; }
+  .mes-desk-elective { font-size: 5px; max-width: 34px; }
+  .mes-desk-row { gap: 3px; }
+  .mes-desks-area { gap: 6px; }
+  .mes-chair-seat { width: 14px; height: 5px; }
+  .mes-chair-back { width: 12px; height: 4px; }
+  .mes-chair-empty { width: 14px; height: 5px; }
+  .mes-podium-top { width: 100px; height: 8px; }
+  .mes-podium-body { width: 90px; height: 16px; }
+  .mes-podium-label { font-size: 7px; letter-spacing: 2px; }
 }
 </style>

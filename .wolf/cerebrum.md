@@ -52,6 +52,8 @@
 
 - [2026-05-23] **Distribution route visualization uses SVG viewBox overlay + numbered badges:** Two modes (S-shaped snaking / row-by-row) with `distOrder` computed lookup. SVG polyline path animated via `stroke-dasharray/dashoffset` CSS keyframes. Numbered circle badges (`esp-dist-badge`) absolutely positioned on seat cells with staggered `animationDelay`. First/last steps highlighted green/red. Blocked seats skipped. Admin can toggle 姓名/班级/选修 visibility on public view via store flags (`publicShowNames/Class/Electives`) persisted to localStorage.
 
+- [2026-05-23] **Theme system architecture:** Portal uses `:root` (light default) + `[data-theme="dark"]` overrides on `<html>`. Admin uses separate `--admin-*` variables with `.admin-layout` (dark default) + `[data-theme="light"] .admin-layout` overrides. Store's `setTheme()` sets `data-theme` on both `<html>` and `.admin-layout` (via `:data-theme="store.theme"`). Theme toggles in AppHeader (public), PortalLayout header, and AdminLayout dropdown. All page components should use CSS variables, never hardcoded colors, to support both modes.
+
 ## Decision Log
 
 <!-- Significant technical decisions with rationale. Why X was chosen over Y. -->

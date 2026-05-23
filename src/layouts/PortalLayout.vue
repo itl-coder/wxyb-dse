@@ -17,6 +17,10 @@
         </nav>
       </div>
       <div class="portal-header-right">
+        <button class="portal-theme-btn" @click="toggleTheme" :title="store.theme === 'dark' ? '切换浅色模式' : '切换深色模式'">
+          <svg v-if="store.theme === 'dark'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
         <span class="portal-cycle-btn" title="切换学生" @click="cycleStudent">🔄</span>
         <button class="portal-btn portal-btn-home" @click="$router.push('/')">📚 学习系统</button>
         <button class="portal-btn portal-btn-logout" @click="handleLogout">
@@ -50,6 +54,10 @@ const router = useRouter()
 const store = useAppStore()
 const studentList = ref([])
 const navOpen = ref(false)
+
+function toggleTheme() {
+  store.setTheme(store.theme === 'dark' ? 'light' : 'dark')
+}
 
 onMounted(() => {
   studentList.value = studentService.getAll()
@@ -157,6 +165,26 @@ function handleLogout() {
   align-items: center;
   gap: 14px;
   flex-shrink: 0;
+}
+
+.portal-theme-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.portal-theme-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .portal-cycle-btn {
