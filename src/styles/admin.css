@@ -882,6 +882,17 @@
    ============================================================ */
 
 /* ---- Buttons ---- */
+.admin-layout .el-button {
+  font-weight: 500;
+  letter-spacing: 0.15px;
+}
+.admin-layout .el-button--small {
+  height: 30px; padding: 5px 12px; font-size: 12px;
+}
+.admin-layout .el-button--default:not(.el-button--small):not(.el-button--large) {
+  height: 34px; padding: 7px 16px; font-size: 13px;
+}
+
 .admin-layout .el-button--primary {
   --el-button-bg-color: var(--admin-accent);
   --el-button-border-color: var(--admin-accent);
@@ -899,6 +910,12 @@
 .admin-layout .el-button--default:hover {
   --el-button-border-color: var(--admin-accent);
   --el-button-text-color: var(--admin-accent);
+}
+
+/* Text buttons — cleaner sizing */
+.admin-layout .el-button.is-text,
+.admin-layout .el-button--text {
+  font-weight: 500;
 }
 
 /* ---- Input / Select ---- */
