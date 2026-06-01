@@ -247,7 +247,7 @@ onMounted(() => {
   genCaptcha()
 })
 
-function handleLogin() {
+async function handleLogin() {
   clearErrors()
   if (!form.account.trim()) { errors.account = '请输入账号'; return }
   if (!form.password) { errors.password = '请输入密码'; return }
@@ -260,16 +260,20 @@ function handleLogin() {
   }
 
   loading.value = true
-  setTimeout(() => {
-    const success = store.login(form.account.trim(), form.password)
-    if (!success) {
-      errors.account = '账号或密码错误'
-      errors.password = '账号或密码错误'
+  try {
+    const result = await store.login(form.account.trim(), form.password)
+    if (!result.success) {
+      errors.form = result.error || '账号或密码错误'
+      genCaptcha()
+      form.captcha = ''
       loading.value = false
       return
     }
     router.push(route.query.redirect || '/admin')
-  }, 600)
+  } catch (e) {
+    errors.form = '网络异常，请稍后重试'
+    loading.value = false
+  }
 }
 </script>
 

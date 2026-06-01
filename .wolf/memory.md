@@ -81,3 +81,11 @@
 | 19:37 | Round 4 complete: index.vue showPaperStats→showElectiveProfile, created ExamElectiveProfile.vue elective portrait component, redesigned ExamSeatPublic.vue with room switching/solid colors/26px padding, updated exportPipeline.js SVG padding+color scheme | index.vue, ExamElectiveProfile.vue, ExamSeatPublic.vue, exportPipeline.js | build OK | ~tokens
 | 19:54 | Round 5: normalized elective names (物理1/2→物理, 化学1/2→化学), added S-shape/row-by-row distribution route animation with SVG path overlay on public view, added admin public display toggles (姓名/班级/选修), removed lock selected/unlock selected/batch reserve buttons | ExamElectiveProfile.vue, ExamSeatPublic.vue, examSeat2Store.js, ExamSeatGrid.vue, index.vue | build OK | ~tokens
 | 12:36 | 家长会预约弹窗优化: 5分区改3分区图标引导、radio代替select、时长预设下拉、footer提示文案 | ParentConference.vue | build通过 | ~800 tok |
+| 20:18 | Created src/request/request.js | — | ~515 |
+| 20:18 | Created src/api/auth.js | — | ~619 |
+| 20:18 | Created src/api/menu.js | — | ~424 |
+| 20:20 | Created src/stores/app.js | — | ~4461 |
+| 20:20 | Edited src/views/admin/auth/Login.vue | added error handling | ~205 |
+| 20:21 | Edited src/main.js | expanded (+9 lines) | ~273 |
+| 20:23 | 后端登录分析+axios封装+API接口+auth store重构+Login页面改造 | .env, src/request/request.js, src/api/auth.js, src/api/menu.js, src/stores/app.js, src/views/admin/auth/Login.vue, src/main.js | 构建通过 | ~8000 tok |
+| 20:23 | Session end: 6 writes across 6 files (request.js, auth.js, menu.js, app.js, Login.vue) | 15 reads | ~6512 tok |

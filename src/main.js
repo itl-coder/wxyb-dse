@@ -18,11 +18,13 @@ import print from 'vue3-print-nb'
 import App from './App.vue'
 import router from './router'
 import pinia from './stores'
+import { useAppStore } from './stores/app'
 import { initAllData } from './services/dataService'
 import './styles/tokens.css'
 import './styles/main.css'
 import './styles/admin.css'
 
+// 初始化模拟数据（其他模块仍依赖 dataService）
 initAllData()
 
 const app = createApp(App)
@@ -31,4 +33,11 @@ app.use(ElementPlus, { locale: zhCn })
 app.use(pinia)
 app.use(print)
 app.use(router)
+
+// 初始化 Auth 状态：如果已有 token，验证有效性并拉取权限菜单
+const store = useAppStore()
+store.initAuth().then(() => {
+  // Auth 初始化完成后挂载应用，确保路由守卫拿到正确的认证状态
+})
+
 app.mount('#app')

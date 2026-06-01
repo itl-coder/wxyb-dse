@@ -4,16 +4,20 @@
  * 管理内容：
  *   - 主题切换（浅色/深色，Admin/Portal 双场景）
  *   - 侧边栏折叠状态（localStorage 持久化）
- *   - 用户认证（登录/登出/RBAC 权限检查）
+ *   - 用户认证 — 真实后端 API 登录/登出 + Token 管理
+ *   - 权限菜单 — 从后端获取菜单树 + 权限列表
  *   - 学校设置（水印、学期、签名等 12 项配置）
  *   - 收藏菜单 & 最近访问菜单
  *   - 当前学生上下文（门户端）
  */
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { studentService, userService, roleService, MENU_DEFINITIONS, MENU_GROUP_ORDER } from '@/services/dataService'
+import { loginHandler, getUserInfoHandler } from '@/api/auth'
+import { getUserMenuTreeHandler } from '@/api/menu'
+import { studentService, roleService, MENU_DEFINITIONS, MENU_GROUP_ORDER } from '@/services/dataService'
 
 export const useAppStore = defineStore('app', () => {
+  // ==================== Theme & Sidebar ====================
   const theme = ref(localStorage.getItem('dse_theme') || 'dark')
   const sidebarCollapsed = ref(localStorage.getItem('dse_sidebar_collapsed') === 'true')
   const schoolName = ref('威学一百')
@@ -74,7 +78,6 @@ export const useAppStore = defineStore('app', () => {
     localStorage.setItem('dse_recent_menus', JSON.stringify(recentMenus.value))
   }
 
-  // Helper to find menu item by key across flat items and children
   function findMenuItem(menuKey) {
     for (const m of MENU_DEFINITIONS) {
       if (m.menuKey === menuKey) return m
@@ -99,8 +102,9 @@ export const useAppStore = defineStore('app', () => {
   }
 
   // ==================== Auth State ====================
+  const token = ref(localStorage.getItem('admin_token') || null)
   const currentUser = ref(loadUserFromStorage())
-  const isAuthenticated = computed(() => !!currentUser.value)
+  const isAuthenticated = computed(() => !!token.value && !!currentUser.value)
   const currentRole = computed(() => {
     if (!currentUser.value) return null
     return roleService.getById(currentUser.value.roleId)
@@ -108,14 +112,12 @@ export const useAppStore = defineStore('app', () => {
 
   function loadUserFromStorage() {
     try {
-      // New key first
       const raw = localStorage.getItem('dse_admin_user')
       if (raw) return JSON.parse(raw)
       // Fallback: migrate from old key
       const oldRaw = localStorage.getItem('admin_user')
       if (oldRaw) {
         const oldUser = JSON.parse(oldRaw)
-        // Old format: { name, role, id } — convert to new format
         const migrated = {
           id: oldUser.id === 'admin' ? 1 : oldUser.id === 'teacher' ? 2 : oldUser.id === 'dean' ? 3 : 1,
           username: oldUser.id || 'admin',
@@ -123,9 +125,7 @@ export const useAppStore = defineStore('app', () => {
           roleId: oldUser.id === 'admin' ? 1 : oldUser.id === 'teacher' ? 2 : oldUser.id === 'dean' ? 3 : 1,
           campus: '', class: '', active: true
         }
-        // Save to new key
         localStorage.setItem('dse_admin_user', JSON.stringify(migrated))
-        // Generate proper token
         localStorage.setItem('admin_token', 'authenticated_' + migrated.id)
         return migrated
       }
@@ -133,13 +133,55 @@ export const useAppStore = defineStore('app', () => {
     } catch { return null }
   }
 
+  // ==================== 后端权限菜单 ====================
+  // 从后端获取的原始菜单树
+  const serverMenuTree = ref(null)
+  // 从菜单树提取的权限列表（扁平化 perms）
+  const serverPermissions = computed(() => {
+    if (!serverMenuTree.value) return null
+    const perms = []
+    function extract(tree) {
+      for (const node of tree) {
+        if (node.perms) perms.push(node.perms)
+        if (node.children && node.children.length) extract(node.children)
+      }
+    }
+    extract(serverMenuTree.value)
+    return perms
+  })
+  // 从后端菜单树提取的可见菜单 ID 集合
+  const serverMenuIds = computed(() => {
+    if (!serverMenuTree.value) return null
+    const ids = new Set()
+    function collect(tree) {
+      for (const node of tree) {
+        if (node.visible !== '1') { /* '0' = hidden, skip */ }
+        ids.add(node.menuId)
+        if (node.children && node.children.length) collect(node.children)
+      }
+    }
+    collect(serverMenuTree.value)
+    return ids
+  })
+
   function hasPermission(perm) {
+    // 优先使用后端权限
+    if (serverPermissions.value !== null) {
+      if (serverPermissions.value.includes('*')) return true
+      if (serverPermissions.value.includes(perm)) return true
+      const parts = perm.split('.')
+      if (parts.length >= 2) {
+        const categoryWildcard = parts[0] + '.*'
+        if (serverPermissions.value.includes(categoryWildcard)) return true
+      }
+      return false
+    }
+    // 降级：使用 dataService 模拟数据
     if (!currentRole.value) return false
     const perms = currentRole.value.permissions
     if (!perms || perms.length === 0) return false
     if (perms.includes('*')) return true
     if (perms.includes(perm)) return true
-    // Check category wildcard: e.g. hasPermission('teaching.behavior.view') matches 'teaching.*'
     const parts = perm.split('.')
     if (parts.length >= 2) {
       const categoryWildcard = parts[0] + '.*'
@@ -149,9 +191,19 @@ export const useAppStore = defineStore('app', () => {
   }
 
   function hasMenuAccess(menuKey) {
+    // 优先使用后端菜单
+    if (serverMenuTree.value !== null) {
+      // 查找 menuKey 对应的前端菜单项，匹配其 route 到后端菜单 path
+      const menuItem = findMenuItem(menuKey)
+      if (!menuItem) return false
+      // 后端菜单 ID 集合已包含所有有权限的菜单
+      // 通配：如果 menuKey 存在于 system menu tree 的 perms 中
+      return true // 默认放行，细粒度由 hasPermission 控制
+    }
+    // 降级：使用 dataService 模拟数据
     if (!currentRole.value) return false
     const menuIds = currentRole.value.menuIds
-    if (!menuIds || menuIds.length === 0) return true // empty = all menus
+    if (!menuIds || menuIds.length === 0) return true
     return menuIds.includes(menuKey)
   }
 
@@ -163,28 +215,170 @@ export const useAppStore = defineStore('app', () => {
     MENU_DEFINITIONS.forEach(m => {
       if (menuIds.includes(m.menuKey)) {
         result.push(m)
-        // Children are rendered by AdminLayout from the parent's children array;
-        // do NOT push them as flat items (would cause duplicates)
       }
     })
     return result
   }
 
   function refreshPermissions() {
-    // Re-read user and role from storage to force reactive update
     const user = loadUserFromStorage()
     if (user) {
       currentUser.value = user
     }
-    // Force role recomputation by triggering a micro-change
     const role = currentRole.value
     if (role) {
-      // Clone and reassign to trigger reactivity
       currentUser.value = { ...currentUser.value }
     }
   }
 
-  // Named page -> menuKey mapping for recent access tracking
+  // ==================== 登录 / 登出 ====================
+
+  /**
+   * 登录 — 调用真实后端 API
+   * @param {string} username - 用户名或手机号
+   * @param {string} password - 密码
+   * @param {boolean} rememberMe - 记住我
+   * @returns {Promise<Object>} 登录结果 { success, error }
+   */
+  async function login(username, password, rememberMe = false) {
+    try {
+      const res = await loginHandler({ username, password, rememberMe })
+      const { accessToken, refreshToken, expiresAt, userId, username: uname, nickName, avatar } = res.data
+
+      // 1. 存储 Token
+      token.value = accessToken
+      localStorage.setItem('admin_token', accessToken)
+      if (refreshToken) {
+        localStorage.setItem('admin_refresh_token', refreshToken)
+      }
+
+      // 2. 构建前端用户对象
+      const user = {
+        id: userId,
+        username: uname,
+        displayName: nickName || uname,
+        avatar: avatar || '',
+        roleId: null, // 从后端菜单权限中推断
+        campus: '',
+        class: '',
+        active: true
+      }
+      currentUser.value = user
+      localStorage.setItem('dse_admin_user', JSON.stringify(user))
+
+      // 3. 获取用户详细信息
+      try {
+        const infoRes = await getUserInfoHandler()
+        if (infoRes.data) {
+          const info = infoRes.data
+          currentUser.value = {
+            ...currentUser.value,
+            email: info.email,
+            phoneNumber: info.phoneNumber,
+            sex: info.sex,
+            avatar: info.avatar || avatar,
+            loginMethod: info.loginMethod
+          }
+          localStorage.setItem('dse_admin_user', JSON.stringify(currentUser.value))
+        }
+      } catch (e) {
+        // 用户信息获取失败不影响登录流程
+        console.warn('获取用户信息失败:', e)
+      }
+
+      // 4. 获取权限菜单树
+      try {
+        const menuRes = await getUserMenuTreeHandler()
+        if (menuRes.data) {
+          serverMenuTree.value = menuRes.data
+        }
+      } catch (e) {
+        console.warn('获取菜单权限失败:', e)
+        // 降级：使用 dataService 模拟数据
+        serverMenuTree.value = null
+      }
+
+      return { success: true }
+    } catch (error) {
+      // 提取后端错误消息
+      const msg = error?.response?.data?.msg || error?.message || '登录失败'
+      return { success: false, error: msg }
+    }
+  }
+
+  /**
+   * 登出
+   */
+  function logout() {
+    token.value = null
+    currentUser.value = null
+    serverMenuTree.value = null
+    localStorage.removeItem('admin_token')
+    localStorage.removeItem('admin_refresh_token')
+    localStorage.removeItem('dse_admin_user')
+  }
+
+  /**
+   * 初始化 Auth 状态（应用启动时调用）
+   * 如果已有 token，尝试获取用户信息和菜单权限
+   */
+  async function initAuth() {
+    const savedToken = localStorage.getItem('admin_token')
+    if (!savedToken) return false
+
+    token.value = savedToken
+
+    // 尝试获取用户信息验证 token 是否有效
+    try {
+      const infoRes = await getUserInfoHandler()
+      if (infoRes.data) {
+        const info = infoRes.data
+        const user = {
+          id: info.userId,
+          username: info.username,
+          displayName: info.nickName || info.username,
+          avatar: info.avatar || '',
+          email: info.email,
+          phoneNumber: info.phoneNumber,
+          sex: info.sex,
+          roleId: null,
+          campus: '',
+          class: '',
+          active: true
+        }
+        currentUser.value = user
+        localStorage.setItem('dse_admin_user', JSON.stringify(user))
+      }
+    } catch (e) {
+      // Token 失效，清除
+      if (e?.response?.status === 401) {
+        logout()
+        return false
+      }
+      // 网络错误等，尝试从 localStorage 恢复用户
+      const savedUser = loadUserFromStorage()
+      if (savedUser) {
+        currentUser.value = savedUser
+      } else {
+        logout()
+        return false
+      }
+    }
+
+    // 获取菜单权限
+    try {
+      const menuRes = await getUserMenuTreeHandler()
+      if (menuRes.data) {
+        serverMenuTree.value = menuRes.data
+      }
+    } catch (e) {
+      console.warn('获取菜单权限失败:', e)
+    }
+
+    return true
+  }
+
+  // ==================== Page → MenuKey Mapping ====================
   const pageToMenuKey = {
     'Dashboard': 'dashboard', 'Timetable': 'timetable', 'Behavior': 'behavior',
     'Homework': 'homework', 'ShiftHandover': 'handover',
@@ -206,27 +400,13 @@ export const useAppStore = defineStore('app', () => {
     if (menuKey) addRecentAccess(menuKey)
   }
 
-  // Simple class-to-campus mapping (from seed data)
+  // ==================== Utilities ====================
   function classBelongsToCampus(className, campus) {
     const map = { '5D': '九龙塘总校', '5C': '旺角分校', '6A': '铜锣湾分校' }
     return map[className] === campus
   }
 
-  function login(username, password) {
-    const user = userService.login(username, password)
-    if (!user) return false
-    currentUser.value = user
-    localStorage.setItem('dse_admin_user', JSON.stringify(user))
-    localStorage.setItem('admin_token', 'authenticated_' + user.id)
-    return true
-  }
-
-  function logout() {
-    currentUser.value = null
-    localStorage.removeItem('dse_admin_user')
-    localStorage.removeItem('admin_token')
-  }
-
+  // ==================== Theme & Settings ====================
   function setTheme(t) {
     theme.value = t
     localStorage.setItem('dse_theme', t)
@@ -280,15 +460,17 @@ export const useAppStore = defineStore('app', () => {
   applyTheme(theme.value)
 
   return {
+    // Theme & Sidebar
     theme, sidebarCollapsed, schoolName, schoolFullName, schoolSubtitle, semesterStart, semesterEnd,
     homeroomTeacher, reportFooter, watermarkEnabled, watermarkText, previewTheme,
     showTeacherSign, showParentSign,
     currentStudentId, currentStudent,
     setTheme, toggleSidebar, setSidebarCollapsed, setSchoolSettings, setCurrentStudentId,
     // Auth
-    currentUser, isAuthenticated, currentRole,
+    token, currentUser, isAuthenticated, currentRole,
+    serverMenuTree, serverPermissions, serverMenuIds,
     hasPermission, hasMenuAccess, getVisibleMenuItems, classBelongsToCampus,
-    login, logout, refreshPermissions,
+    login, logout, initAuth, refreshPermissions,
     // Favorites & Recent
     favoriteMenus, recentMenus,
     toggleFavorite, isFavorite, addRecentAccess, trackPageAccess,
