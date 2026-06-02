@@ -29,9 +29,6 @@
           <el-option label="未提交" value="未提交" />
           <el-option label="已批改" value="已批改" />
         </el-select>
-        <el-select v-model="selectedAssignmentId" size="small" placeholder="按作业筛选" clearable style="width:180px" @change="onAssignmentFilterChange">
-          <el-option v-for="a in assignments" :key="a.id" :label="a.title + ' (' + a.subject + ')'" :value="a.id" />
-        </el-select>
         <el-input v-model="filterSearch" size="small" placeholder="搜索学生姓名…" clearable style="width:160px" />
         <div class="hw-filter-stats">
           <span class="hw-fs-item">共 <b>{{ filteredList.length }}</b> 条</span>
@@ -46,23 +43,27 @@
       </div>
       <!-- 表格工具栏 -->
       <div class="hw-filter-row hw-toolbar-row">
-        <el-button-group size="small">
-          <el-button v-for="d in densityOptions" :key="d.key" :type="table.density.value === d.key ? 'primary' : 'default'" @click="table.density.value = d.key">{{ d.label }}</el-button>
-        </el-button-group>
         <el-dropdown trigger="click" size="small">
-          <el-button size="small" plain>列配置 ▾</el-button>
+          <el-button size="small" plain>⟺ 密度</el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item v-for="col in table.ALL_COLUMNS" :key="col.key" :disabled="col.required" @click="table.toggleColumn(col.key)">
-                <el-checkbox :model-value="table.isColumnVisible(col.key)" :disabled="col.required" style="pointer-events:none">{{ col.label }}</el-checkbox>
+              <el-dropdown-item v-for="d in densityOptions" :key="d.key" @click="table.density.value = d.key">
+                <span :style="{fontWeight: table.density.value === d.key ? 700 : 400}">{{ d.label }}</span>
+                <span style="color:var(--admin-text-muted);margin-left:8px;font-size:10px">{{ d.desc }}</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <el-button-group size="small">
-          <el-button :type="!table.cardMode.value ? 'primary' : 'default'" @click="table.cardMode.value = false">☰ 表格</el-button>
-          <el-button :type="table.cardMode.value ? 'primary' : 'default'" @click="table.cardMode.value = true">▦ 卡片</el-button>
-        </el-button-group>
+        <el-dropdown trigger="click" size="small">
+          <el-button size="small" plain>☰ 列配置</el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item v-for="col in table.ALL_COLUMNS" :key="col.key" :disabled="col.required" @click.stop>
+                <el-checkbox :model-value="table.isColumnVisible(col.key)" :disabled="col.required" @change="table.toggleColumn(col.key)">{{ col.label }}</el-checkbox>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </div>
 
@@ -80,7 +81,7 @@
         </AppWatermark>
 
         <!-- 表格模式 -->
-        <AppWatermark v-else-if="!table.cardMode.value">
+        <AppWatermark>
           <el-table
             :data="pagedList" border stripe
             :size="table.density.value === 'compact' ? 'small' : table.density.value === 'loose' ? 'default' : 'small'"
@@ -103,18 +104,7 @@
               v-if="table.isColumnVisible('title')" prop="title" label="作业内容" min-width="140"
             >
               <template #default="{ row }">
-                <div v-if="editingTitleId === row.id" class="hw-inline-edit" @click.stop>
-                  <el-input
-                    v-model="editTitleValue" size="small"
-                    @blur="saveEditTitle(row)"
-                    @keyup.enter="saveEditTitle(row)"
-                    @keyup.escape="cancelEditTitle"
-                    ref="titleInputRef"
-                  />
-                </div>
-                <span v-else class="hw-title-clickable" @click="startEditTitle(row)" :title="row.title">
-                  {{ row.title }}
-                </span>
+                <span class="hw-title-link" @click="openTrackingEdit(row)" :title="row.title + '（点击编辑）'">{{ row.title }}</span>
               </template>
             </el-table-column>
             <el-table-column
@@ -127,20 +117,20 @@
               </template>
             </el-table-column>
             <el-table-column
-              v-if="table.isColumnVisible('quality')" prop="quality" label="质量" width="72" align="center"
+              v-if="table.isColumnVisible('quality')" prop="quality" label="质量" width="80" align="center"
             >
               <template #default="{ row }">
                 <el-tag v-if="row.quality" size="small"
                   :type="row.quality === '优秀' ? 'success' : row.quality === '良好' ? 'primary' : row.quality === '一般' ? 'warning' : 'info'"
-                  effect="plain">{{ row.quality }}</el-tag>
+                  >{{ row.quality }}</el-tag>
                 <span v-else style="color:var(--admin-text-muted)">—</span>
               </template>
             </el-table-column>
             <el-table-column
-              v-if="table.isColumnVisible('accuracy')" prop="accuracy" label="正确率" width="68" align="center"
+              v-if="table.isColumnVisible('accuracy')" prop="accuracy" label="正确率" width="80" align="center"
             >
               <template #default="{ row }">
-                <span v-if="row.accuracy != null" :style="{color: row.accuracy >= 80 ? 'var(--admin-success)' : row.accuracy >= 60 ? 'var(--admin-warning)' : 'var(--admin-danger)', fontWeight:600}">{{ row.accuracy }}%</span>
+                <el-tag v-if="row.accuracy != null" size="small" :type="row.accuracy >= 80 ? 'success' : row.accuracy >= 60 ? 'warning' : 'danger'">{{ row.accuracy }}%</el-tag>
                 <span v-else style="color:var(--admin-text-muted)">—</span>
               </template>
             </el-table-column>
@@ -148,7 +138,7 @@
               v-if="table.isColumnVisible('status')" prop="status" label="状态" width="105" align="center"
             >
               <template #default="{ row }">
-                <el-tag size="small" :type="shared.hwStatusTagType(row.status)" effect="dark">{{ row.status || '—' }}</el-tag>
+                <span class="hw-status-text" :class="'hw-status-' + (row.status || '未提交')">{{ row.status || '—' }}</span>
               </template>
             </el-table-column>
             <el-table-column
@@ -169,47 +159,7 @@
               :page-sizes="[10,15,20,50]" :total="filteredList.length"
               layout="total, sizes, prev, pager, next, jumper" size="small" background />
           </div>
-        </AppWatermark>
-
-        <!-- 卡片模式 -->
-        <div v-else class="hw-card-grid">
-          <div v-if="!pagedList.length" class="hw-empty-lg">暂无数据</div>
-          <div
-            v-for="row in pagedList"
-            :key="row.id"
-            class="hw-card"
-            :class="{
-              'hw-card-danger': row.status === '未提交' && (!row.submitStatus || row.submitStatus === '未提交'),
-              'hw-card-warning': row.movedToTA && !row.retrieved
-            }"
-          >
-            <div class="hw-card-top">
-              <span class="hw-card-subject" :style="{ color: shared.subjectColor(row.subject) }">{{ row.subject }}</span>
-              <el-tag size="small" :type="shared.hwStatusTagType(row.status)" effect="dark">{{ row.status || '—' }}</el-tag>
-            </div>
-            <div class="hw-card-body">
-              <div class="hw-card-name">{{ row.studentName }}</div>
-              <div class="hw-card-title">{{ row.title }}</div>
-            </div>
-            <div class="hw-card-bottom">
-              <span :style="{color: row.submitStatus === '已提交' || row.submitStatus === '已批改' ? 'var(--admin-success)' : 'var(--admin-danger)'}">
-                {{ row.submitStatus || '未提交' }}
-              </span>
-              <span v-if="row.quality" class="hw-card-quality">{{ row.quality }}</span>
-              <span v-if="row.accuracy != null" class="hw-card-acc"
-                :style="{color: row.accuracy >= 80 ? 'var(--admin-success)' : row.accuracy >= 60 ? 'var(--admin-warning)' : 'var(--admin-danger)'}">
-                {{ row.accuracy }}%
-              </span>
-              <el-button size="small" text type="primary" @click="openTrackingEdit(row)" class="hw-card-edit">编辑</el-button>
-            </div>
-          </div>
-          <div class="hw-pagination">
-            <el-pagination v-model:current-page="curPage" v-model:page-size="pageSize"
-              :page-sizes="[10,15,20,50]" :total="filteredList.length"
-              layout="total, sizes, prev, pager, next, jumper" size="small" background />
-          </div>
-        </div>
-      </main>
+        </AppWatermark>      </main>
 
     </div>
 
@@ -230,7 +180,7 @@
             <span v-if="filterSubject">{{ filterSubject }}</span>
           </div>
         </div>
-        <el-table :data="filteredList" border size="small" style="font-size:10px">
+        <el-table :data="filteredList" border size="small" style="font-size:10px" :span-method="exportSpanMethod">
           <el-table-column prop="seq" label="#" width="36" />
           <el-table-column prop="subject" label="科目" width="80" />
           <el-table-column prop="studentName" label="姓名" width="66" />
@@ -255,8 +205,10 @@
 
     <!-- 作业追踪编辑对话框 -->
     <el-dialog v-model="trackEditVisible" title="编辑作业追踪" width="520px" top="3vh">
-      <div class="hw-edit-summary">
-        {{ trackEditForm.subject }} · {{ trackEditForm.title }} · {{ trackEditForm.studentName }}
+      <div class="hw-edit-summary">{{ trackEditForm.subject }} · {{ trackEditForm.studentName }}</div>
+      <div class="admin-form-group">
+        <label>作业内容 <span style="font-size:10px;color:var(--admin-text-muted)">（修改后同步同科目所有学生）</span></label>
+        <el-input v-model="trackEditForm.title" placeholder="作业内容" @change="syncTitleToSubject" />
       </div>
       <div class="admin-form-group">
         <label>作业状态</label>
@@ -310,68 +262,62 @@
     </el-dialog>
 
     <!-- 布置作业对话框 -->
-    <el-dialog v-model="assignVisible" title="布置作业" width="620px" top="3vh" @close="resetAssignForm">
-      <div class="admin-two-col">
-        <div class="admin-form-group">
-          <label>科目 <span style="color:var(--admin-danger)">*</span></label>
-          <el-select v-model="assignForm.subject" style="width:100%" placeholder="选择科目" :disabled="!canAssignAnySubject">
-            <el-option-group label="核心科目">
-              <el-option v-for="s in assignableSubjects" :key="s" :label="s" :value="s" />
-            </el-option-group>
-            <el-option-group label="选修科目">
-              <el-option v-for="s in assignableElectives" :key="s" :label="s" :value="s" />
-            </el-option-group>
+    <el-dialog v-model="assignVisible" title="布置作业" width="680px" top="3vh" @close="resetAssignForm" class="hw-assign-dialog">
+      <div class="ha-form">
+        <div class="ha-row">
+          <div class="ha-field ha-field-half">
+            <label>科目 <span class="ha-req">*</span></label>
+            <el-select v-model="assignForm.subject" placeholder="选择科目">
+              <el-option-group label="核心科目"><el-option v-for="s in assignableSubjects" :key="s" :label="s" :value="s" /></el-option-group>
+              <el-option-group label="选修科目"><el-option v-for="s in assignableElectives" :key="s" :label="s" :value="s" /></el-option-group>
+            </el-select>
+          </div>
+          <div class="ha-field ha-field-half">
+            <label>班级 <span class="ha-req">*</span></label>
+            <el-select v-model="assignForm.class" placeholder="选择班级" @change="onAssignClassChange">
+              <el-option v-for="c in shared.classList.value" :key="c" :label="c" :value="c" />
+            </el-select>
+          </div>
+        </div>
+        <div class="ha-field">
+          <label>作业标题 <span class="ha-req">*</span></label>
+          <el-input v-model="assignForm.title" placeholder="如：二次函数综合练习" />
+        </div>
+        <div class="ha-field">
+          <label>作业内容</label>
+          <el-input v-model="assignForm.content" type="textarea" :rows="2" placeholder="题目范围、页码、具体要求…" />
+        </div>
+        <div class="ha-row">
+          <div class="ha-field ha-field-half">
+            <label>截止日期 <span class="ha-req">*</span></label>
+            <el-date-picker v-model="assignForm.dueDate" type="date" placeholder="选择日期" value-format="YYYY-MM-DD" />
+          </div>
+          <div class="ha-field ha-field-half">
+            <label>时间段</label>
+            <el-input v-model="assignForm.timeRange" placeholder="如：19:30-21:05" />
+          </div>
+        </div>
+        <div class="ha-field">
+          <label>发放范围</label>
+          <div class="ha-scope-tabs">
+            <button type="button" class="ha-scope-btn" :class="{ active: assignForm.targetScope === 'auto' }" @click="assignForm.targetScope = 'auto'">
+              <span class="ha-scope-icon">📚</span><span>全班分发</span><small>必修→全班 / 选修→选该科目的学生</small>
+            </button>
+            <button type="button" class="ha-scope-btn" :class="{ active: assignForm.targetScope === 'selected' }" @click="assignForm.targetScope = 'selected'">
+              <span class="ha-scope-icon">👤</span><span>指定学生</span><small>手动选择接收人</small>
+            </button>
+          </div>
+        </div>
+        <div v-if="assignForm.targetScope === 'selected'" class="ha-field">
+          <label>选择学生</label>
+          <el-select v-model="assignForm.targetStudentIds" multiple placeholder="选择学生…" style="width:100%">
+            <el-option v-for="s in classStudents" :key="s.id" :label="`${s.name} (${s.class})`" :value="s.id" />
           </el-select>
         </div>
-        <div class="admin-form-group">
-          <label>班级 <span style="color:var(--admin-danger)">*</span></label>
-          <el-select v-model="assignForm.class" style="width:100%" placeholder="选择班级" @change="onAssignClassChange">
-            <el-option v-for="c in shared.classList.value" :key="c" :label="c" :value="c" />
-          </el-select>
+        <div v-if="distPreview.length" class="ha-preview">
+          <div class="ha-preview-title">分发预览 · {{ distPreview.length }} 人</div>
+          <div class="ha-preview-list">{{ distPreview.join('、') }}</div>
         </div>
-      </div>
-      <div class="admin-form-group">
-        <label>作业标题 <span style="color:var(--admin-danger)">*</span></label>
-        <el-input v-model="assignForm.title" placeholder="如：二次函数综合练习" />
-      </div>
-      <div class="admin-form-group">
-        <label>作业内容</label>
-        <el-input v-model="assignForm.content" type="textarea" :rows="2" placeholder="作业具体内容…" />
-      </div>
-      <div class="admin-form-group">
-        <label>详细描述</label>
-        <el-input v-model="assignForm.description" type="textarea" :rows="2" placeholder="详细要求、步骤说明…" />
-      </div>
-      <div class="admin-two-col">
-        <div class="admin-form-group">
-          <label>截止日期 <span style="color:var(--admin-danger)">*</span></label>
-          <el-date-picker v-model="assignForm.dueDate" type="date" placeholder="选择日期" style="width:100%" value-format="YYYY-MM-DD" />
-        </div>
-        <div class="admin-form-group">
-          <label>时间段</label>
-          <el-input v-model="assignForm.timeRange" placeholder="如：19:30-21:05" />
-        </div>
-      </div>
-      <div class="admin-form-group">
-        <label>发放范围</label>
-        <el-radio-group v-model="assignForm.targetScope" @change="onScopeChange">
-          <el-radio value="auto">自动匹配（必修→全班 / 选修→选课学生）</el-radio>
-          <el-radio value="selected">指定学生</el-radio>
-        </el-radio-group>
-      </div>
-      <div v-if="assignForm.targetScope === 'selected'" class="admin-form-group">
-        <label>选择学生</label>
-        <el-select v-model="assignForm.targetStudentIds" style="width:100%" multiple placeholder="选择学生…">
-          <el-option v-for="s in classStudents" :key="s.id" :label="`${s.name} (${s.class})`" :value="s.id" />
-        </el-select>
-      </div>
-      <div class="admin-form-group">
-        <label>备注</label>
-        <el-input v-model="assignForm.notes" type="textarea" :rows="1" placeholder="补充说明…" />
-      </div>
-      <div v-if="distPreview.length" class="ha-dist-preview">
-        <div class="ha-dist-preview-title">分发预览 — 将分发给以下 {{ distPreview.length }} 名学生：</div>
-        <div class="ha-dist-preview-list">{{ distPreview.join('、') }}</div>
       </div>
       <template #footer>
         <el-button @click="assignVisible = false">取消</el-button>
@@ -468,9 +414,6 @@ const assFilterSearch = ref('')
 const selectedAssignment = ref(null)
 const selectedAssignmentId = ref('')
 const collapsedSections = ref([])
-const editingTitleId = ref(null)
-const editTitleValue = ref('')
-
 const assignForm = ref({
   subject: '', class: '', title: '', content: '', description: '',
   dueDate: '', timeRange: '', targetScope: 'auto', targetStudentIds: [], notes: ''
@@ -478,32 +421,16 @@ const assignForm = ref({
 const editForm = ref({})
 
 // ====== Permissions ======
-const isAdmin = computed(() => store.currentRole?.name === '超级管理员' || store.currentRole?.name === '教务主任')
-const isHomeroom = computed(() => store.currentRole?.name === '班主任/教师')
-const canAssignAnySubject = computed(() => isAdmin.value || isHomeroom.value)
-const canAssign = computed(() => store.hasPermission('homework.assign'))
+const canAssign = computed(() => store.hasPermission("homework:view"))
 
 const densityOptions = [
-  { key: 'compact', label: '紧' },
-  { key: 'comfortable', label: '适' },
-  { key: 'loose', label: '松' }
+  { key: "compact", label: "紧" },
+  { key: "comfortable", label: "适" },
+  { key: "loose", label: "松" }
 ]
 
-const teacherSubjects = computed(() => {
-  if (canAssignAnySubject.value) return [...shared.coreSubjects, ...shared.electiveSubjects.value]
-  const teacherName = store.currentUser?.displayName || ''
-  try {
-    const timetable = JSON.parse(localStorage.getItem('dse_timetable') || '[]')
-    return [...new Set(timetable.filter(t => t.teacher === teacherName).map(t => t.subject))]
-  } catch { return [] }
-})
-
-const assignableSubjects = computed(() =>
-  canAssignAnySubject.value ? shared.coreSubjects : shared.coreSubjects.filter(s => teacherSubjects.value.includes(s))
-)
-const assignableElectives = computed(() =>
-  canAssignAnySubject.value ? shared.electiveSubjects.value : shared.electiveSubjects.value.filter(s => teacherSubjects.value.includes(s))
-)
+const assignableSubjects = shared.coreSubjects
+const assignableElectives = shared.electiveSubjects
 
 // ====== Computed ======
 const totalCount = computed(() => homeworks.value.length)
@@ -570,24 +497,6 @@ function onAssignmentFilterChange() {
   curPage.value = 1
 }
 
-// ====== Inline Title Editing ======
-function startEditTitle(row) {
-  editingTitleId.value = row.id
-  editTitleValue.value = row.title || ''
-}
-
-function saveEditTitle(row) {
-  if (editTitleValue.value !== row.title) {
-    homeworkService.update(row.id, { ...row, title: editTitleValue.value })
-    homeworks.value = homeworkService.getAll()
-  }
-  editingTitleId.value = null
-}
-
-function cancelEditTitle() {
-  editingTitleId.value = null
-}
-
 const distPreview = computed(() => {
   const f = assignForm.value
   if (!f.class || !f.subject) return []
@@ -625,12 +534,48 @@ function collapseIcon(section) {
 
 // ====== Table helpers ======
 function spanMethod({ row, column, rowIndex }) {
-  if (!table.isColumnVisible('subject')) return { rowspan: 1, colspan: 1 }
   const list = pagedList.value
+  if (!list.length) return { rowspan: 1, colspan: 1 }
+
+  // 科目列合并
+  if (column.property === 'subject' && table.isColumnVisible('subject')) {
+    if (rowIndex === 0 || row.subject !== list[rowIndex - 1].subject) {
+      let count = 1
+      for (let i = rowIndex + 1; i < list.length && list[i].subject === row.subject; i++) count++
+      return { rowspan: count, colspan: 1 }
+    }
+    return { rowspan: 0, colspan: 0 }
+  }
+
+  // 作业内容列合并（同一科目+同一标题）
+  if (column.property === 'title' && table.isColumnVisible('title')) {
+    if (rowIndex === 0 || row.subject !== list[rowIndex - 1].subject || row.title !== list[rowIndex - 1].title) {
+      let count = 1
+      for (let i = rowIndex + 1; i < list.length && list[i].subject === row.subject && list[i].title === row.title; i++) count++
+      return { rowspan: count, colspan: 1 }
+    }
+    return { rowspan: 0, colspan: 0 }
+  }
+
+  return { rowspan: 1, colspan: 1 }
+}
+
+// 导出表格合并（同 spanMethod 逻辑，但数据源为 filteredList）
+function exportSpanMethod({ row, column, rowIndex }) {
+  const list = filteredList.value
+  if (!list.length) return { rowspan: 1, colspan: 1 }
   if (column.property === 'subject') {
     if (rowIndex === 0 || row.subject !== list[rowIndex - 1].subject) {
       let count = 1
       for (let i = rowIndex + 1; i < list.length && list[i].subject === row.subject; i++) count++
+      return { rowspan: count, colspan: 1 }
+    }
+    return { rowspan: 0, colspan: 0 }
+  }
+  if (column.property === 'title') {
+    if (rowIndex === 0 || row.subject !== list[rowIndex - 1].subject || row.title !== list[rowIndex - 1].title) {
+      let count = 1
+      for (let i = rowIndex + 1; i < list.length && list[i].subject === row.subject && list[i].title === row.title; i++) count++
       return { rowspan: count, colspan: 1 }
     }
     return { rowspan: 0, colspan: 0 }
@@ -656,12 +601,23 @@ function openTrackingEdit(row) {
   trackEditVisible.value = true
 }
 
+function syncTitleToSubject() {
+  const f = trackEditForm.value
+  if (!f.title || !f.subject) return
+  homeworks.value.forEach(h => {
+    if (h.subject === f.subject) {
+      homeworkService.update(h.id, { ...h, title: f.title })
+    }
+  })
+  homeworks.value = homeworkService.getAll()
+}
+
 function saveTrackingEdit() {
   const data = { ...trackEditForm.value }
   if (data.id) {
     const existing = homeworks.value.find(h => h.id === data.id)
     if (existing) {
-      const merged = { ...existing, status: data.status, submitStatus: data.submitStatus,
+      const merged = { ...existing, title: data.title, status: data.status, submitStatus: data.submitStatus,
         quality: data.quality, accuracy: data.accuracy, errorSummary: data.errorSummary,
         teacherComment: data.teacherComment, movedToTA: data.movedToTA, retrieved: data.retrieved }
       homeworkService.update(data.id, merged)
@@ -803,9 +759,6 @@ onMounted(() => {
 .hw-center { flex: 1; overflow-y: auto; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 
 /* Inline title editing */
-.hw-title-clickable { cursor: pointer; display: block; padding: 2px 4px; border-radius: 3px; border: 1px solid transparent; transition: all 0.15s; }
-.hw-title-clickable:hover { border-color: var(--admin-accent); background: rgba(99,102,241,0.04); }
-.hw-inline-edit { min-width: 120px; }
 
 .hw-pagination { padding: 10px 0; display: flex; align-items: center; }
 
@@ -870,9 +823,42 @@ onMounted(() => {
 .hw-export-container :deep(.hw-track-row-warning) { background: rgba(217, 119, 6, 0.06) !important; }
 
 /* Dist Preview */
-.ha-dist-preview { margin-top: 12px; padding: 10px 14px; background: var(--admin-bg); border-radius: 8px; border: 1px solid var(--admin-border); }
-.ha-dist-preview-title { font-size: 12px; font-weight: 600; color: var(--admin-accent); margin-bottom: 6px; }
-.ha-dist-preview-list { font-size: 11px; color: var(--admin-text-secondary); line-height: 1.6; }
+/* ===== 布置作业对话框 ===== */
+.ha-form { display: flex; flex-direction: column; gap: 14px; }
+.ha-row { display: flex; gap: 14px; }
+.ha-field { display: flex; flex-direction: column; gap: 4px; }
+.ha-field label { font-size: 12px; font-weight: 600; color: var(--admin-text-secondary); }
+.ha-req { color: var(--admin-danger); }
+.ha-field-half { flex: 1; min-width: 0; }
+.ha-field .el-select { width: 100%; }
+.ha-field .el-date-editor { width: 100%; }
+
+/* 发放范围 */
+.ha-scope-tabs { display: flex; gap: 8px; }
+.ha-scope-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 12px 8px; border: 1px solid var(--admin-border); border-radius: 10px;
+  background: var(--admin-bg); cursor: pointer; transition: all 0.2s;
+  font-family: inherit; color: var(--admin-text-secondary); text-align: center;
+}
+.ha-scope-btn:hover { border-color: var(--admin-accent); background: rgba(99,102,241,0.04); }
+.ha-scope-btn.active { border-color: var(--admin-accent); background: rgba(99,102,241,0.08); color: var(--admin-text); }
+.ha-scope-icon { font-size: 20px; }
+.ha-scope-btn span:nth-child(2) { font-size: 13px; font-weight: 600; }
+.ha-scope-btn small { font-size: 10px; color: var(--admin-text-muted); display: block; }
+.ha-scope-btn.active small { color: var(--admin-text-secondary); }
+
+/* 分发预览 */
+.ha-preview { margin-top: 4px; padding: 12px 14px; background: rgba(34,197,94,0.04); border: 1px solid rgba(34,197,94,0.15); border-radius: 8px; }
+.ha-preview-title { font-size: 12px; font-weight: 600; color: #4ade80; margin-bottom: 6px; }
+.ha-preview-list { font-size: 11px; color: var(--admin-text-secondary); line-height: 1.6; }
+.hw-title-link { cursor: pointer; color: var(--admin-text); }
+.hw-title-link:hover { color: var(--admin-accent-light); text-decoration: underline; }
+.hw-status-text { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+.hw-status-已提交,.hw-status-已批改 { background: rgba(34,197,94,0.1); color: #4ade80; }
+.hw-status-未提交 { background: rgba(239,68,68,0.1); color: #f87171; }
+.hw-status-补交,.hw-status-迟交 { background: rgba(245,158,11,0.1); color: #fbbf24; }
+.hw-status-已退回 { background: rgba(148,163,184,0.1); color: #94a3b8; }
 
 @media (max-width: 1024px) {
   .hw-body { flex-direction: column; }

@@ -13,6 +13,7 @@
  */
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import { useMenuStore } from '@/stores/menu'
 
 const routes = [
   // === 公共学习系统 (Warm Academia 浅色主题) ===
@@ -137,22 +138,23 @@ router.beforeEach((to, from, next) => {
     }
     // Check that user data still exists in store
     const store = useAppStore()
+    const menuStore = useMenuStore()
     if (!store.currentUser) {
       // Stale token without user data — clean up and redirect to login
       localStorage.removeItem('admin_token')
       next({ name: 'Login', query: { redirect: to.fullPath } })
       return
     }
-    // Role-based menu access check for admin routes
-    if (to.meta?.menuKey) {
-      if (!store.hasMenuAccess(to.meta.menuKey)) {
+    // 基于后端菜单树的路径鉴权（检查 to.path 是否在后端菜单中）
+    if (menuStore.serverMenuTree && to.path !== '/admin') {
+      if (!menuStore.hasMenuAccess(to.path)) {
         next({ name: 'Dashboard' })
         return
       }
     }
-    // Fine-grained permission check (optional per-route)
+    // 细粒度权限检查（permission 对应后端 perms 字段）
     if (to.meta?.permission) {
-      if (!store.hasPermission(to.meta.permission)) {
+      if (!menuStore.hasPermission(to.meta.permission)) {
         next({ name: 'Dashboard' })
         return
       }

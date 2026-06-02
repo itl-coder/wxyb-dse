@@ -91,7 +91,13 @@
       "file": "src/layouts/AdminLayout.vue",
       "root_cause": "屏幕宽度≤1200px时CSS强制侧边栏折叠，但header中切换按钮只调用store.toggleSidebar()改变sidebarCollapsed状态，不触发sidebarOpen overlay状态，导致中等屏幕点击切换按钮无效。",
       "fix": "新增handleSidebarToggle()函数，根据window.innerWidth判断：≤1200px时切换sidebarOpen（移动端overlay），>1200px时切换store.sidebarCollapsed（桌面端折叠）。",
-      "tags": ["sidebar", "collapse", "responsive", "toggle", "overlay"],
+      "tags": [
+        "sidebar",
+        "collapse",
+        "responsive",
+        "toggle",
+        "overlay"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-20"
@@ -103,7 +109,13 @@
       "file": "src/stores/app.js, src/router/index.js, src/views/admin/Login.vue",
       "root_cause": "RBAC改造后 loadUserFromStorage() 读取新键 dse_admin_user，但旧登录系统存储的是 admin_user 键。router guard 检查到 admin_token 存在但 currentUser 为 null → 重定向到 /login → Login.vue onMounted 检测到 admin_token 存在 → 重定向回 /admin → 无限循环直至浏览器崩溃。",
       "fix": "1) loadUserFromStorage() 增加旧键 admin_user 回退并自动迁移到新键 2) Login.vue onMounted 增加 store.isAuthenticated 验证 3) router guard 中 admin→login 重定向也验证 isAuthenticated 4) guard 中清理无用户数据的过期 token",
-      "tags": ["rbac", "infinite-loop", "redirect", "auth", "localStorage"],
+      "tags": [
+        "rbac",
+        "infinite-loop",
+        "redirect",
+        "auth",
+        "localStorage"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-10"
@@ -115,7 +127,13 @@
       "file": "src/views/admin/exams/exam-seat/components/StudentPool.vue",
       "root_cause": "The onEnd drag handler used document.elementFromPoint() with .closest('.sg-cell') and .closest('.sg-grid'), but SeatGrid.vue uses .sg-td-seat for cells and .sg-table for the grid. These class selectors were never updated when SeatGrid was refactored.",
       "fix": "Updated selectors to .sg-td-seat (cell) and .sg-table (grid), matching the current SeatGrid markup. Also extracted findDropTarget() helper for clarity and added touch event support via changedTouches fallback.",
-      "tags": ["drag", "sortablejs", "class-selectors", "seat-grid", "student-pool"],
+      "tags": [
+        "drag",
+        "sortablejs",
+        "class-selectors",
+        "seat-grid",
+        "student-pool"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-22"
@@ -127,10 +145,672 @@
       "file": "src/views/admin/exams/exam-seat/utils/seatAllocator.js, src/views/admin/exams/exam-seat/store/examSeatStore.js, src/views/admin/exams/exam-seat/components/ImportExcelDialog.vue",
       "root_cause": "Exclusive classroom feature was partially implemented. The store-level validateExclusiveRules() gate existed but the seat allocator algorithm had no exclusive constraint awareness — no pre-computed class→room mapping, no constraint in greedy/fallback loops. groupByClass option was removed from destructure but its 56-line code branch remained as dead code. warnings array was used before declaration.",
       "fix": "1) Moved warnings declaration before capacity check, changed to fail-fast error return 2) Removed groupByClass dead code block (~56 lines) 3) Added exclusiveClassRoomMap pre-computation 4) Added exclusive constraint to greedy loop (Bug B) 5) Added exclusive constraint to fallback retry loop (Bug A) 6) Removed groupByClass checkbox/ref/logic from ImportExcelDialog.vue",
-      "tags": ["exclusive-classroom", "seat-allocator", "constraint", "dead-code", "reference-error"],
+      "tags": [
+        "exclusive-classroom",
+        "seat-allocator",
+        "constraint",
+        "dead-code",
+        "reference-error"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-23"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-06-01T12:20:55.746Z",
+      "error_message": "Missing error handling in function",
+      "file": "src/views/admin/auth/Login.vue",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-01T12:20:55.746Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-06-01T12:59:13.717Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/stores/app.js",
+      "root_cause": "21 lines replaced/restructured",
+      "fix": "Rewrote 86→112 lines (21 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-01T12:59:13.717Z"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-06-01T13:22:37.097Z",
+      "error_message": "Missing guard clause",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "No early return/throw for edge case: !store.dynamicMenuGroups",
+      "fix": "Added guard clause: if (!store.dynamicMenuGroups)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-01T13:22:37.097Z"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-06-01T13:22:58.951Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "Had \"store.toggleFavorite(item.menuKey)\"",
+      "fix": "Changed to \"store.toggleFavorite(item.route)\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-01T13:22:58.951Z"
+    },
+    {
+      "id": "bug-014",
+      "timestamp": "2026-06-01T13:23:05.037Z",
+      "error_message": "CSS fix: faved",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "faved: store.isFavorite(child.menuKey) → store.isFavorite(child.route)",
+      "fix": "Changed faved: store.isFavorite(child.menuKey) → store.isFavorite(child.route)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-01T13:23:10.919Z"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-06-01T13:23:19.649Z",
+      "error_message": "Wrong reference: store should be div",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "Used \"store\" instead of \"div\"",
+      "fix": "Changed store → div",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-01T13:23:19.649Z"
+    },
+    {
+      "id": "bug-016",
+      "timestamp": "2026-06-02T05:50:39.346Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "Had \"{ open: sidebarOpen }\"",
+      "fix": "Changed to \"{ open: sidebarOpen, collapsed: store.sidebarColl",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T05:50:39.346Z"
+    },
+    {
+      "id": "bug-017",
+      "timestamp": "2026-06-02T06:01:21.899Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/stores/menu.js",
+      "root_cause": "19 lines replaced/restructured",
+      "fix": "Rewrote 23→4 lines (19 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:01:21.899Z"
+    },
+    {
+      "id": "bug-018",
+      "timestamp": "2026-06-02T06:01:34.993Z",
+      "error_message": "Wrong reference: store should be menuStore",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "Used \"store\" instead of \"menuStore\"",
+      "fix": "Changed store → menuStore",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:01:34.993Z"
+    },
+    {
+      "id": "bug-019",
+      "timestamp": "2026-06-02T06:01:51.081Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "Had \"true\"",
+      "fix": "Changed to \"store.sidebarCollapsed\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:01:51.081Z"
+    },
+    {
+      "id": "bug-020",
+      "timestamp": "2026-06-02T06:02:20.158Z",
+      "error_message": "Wrong condition in logic",
+      "file": "src/router/index.js",
+      "root_cause": "Condition was: if (store.serverMenuTree && to.path !== '/admin')",
+      "fix": "Changed to: if (menuStore.serverMenuTree && to.path !== '/admin')",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:02:20.158Z"
+    },
+    {
+      "id": "bug-021",
+      "timestamp": "2026-06-02T06:02:55.357Z",
+      "error_message": "Wrong reference: store should be menuStore",
+      "file": "src/router/index.js",
+      "root_cause": "Used \"store\" instead of \"menuStore\"",
+      "fix": "Changed store → menuStore",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:02:55.357Z"
+    },
+    {
+      "id": "bug-022",
+      "timestamp": "2026-06-02T06:03:41.872Z",
+      "error_message": "CSS fix: margin-left",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "margin-left: 0 → 64px",
+      "fix": "Changed margin-left: 0 → 64px",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-06-02T06:08:00.664Z"
+    },
+    {
+      "id": "bug-023",
+      "timestamp": "2026-06-02T06:07:27.155Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:07:27.155Z"
+    },
+    {
+      "id": "bug-024",
+      "timestamp": "2026-06-02T06:13:15.569Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: function walk(nodes) {; if (!nodes) return",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-02T06:13:23.807Z"
+    },
+    {
+      "id": "bug-025",
+      "timestamp": "2026-06-02T06:14:19.153Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "14 lines replaced/restructured",
+      "fix": "Rewrote 15→26 lines (14 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:14:19.153Z"
+    },
+    {
+      "id": "bug-026",
+      "timestamp": "2026-06-02T06:15:52.898Z",
+      "error_message": "Significant refactor of ",
+      "file": "docs/menu-data-flow.md",
+      "root_cause": "30 lines replaced/restructured",
+      "fix": "Rewrote 43→25 lines (30 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:15:52.898Z"
+    },
+    {
+      "id": "bug-027",
+      "timestamp": "2026-06-02T06:17:22.509Z",
+      "error_message": "Wrong reference: 0b0f1a should be 111827",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "Used \"0b0f1a\" instead of \"111827\"",
+      "fix": "Changed 0b0f1a → 111827",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-06-02T06:17:33.095Z"
+    },
+    {
+      "id": "bug-028",
+      "timestamp": "2026-06-02T06:18:20.827Z",
+      "error_message": "CSS fix: background",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "background: var(--admin-sidebar-bg, #111827) → var(--admin-bg-secondary, #131B2B)",
+      "fix": "Changed background: var(--admin-sidebar-bg, #111827) → var(--admin-bg-secondary, #131B2B)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 4,
+      "last_seen": "2026-06-02T06:20:23.241Z"
+    },
+    {
+      "id": "bug-029",
+      "timestamp": "2026-06-02T06:32:50.609Z",
+      "error_message": "CSS fix: gap, width",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "gap: 8px\"><el-switch v-model=\"form.sections.homework\" → 8px\">; width: 95px\"><el-option label=\"未批改\" → 72px\" />",
+      "fix": "Changed gap: 8px\"><el-switch v-model=\"form.sections.homework\" → 8px\">; width: 95px\"><el-option label=\"未批改\" → 72px\" />",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-06-02T06:34:06.029Z"
+    },
+    {
+      "id": "bug-030",
+      "timestamp": "2026-06-02T06:33:09.322Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:33:09.322Z"
+    },
+    {
+      "id": "bug-031",
+      "timestamp": "2026-06-02T06:37:54.152Z",
+      "error_message": "Wrong operator: !== should be ||",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "Used \"!==\" instead of \"||\"",
+      "fix": "Changed operator !== → ||",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:37:54.152Z"
+    },
+    {
+      "id": "bug-032",
+      "timestamp": "2026-06-02T06:43:10.086Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "Had ', lateReason: '",
+      "fix": "Changed to ', lateContent: '",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-02T06:43:15.890Z"
+    },
+    {
+      "id": "bug-033",
+      "timestamp": "2026-06-02T06:43:47.353Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/views/ShiftHandoverPublic.vue",
+      "root_cause": "11 lines replaced/restructured",
+      "fix": "Rewrote 20→55 lines (11 removed) | Also: /* 作业 */; .hop-hw-list { | Also: /* ===== 作业收集（新版） ===== */; .phw-list { display: flex; flex-direction: column;",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-06-02T06:48:01.098Z"
+    },
+    {
+      "id": "bug-034",
+      "timestamp": "2026-06-02T06:51:32.876Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "Had ', totalCount: 0, submittedCount: 0,\n    submitted",
+      "fix": "Changed to ', totalCount: 0, submittedCount: 0, missingCount:",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-02T06:55:23.572Z"
+    },
+    {
+      "id": "bug-035",
+      "timestamp": "2026-06-02T06:53:11.639Z",
+      "error_message": "CSS fix: color",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "color: #f87171 → var(--admin-text-muted, #6B7D9E)",
+      "fix": "Changed color: #f87171 → var(--admin-text-muted, #6B7D9E)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-06-02T06:59:19.210Z"
+    },
+    {
+      "id": "bug-036",
+      "timestamp": "2026-06-02T06:59:29.316Z",
+      "error_message": "Wrong return value",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "Was returning: Math.max(0, item.totalCount - (item.submittedCount",
+      "fix": "Now returns: collapsedItems.value.has(idx) }",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:59:29.316Z"
+    },
+    {
+      "id": "bug-037",
+      "timestamp": "2026-06-02T07:01:44.290Z",
+      "error_message": "CSS fix: font-size, color, line-height",
+      "file": "src/views/ShiftHandoverPublic.vue",
+      "root_cause": "font-size: 13px → 14px; color: #666 → #c4c8d4; line-height: 1.5 → 1.6",
+      "fix": "Changed font-size: 13px → 14px; color: #666 → #c4c8d4; line-height: 1.5 → 1.6",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-02T07:01:50.402Z"
+    },
+    {
+      "id": "bug-038",
+      "timestamp": "2026-06-02T07:09:13.465Z",
+      "error_message": "CSS fix: flex",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "flex: 1\" /> → 2\" />",
+      "fix": "Changed flex: 1\" /> → 2\" />",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T07:09:13.465Z"
+    },
+    {
+      "id": "bug-039",
+      "timestamp": "2026-06-02T07:17:26.802Z",
+      "error_message": "CSS fix: gap",
+      "file": "src/views/ShiftHandoverPublic.vue",
+      "root_cause": "gap: 6px → 10px",
+      "fix": "Changed gap: 6px → 10px",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T07:17:26.802Z"
+    },
+    {
+      "id": "bug-040",
+      "timestamp": "2026-06-02T07:20:26.146Z",
+      "error_message": "CSS fix: width",
+      "file": "src/views/admin/homework/Homework.vue",
+      "root_cause": "width: 100%\" multiple placeholder=\"选择学生…\"> → 100%\">",
+      "fix": "Changed width: 100%\" multiple placeholder=\"选择学生…\"> → 100%\">",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-02T07:20:46.382Z"
+    },
+    {
+      "id": "bug-041",
+      "timestamp": "2026-06-02T07:20:37.612Z",
+      "error_message": "Missing guard clause",
+      "file": "src/views/admin/homework/Homework.vue",
+      "root_cause": "No early return/throw for edge case: !list.length",
+      "fix": "Added guard clause: if (!list.length)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-02T07:20:55.397Z"
+    },
+    {
+      "id": "bug-042",
+      "timestamp": "2026-06-02T07:21:15.139Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/views/admin/homework/Homework.vue",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 3→29 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T07:21:15.139Z"
+    },
+    {
+      "id": "bug-043",
+      "timestamp": "2026-06-02T07:23:07.526Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/views/admin/students/StudentManagement.vue",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 6→7 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T07:23:07.526Z"
+    },
+    {
+      "id": "bug-044",
+      "timestamp": "2026-06-02T07:34:39.077Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/views/admin/homework/Homework.vue",
+      "root_cause": "16 lines replaced/restructured",
+      "fix": "Rewrote 18→3 lines (16 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T07:34:39.077Z"
+    },
+    {
+      "id": "bug-045",
+      "timestamp": "2026-06-02T07:36:15.114Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/views/admin/students/Counseling.vue",
+      "root_cause": "Had \"📋 咨询记录详情\"",
+      "fix": "Changed to \"咨询记录详情\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-02T07:36:28.943Z"
+    },
+    {
+      "id": "bug-046",
+      "timestamp": "2026-06-02T07:39:02.035Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/views/admin/homework/Homework.vue",
+      "root_cause": "Had 'homework.assign'",
+      "fix": "Changed to 'homework:view'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-06-02T07:42:30.115Z"
+    },
+    {
+      "id": "bug-047",
+      "timestamp": "2026-06-02T07:41:05.700Z",
+      "error_message": "CSS fix: active",
+      "file": "src/views/admin/homework/Homework.vue",
+      "root_cause": "active: assignForm.targetScope === 'personal' → assignForm.targetScope === 'selected'",
+      "fix": "Changed active: assignForm.targetScope === 'personal' → assignForm.targetScope === 'selected'",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-06-02T07:45:34.484Z"
+    },
+    {
+      "id": "bug-048",
+      "timestamp": "2026-06-02T07:47:34.979Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/views/admin/homework/Homework.vue",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 7→9 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T07:47:34.979Z"
+    },
+    {
+      "id": "bug-049",
+      "timestamp": "2026-06-02T07:47:54.648Z",
+      "error_message": "Missing guard clause",
+      "file": "src/views/admin/homework/Homework.vue",
+      "root_cause": "No early return/throw for edge case: !f.title || !f.subject",
+      "fix": "Added guard clause: if (!f.title || !f.subject)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T07:47:54.648Z"
+    },
+    {
+      "id": "bug-050",
+      "timestamp": "2026-06-02T08:10:50.751Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/views/admin/homework/Homework.vue",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 3→7 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:10:50.751Z"
     }
   ]
 }

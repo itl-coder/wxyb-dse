@@ -28,7 +28,6 @@
           height="400"
           style="width:100%"
           @selection-change="onSelectionChange"
-          @row-click="onRowClick"
         >
         <el-table-column type="selection" width="40" fixed />
         <el-table-column prop="name" label="姓名" fixed width="100">
@@ -60,10 +59,11 @@
         <el-table-column prop="elective1" label="选修1" width="90" />
         <el-table-column prop="elective2" label="选修2" width="90" />
         <el-table-column prop="elective3" label="选修3" width="90" />
-        <el-table-column label="操作" fixed="right" width="140">
+        <el-table-column label="操作" fixed="right" width="120">
           <template #default="{ row }">
-            <el-button v-if="store.hasPermission('student.edit')" size="small" text @click="openDialog(row)">编辑</el-button>
-            <el-button v-if="store.hasPermission('student.delete')" size="small" text type="danger" @click="handleDelete(row)">删除</el-button>
+            <span v-if="store.hasPermission('student.edit')" class="stu-action-link" @click.stop="openDialog(row)">编辑</span>
+            <span class="stu-action-sep" v-if="store.hasPermission('student.edit') && store.hasPermission('student.delete')">|</span>
+            <span v-if="store.hasPermission('student.delete')" class="stu-action-link danger" @click.stop="handleDelete(row)">删除</span>
           </template>
         </el-table-column>
       </el-table>
@@ -344,10 +344,6 @@ function onSelectionChange(rows) {
   selectedIds.value = rows.map(r => r.id)
 }
 
-function onRowClick(row) {
-  openDialog(row)
-}
-
 function clearSelection() {
   studentTableRef.value?.clearSelection()
 }
@@ -402,6 +398,23 @@ async function batchDelete() {
   max-height: 60vh;
   overflow-y: auto;
   padding-right: 4px;
+}
+
+/* 操作文本链接 */
+.stu-action-link { font-size: 12px; cursor: pointer; color: var(--admin-accent-light, #818cf8); }
+.stu-action-link:hover { color: var(--admin-accent, #6366f1); text-decoration: underline; }
+.stu-action-link.danger { color: var(--admin-danger, #f87171); }
+.stu-action-link.danger:hover { color: #ef4444; }
+.stu-action-sep { color: var(--admin-border); margin: 0 4px; font-size: 11px; }
+
+/* 固定列背景 */
+.student-table-wrap :deep(.el-table__fixed),
+.student-table-wrap :deep(.el-table__fixed-right) { background: var(--admin-bg-secondary, #131B2B); }
+.student-table-wrap :deep(.el-table__fixed tr),
+.student-table-wrap :deep(.el-table__fixed-right tr) { background: transparent; }
+.student-table-wrap :deep(.el-table__fixed .el-table__cell),
+.student-table-wrap :deep(.el-table__fixed-right .el-table__cell) {
+  background: var(--admin-bg-secondary, #131B2B) !important;
 }
 
 @media (max-width: 768px) {

@@ -57,22 +57,37 @@
           </div>
 
           <template v-if="d.record">
-            <!-- 作业收集 -->
             <div v-if="d.record.sections?.homework && d.record.homeworkItems?.length" class="hop-block">
-              <div class="hop-block-title">📝 作业收集情况</div>
-              <div class="hop-hw-list">
-                <div v-for="(h, i) in d.record.homeworkItems" :key="i" class="hop-hw-item">
-                  <div class="hop-hw-head">
-                    <span class="hop-hw-subject">{{ h.subject }}</span>
-                    <span class="hop-hw-count">实交 {{ h.count }}{{ h.totalCount ? ' / 应交 ' + h.totalCount : '' }} 份</span>
-                    <span class="hop-hw-grade" :class="h.graded === true ? 'done' : h.graded === 'partial' ? 'part' : 'no'">
-                      {{ h.graded === true ? '✓ 已收取' : h.graded === 'partial' ? '◐ 部分收取' : '○ 未收取' }}
-                    </span>
+              <div class="hop-block-title">作业收集</div>
+              <div class="hw-public-list" :class="{ compact: d.record.homeworkItems.length > 2 }">
+                <div v-for="(h, i) in d.record.homeworkItems" :key="i" class="hw-pub-card">
+                  <div class="hw-pub-top">
+                    <span class="hw-pub-icon">{{ getPublicSubjectIcon(h.subject) }}</span>
+                    <span class="hw-pub-name">{{ h.subject }}</span>
+                    <span class="hw-pub-grade" :class="{ ok: h.graded===true, warn: h.graded==='partial' }">{{ h.graded===true?'已批改':h.graded==='partial'?'部分批改':'未批改' }}</span>
                   </div>
-                  <div class="hop-hw-body">
-                    <div v-if="h.studentNames" class="hop-hw-line"><b>缺交/迟交：</b>{{ h.studentNames }}</div>
-                    <div v-if="h.location" class="hop-hw-line"><b>放置位置：</b>{{ h.location }}</div>
-                    <div v-if="h.notes" class="hop-hw-line"><b>备注：</b>{{ h.notes }}</div>
+                  <p v-if="h.homeworkContent" class="hw-pub-content">{{ h.homeworkContent }}</p>
+                  <div class="hw-pub-nums">
+                    <div class="hw-pub-num"><em>{{ h.totalCount||0 }}</em><span>应交</span></div>
+                    <div class="hw-pub-num ok"><em>{{ h.submittedCount||h.count||0 }}</em><span>实交</span></div>
+                    <div class="hw-pub-num bad"><em>{{ h.missingCount||(h.totalCount||0)-(h.submittedCount||h.count||0)||0 }}</em><span>缺交</span></div>
+                  </div>
+                  <div v-if="h.submittedNames||h.missingNames||h.studentNames" class="hw-pub-names">
+                    <div v-if="h.submittedNames" class="hw-pub-names-item ok"><label>已交</label><span>{{ h.submittedNames }}</span></div>
+                    <div v-if="h.missingNames||h.studentNames" class="hw-pub-names-item bad"><label>缺交</label><span>{{ h.missingNames||h.studentNames }}</span></div>
+                  </div>
+                  <div v-if="h.hasLateSubmission" class="hw-pub-late">
+                    <div class="hw-pub-late-hd">补交作业</div>
+                    <p class="hw-pub-late-info">
+                      <span v-if="h.lateCount"><b>{{ h.lateCount }}</b> 份</span>
+                      <span v-if="h.lateNames"><b>学生</b> {{ h.lateNames }}</span>
+                    </p>
+                    <p v-if="h.lateContent" class="hw-pub-late-info">{{ h.lateContent }}</p>
+                    <p v-if="h.lateReason" class="hw-pub-late-why">{{ h.lateReason }}</p>
+                  </div>
+                  <div v-if="h.location||h.notes" class="hw-pub-foot">
+                    <span v-if="h.location">{{ h.location }}</span>
+                    <span v-if="h.notes">{{ h.notes }}</span>
                   </div>
                 </div>
               </div>
@@ -183,6 +198,15 @@ let cdTimer = null
 function checkEnabled() { const cfg = portalConfigService.get(); enabled.value = cfg.handoverEnabled !== false }
 function startCd() { countdown.value = 10; cdTimer = setInterval(() => { countdown.value--; if (countdown.value <= 0) { clearInterval(cdTimer); goHome() } }, 1000) }
 function goHome() { router.push('/') }
+
+// 科目图标
+const publicSubjectIcons = {
+  '中国语文':'📖','英语阅读':'📰','英语写作':'✍️','英语听力':'🎧','英语口语':'🗣️','数学':'🔢',
+  '公民与社会发展':'🏛️','物理':'⚡','化学':'🧪','生物':'🧬','经济':'💰','历史':'📜',
+  '地理':'🌍','中国历史':'🏯','资讯及通讯科技':'💻','企业、会计与财务概论':'📊',
+  '视觉艺术':'🎨','数学延伸M1':'📐','数学延伸M2':'📏'
+}
+function getPublicSubjectIcon(s) { return publicSubjectIcons[s] || '📝' }
 
 // ===== 班级 =====
 const CLASS_NAMES_KEY = 'dse_handover_classNames'
@@ -598,73 +622,135 @@ onUnmounted(() => { if (cdTimer) clearInterval(cdTimer) })
   border-bottom: 1px solid var(--border-lighter)
 }
 
-/* 作业 */
-.hop-hw-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px
+/* ==================== 作业收集 ==================== */
+.hw-public-list { display: flex; flex-direction: column; gap: 24px; }
+.hw-pub-card {
+  background: #fff; border: 1px solid #e8ecf2; border-radius: 14px;
+  padding: 26px 30px 22px;
+}
+.hw-pub-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.hw-pub-icon {
+  width: 44px; height: 44px; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  background: #eef2ff; color: #4f46e5; border-radius: 12px; flex-shrink: 0;
+}
+.hw-pub-name { font-size: 17px; font-weight: 700; color: #0f172a; flex:1; letter-spacing: -0.2px; }
+.hw-pub-grade {
+  font-size: 11px; padding: 4px 12px; border-radius: 100px;
+  background: #f1f5f9; color: #64748b; font-weight: 500;
+}
+.hw-pub-grade.ok { background: #ecfdf5; color: #059669; }
+.hw-pub-grade.warn { background: #fff7ed; color: #ea580c; }
+
+.hw-pub-content {
+  font-size: 14px; color: #334155; line-height: 1.7; margin: 0 0 16px;
+  padding: 12px 16px; background: #f8fafc; border-radius: 8px;
 }
 
-.hop-hw-item {
-  background: var(--bg-warm);
-  border-radius: var(--radius);
-  padding: 12px
+.hw-pub-nums { display: flex; border: 1px solid #e8ecf2; border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+.hw-pub-num { flex:1; text-align:center; padding:14px 4px; background:#fafbfd; }
+.hw-pub-num + .hw-pub-num { border-left: 1px solid #e8ecf2; }
+.hw-pub-num em {
+  display: block; font-size: 30px; font-weight: 700; font-style: normal;
+  font-family: 'JetBrains Mono', monospace; color: #475569; line-height: 1;
+}
+.hw-pub-num span { font-size: 10px; color: #94a3b8; display: block; margin-top: 4px; letter-spacing: 0.5px; }
+.hw-pub-num.ok { background: #f0fdf6; }
+.hw-pub-num.ok em { color: #059669; }
+.hw-pub-num.bad { background: #fef5f5; }
+.hw-pub-num.bad em { color: #dc2626; }
+
+.hw-pub-names { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.hw-pub-names-item { font-size: 13px; padding: 10px 14px; border-radius: 8px; line-height:1.6; display: flex; gap: 8px; }
+.hw-pub-names-item label { font-weight: 600; font-size: 10px; padding: 2px 7px; border-radius: 4px; white-space: nowrap; letter-spacing: 0.3px; }
+.hw-pub-names-item span { color: #475569; }
+.hw-pub-names-item.ok { background: #f0fdf6; }
+.hw-pub-names-item.ok label { background: #d1fae5; color: #059669; }
+.hw-pub-names-item.bad { background: #fef5f5; }
+.hw-pub-names-item.bad label { background: #fee2e2; color: #dc2626; }
+
+.hw-pub-late { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 14px 18px; margin-bottom: 12px; }
+.hw-pub-late-hd { font-size: 13px; font-weight: 600; color: #b45309; margin-bottom: 6px; }
+.hw-pub-late-info { font-size: 13px; color: #475569; margin: 0 0 2px; line-height: 1.6; }
+.hw-pub-late-info b { color: #92400e; }
+.hw-pub-late-why { font-size: 12px; color: #94a3b8; margin: 4px 0 0; font-style: italic; }
+
+.hw-pub-foot {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  padding-top: 10px; border-top: 1px solid #f1f5f9;
+  font-size: 12px; color: #94a3b8;
 }
 
-.hop-hw-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 6px
-}
+/* Dark */
+[data-theme="dark"] .hw-pub-card { background: #1a1d2e; border-color: #292d42; }
+[data-theme="dark"] .hw-pub-icon { background: #1e2050; color: #818cf8; }
+[data-theme="dark"] .hw-pub-name { color: #e2e8f0; }
+[data-theme="dark"] .hw-pub-grade { background: #1e2235; color: #8899b4; }
+[data-theme="dark"] .hw-pub-grade.ok { background: #0f2b22; color: #34d399; }
+[data-theme="dark"] .hw-pub-grade.warn { background: #2b1a10; color: #fbbf24; }
+[data-theme="dark"] .hw-pub-content { color: #cbd5e1; background: #1e2235; }
+[data-theme="dark"] .hw-pub-nums { border-color: #292d42; }
+[data-theme="dark"] .hw-pub-num { background: #151828; }
+[data-theme="dark"] .hw-pub-num + .hw-pub-num { border-left-color: #292d42; }
+[data-theme="dark"] .hw-pub-num em { color: #8899b4; }
+[data-theme="dark"] .hw-pub-num.ok { background: #0f2b22; }
+[data-theme="dark"] .hw-pub-num.ok em { color: #34d399; }
+[data-theme="dark"] .hw-pub-num.bad { background: #2b1515; }
+[data-theme="dark"] .hw-pub-num.bad em { color: #f87171; }
+[data-theme="dark"] .hw-pub-num span { color: #5c6e8e; }
+[data-theme="dark"] .hw-pub-names-item span { color: #8899b4; }
+[data-theme="dark"] .hw-pub-names-item.ok { background: #0f2b22; }
+[data-theme="dark"] .hw-pub-names-item.ok label { background: #064e3b; color: #34d399; }
+[data-theme="dark"] .hw-pub-names-item.bad { background: #2b1515; }
+[data-theme="dark"] .hw-pub-names-item.bad label { background: #5c1010; color: #f87171; }
+[data-theme="dark"] .hw-pub-late { background: #1f1b10; border-color: #4a3510; }
+[data-theme="dark"] .hw-pub-late-hd { color: #fbbf24; }
+[data-theme="dark"] .hw-pub-late-info { color: #8899b4; }
+[data-theme="dark"] .hw-pub-late-info b { color: #fbbf24; }
+[data-theme="dark"] .hw-pub-foot { border-top-color: #292d42; color: #5c6e8e; }
+/* 3科及以上紧凑模式 */
+.hw-public-list.compact { gap: 12px; }
+.hw-public-list.compact .hw-pub-card { padding: 16px 20px; }
+.hw-public-list.compact .hw-pub-content { font-size:13px; padding:8px 12px; margin-bottom:10px; }
+.hw-public-list.compact .hw-pub-num em { font-size:24px; }
+.hw-public-list.compact .hw-pub-num { padding:10px 4px; }
+.hw-public-list.compact .hw-pub-late { padding:10px 14px; }
 
-.hop-hw-subject {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary)
-}
+@media (max-width:600px) { .hw-pub-card { padding:18px 16px 16px; } .hw-pub-foot { flex-direction:column; gap:6px; } }
 
-.hop-hw-count {
-  font-size: 12px;
-  background: var(--accent);
-  color: #fff;
-  padding: 1px 8px;
-  border-radius: 4px;
-  font-weight: 500
+/* ==================== A4 打印 ==================== */
+@media print {
+  @page { size: A4; margin: 12mm 14mm; }
+  body { background: #fff !important; color: #000 !important; }
+  .hop-toolbar, .hop-export-btn, .hop-today-btn { display: none !important; }
+  .hop-export-area { padding: 0 !important; }
+  .hop-wd-card { border: 1px solid #ccc !important; }
+  .hop-day-section { page-break-inside: avoid; margin-bottom: 14px; }
+  .hop-block { margin-bottom: 10px; }
+  .hop-block-title { font-size: 14px; margin-bottom: 8px; }
+  .hw-public-list { gap: 10px; }
+  .hw-pub-card {
+    box-shadow: none !important; border: 1px solid #ccc !important;
+    padding: 12px 16px; border-radius: 6px; page-break-inside: avoid;
+  }
+  .hw-pub-top { margin-bottom: 8px; }
+  .hw-pub-icon { width: 32px; height: 32px; font-size: 16px; border-radius: 6px; }
+  .hw-pub-name { font-size: 14px; }
+  .hw-pub-grade { font-size: 9px; padding: 2px 8px; }
+  .hw-pub-content { font-size: 11px; padding: 6px 10px; margin-bottom: 8px; }
+  .hw-pub-nums { margin-bottom: 8px; }
+  .hw-pub-num { padding: 8px 4px; }
+  .hw-pub-num em { font-size: 22px; }
+  .hw-pub-num span { font-size: 8px; }
+  .hw-pub-names-item { font-size: 11px; padding: 6px 10px; }
+  .hw-pub-names-item label { font-size: 8px; }
+  .hw-pub-late { padding: 8px 12px; margin-bottom: 8px; }
+  .hw-pub-late-hd { font-size: 11px; }
+  .hw-pub-late-info { font-size: 11px; }
+  .hw-pub-late-why { font-size: 10px; }
+  .hw-pub-foot { font-size: 10px; padding-top: 6px; }
+  .hop-stu-card, .hop-mt-card, .hop-phone-block, .hop-leave-item, .hop-note-card { page-break-inside: avoid; }
 }
-
-.hop-hw-grade {
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 4px
-}
-
-.hop-hw-grade.done {
-  background: rgba(16, 185, 129, .1);
-  color: var(--success)
-}
-
-.hop-hw-grade.part {
-  background: rgba(245, 158, 11, .1);
-  color: var(--warning)
-}
-
-.hop-hw-grade.no {
-  background: rgba(100, 100, 120, .1);
-  color: var(--text-muted)
-}
-
-.hop-hw-body {
-  font-size: 12px;
-  color: var(--text-secondary);
-  line-height: 1.8
-}
-
-.hop-hw-line b {
-  color: var(--text-primary)
-}
-
 /* 会议 */
 .hop-mt-card {
   background: var(--bg-warm);

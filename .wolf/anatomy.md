@@ -1,15 +1,14 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-01T12:21:17.044Z
-> Files: 6 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-02T08:10:57.207Z
+> Files: 20 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
 - `.env` — API 基础地址环境变量 (~2 tok)
 - `index.html` — DSE 智能学习系统入口 HTML (~150 tok)
 - `package.json` — Node.js package manifest (~200 tok)
-- `vite.config.js` — Vite build configuration (~80 tok)
-
+- `vite.config.js` (~134 tok)
 
 ## .claude/
 
@@ -28,6 +27,10 @@
 
 ## .claude/skills/ui-ux-pro-max/scripts/
 
+
+## docs/
+
+- `menu-data-flow.md` — 动态菜单数据流 (~1389 tok)
 
 ## src/
 
@@ -70,6 +73,7 @@
 
 ## src/layouts/
 
+- `AdminLayout.vue` — AdminLayout — 管理后台布局 (~5213 tok)
 
 ## src/request/
 
@@ -77,22 +81,26 @@
 
 ## src/router/
 
+- `index.js` — 路由配置 — 全部路由定义 + 权限守卫 (~2994 tok)
 
 ## src/services/
 
 
 ## src/stores/
 
-- `app.js` — 全局状态管理 — Pinia Store (~4461 tok)
+- `app.js` — 应用 Store — 主题 / 侧边栏 / 学校设置 / 用户认证 / 学生上下文 (~2080 tok)
+- `menu.js` — 菜单 Store — 后端树直接渲染，不做前端转换 (~1270 tok)
 
 ## src/styles/
 
+- `tokens.css` — Styles: 2 rules, 265 vars (~3588 tok)
 
 ## src/utils/
 
 
 ## src/views/
 
+- `ShiftHandoverPublic.vue` — Vue: setup (~8588 tok)
 
 ## src/views/admin/
 
@@ -113,14 +121,24 @@
 ## src/views/admin/exams/exam-seat2/utils/
 
 
+## src/views/admin/handover/
+
+- `ShiftHandover.vue` — Vue component (~11583 tok)
+
 ## src/views/admin/homework/
 
+- `Homework.vue` — Vue component (~10386 tok)
 
 ## src/views/admin/homework/components/
 
 
 ## src/views/admin/homework/composables/
 
+
+## src/views/admin/students/
+
+- `Counseling.vue` — Vue component (~10144 tok)
+- `StudentManagement.vue` — 页面：学生信息管理 (~4916 tok)
 
 ## src/views/admin/teaching/phone/
 

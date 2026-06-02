@@ -232,16 +232,16 @@
    ============================================================ */
 [data-theme="admin"],
 .admin-layout {
-  --admin-bg:              #06090F;
-  --admin-bg-secondary:    #0B101E;
-  --admin-surface:         #0D1323;
-  --admin-surface-hover:   #131B30;
-  --admin-surface-active:  #18203C;
-  --admin-border:          #1A2340;
-  --admin-border-light:    #243050;
-  --admin-text:            #E4ECF6;
-  --admin-text-secondary:  #8899B4;
-  --admin-text-muted:      #4A5470;
+  --admin-bg:              #0C1119;
+  --admin-bg-secondary:    #131B2B;
+  --admin-surface:         #161E2E;
+  --admin-surface-hover:   #1C263B;
+  --admin-surface-active:  #222D44;
+  --admin-border:          #1E2D4A;
+  --admin-border-light:    #293B5C;
+  --admin-text:            #EBF0F8;
+  --admin-text-secondary:  #9AADC8;
+  --admin-text-muted:      #6B7D9E;
   --admin-accent:          #6366F1;
   --admin-accent-light:    #818CF8;
   --admin-accent-dark:     #4F46E5;

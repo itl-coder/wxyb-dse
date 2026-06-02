@@ -64,34 +64,82 @@
           <div class="admin-card hoa-sec">
             <div class="hoa-sec-hd" @click="toggleSec('hw')">
               <span>📝 作业收集 <em class="hoa-badge">{{ form.homeworkItems.length }}科</em></span>
-              <span style="display:flex;align-items:center;gap:8px"><el-switch v-model="form.sections.homework"
-                  size="small" @click.stop /> <span class="hoa-arr">{{ sec.hw ? '▾' : '▸' }}</span></span>
+              <span style="display:flex;align-items:center;gap:8px">
+                <el-switch v-model="form.sections.homework" size="small" @click.stop />
+                <span class="hoa-arr">{{ sec.hw ? '▾' : '▸' }}</span>
+              </span>
             </div>
             <div v-show="sec.hw" class="hoa-sec-bd">
               <div v-if="form.homeworkItems.length === 0" class="hoa-empty">暂无，点击下方添加</div>
-              <div v-for="(item, idx) in form.homeworkItems" :key="idx" class="hoa-item">
-                <div class="hoa-item-row">
-                  <el-select v-model="item.subject" size="small" style="width:160px" placeholder="选择科目"><el-option
-                      v-for="s in subjects" :key="s" :label="s" :value="s" /></el-select>
-                  <span class="hoa-unit">应交</span>
-                  <el-input-number v-model="item.totalCount" size="small" :min="0" style="width:85px" />
-                  <span class="hoa-unit">实交</span>
-                  <el-input-number v-model="item.count" size="small" :min="0" style="width:85px" />
-                  <span class="hoa-unit">份</span>
-                  <el-select v-model="item.graded" size="small" style="width:95px"><el-option label="未批改"
-                      :value="false" /><el-option label="已批改" :value="true" /><el-option label="部分批改"
-                      value="partial" /></el-select>
-                  <button class="hoa-rm" @click="form.homeworkItems.splice(idx, 1)">✕</button>
+
+              <div v-for="(item, idx) in form.homeworkItems" :key="idx" class="hw-card" :class="{ folded: isCollapsed(idx) }">
+                <div class="hw-bar" @click="toggleCollapse(idx)">
+                  <span class="hw-bar-icon">{{ getSubjectIcon(item.subject) }}</span>
+                  <div class="hw-bar-main">
+                    <el-select v-if="!item.subject" v-model="item.subject" size="small" style="width:150px" placeholder="选择科目" @click.stop>
+                      <el-option v-for="s in subjects" :key="s" :label="s" :value="s" /></el-select>
+                    <span v-else class="hw-bar-name" @dblclick.stop="item.subject = ''" title="双击换科目">{{ item.subject }}</span>
+                    <span v-if="item.homeworkContent && isCollapsed(idx)" class="hw-bar-desc">{{ item.homeworkContent }}</span>
+                  </div>
+                  <el-select v-model="item.graded" size="small" style="width:100px" @click.stop>
+                    <el-option label="未批改" :value="false" /><el-option label="已批改" :value="true" /><el-option label="部分批改" value="partial" /></el-select>
+                  <span class="hw-bar-arrow">{{ isCollapsed(idx) ? '▸' : '▾' }}</span>
+                  <button class="hw-bar-del" @click.stop="form.homeworkItems.splice(idx, 1)">✕</button>
                 </div>
-                <div class="hoa-item-fields">
-                  <el-input v-model="item.studentNames" size="small" placeholder="缺交/迟交学生姓名（逗号分隔）"
-                    style="margin-bottom:6px" />
-                  <el-input v-model="item.location" size="small" placeholder="作业放置位置（如：办公室三层架）"
-                    style="margin-bottom:6px" />
-                  <el-input v-model="item.notes" size="small" type="textarea" :rows="2"
-                    placeholder="补充说明（批改进度、典型错误等）…" />
+
+                <div v-show="!isCollapsed(idx)" class="hw-body">
+                  <el-input v-model="item.homeworkContent" size="small" placeholder="作业内容（练习册页码、作文题目…）" />
+
+                  <div class="hw-stats">
+                    <div class="hw-stat">
+                      <span class="hw-stat-num" @dblclick.stop="startEdit(idx,'totalCount')">
+                        <input v-if="isEditing(idx,'totalCount')" type="number" min="0" :value="item.totalCount" @input="e=>item.totalCount=Number(e.target.value)" @blur="stopEdit(idx)" @keydown.enter="stopEdit(idx)" class="hw-stat-input" />
+                        <span v-else>{{ item.totalCount || 0 }}</span>
+                      </span>
+                      <span class="hw-stat-lbl">应交</span>
+                    </div>
+                    <div class="hw-stat ok">
+                      <span class="hw-stat-num" @dblclick.stop="startEdit(idx,'submittedCount')">
+                        <input v-if="isEditing(idx,'submittedCount')" type="number" min="0" :value="item.submittedCount" @input="e=>item.submittedCount=Number(e.target.value)" @blur="stopEdit(idx)" @keydown.enter="stopEdit(idx)" class="hw-stat-input" />
+                        <span v-else>{{ item.submittedCount || 0 }}</span>
+                      </span>
+                      <span class="hw-stat-lbl">实交</span>
+                    </div>
+                    <div class="hw-stat bad">
+                      <span class="hw-stat-num" @dblclick.stop="startEdit(idx,'missingCount')">
+                        <input v-if="isEditing(idx,'missingCount')" type="number" min="0" :value="item.missingCount" @input="e=>item.missingCount=Number(e.target.value)" @blur="stopEdit(idx)" @keydown.enter="stopEdit(idx)" class="hw-stat-input" />
+                        <span v-else>{{ item.missingCount || 0 }}</span>
+                      </span>
+                      <span class="hw-stat-lbl">缺交</span>
+                    </div>
+                  </div>
+
+                  <div class="hw-names">
+                    <div class="hw-name-row"><span class="hw-name-tag ok">已交</span><el-input v-model="item.submittedNames" size="small" placeholder="已交学生，逗号分隔" /></div>
+                    <div class="hw-name-row"><span class="hw-name-tag bad">缺交</span><el-input v-model="item.missingNames" size="small" placeholder="缺交学生，逗号分隔" /></div>
+                  </div>
+
+                  <div class="hw-late" :class="{ on: item.hasLateSubmission }">
+                    <label class="hw-late-bar" @click.stop><el-switch v-model="item.hasLateSubmission" size="small" /><span>补交作业</span></label>
+                    <div v-if="item.hasLateSubmission" class="hw-late-form">
+                      <div class="hw-late-row">
+                        <el-input-number v-model="item.lateCount" size="small" :min="0" placeholder="份数" style="width:80px" />
+                        <el-input v-model="item.lateNames" size="small" placeholder="补交学生" style="flex:1" />
+                      </div>
+                      <div class="hw-late-row">
+                        <el-input v-model="item.lateContent" size="small" placeholder="补交内容" style="flex:1" />
+                        <el-input v-model="item.lateReason" size="small" placeholder="补交原因" style="flex:1" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="hw-foot">
+                    <el-input v-model="item.location" size="small" placeholder="放置位置" style="flex:1" />
+                    <el-input v-model="item.notes" size="small" placeholder="补充说明…" style="flex:2" />
+                  </div>
                 </div>
               </div>
+
               <button class="hoa-add" @click="addHomework">+ 添加科目作业</button>
             </div>
           </div>
@@ -330,7 +378,36 @@ const editingId = ref(null)
 const saving = ref(false)
 const savingAll = ref(false)
 
-function addHomework() { form.homeworkItems.push({ subject: '', totalCount: 0, count: 0, studentNames: '', location: '', graded: false, notes: '' }) }
+const subjectIcons = {
+  '中国语文': '📖', '英语阅读': '📰', '英语写作': '✍️', '英语听力': '🎧', '英语口语': '🗣️', '数学': '🔢',
+  '公民与社会发展': '🏛️', '物理': '⚡', '化学': '🧪', '生物': '🧬', '经济': '💰', '历史': '📜',
+  '地理': '🌍', '中国历史': '🏯', '资讯及通讯科技': '💻', '企业、会计与财务概论': '📊',
+  '视觉艺术': '🎨', '数学延伸M1': '📐', '数学延伸M2': '📏'
+}
+function getSubjectIcon(subject) { return subjectIcons[subject] || '📝' }
+
+function addHomework() {
+  form.homeworkItems.push({
+    subject: '', homeworkContent: '', totalCount: 0, submittedCount: 0, missingCount: 0,
+    submittedNames: '', missingNames: '',
+    showSubmitted: true, showMissing: true,
+    hasLateSubmission: false, lateCount: 0, lateNames: '', lateContent: '', lateReason: '',
+    location: '', graded: false, notes: ''
+  })
+}
+
+// 折叠状态
+const collapsedItems = ref(new Set())
+function isCollapsed(idx) { return collapsedItems.value.has(idx) }
+function toggleCollapse(idx) { collapsedItems.value.has(idx) ? collapsedItems.value.delete(idx) : collapsedItems.value.add(idx) }
+
+// 双击编辑数值
+const editingKey = ref(null) // `${idx}-${field}`
+function isEditing(idx, field) { return editingKey.value === `${idx}-${field}` }
+function startEdit(idx, field) { editingKey.value = `${idx}-${field}` }
+function stopEdit() { editingKey.value = null }
+
+function gradedLabel(v) { return v === true ? '已批改' : v === 'partial' ? '部分批改' : '未批改' }
 function addStudent() { form.studentSituations.push({ studentName: '', type: '其他事项', description: '', handled: false, followUp: '' }) }
 function addLeaveRecord() { form.leaveRecords.push({ studentName: '', reason: '', parentNotified: false, leaveTime: '', phoneGiven: false }) }
 
@@ -347,7 +424,14 @@ function loadDay() {
 function resetForm() { editingId.value = null; const e = emptyForm(); Object.keys(e).forEach(k => { if (k === 'homeworkItems' || k === 'studentSituations' || k === 'leaveRecords') form[k] = []; else if (k === 'meetingNotes') form.meetingNotes = { hasMeeting: false, title: '', content: '', recordingUrl: '', transcription: '' }; else if (k === 'phoneManagement') form.phoneManagement = { enabled: false, totalPhones: 0, receivedPhones: 0, unreceivedReason: '' }; else if (k === 'sections') form.sections = { homework: true, meeting: true, students: true, phones: false, leave: false, notes: true }; else if (k === 'className') form.className = activeClass.value; else form[k] = e[k] }) }
 function loadRecord(rec) {
   editingId.value = rec.id; form.date = rec.date; form.shift = rec.shift || ''; form.className = rec.className || ''
-  form.homeworkItems = rec.homeworkItems ? JSON.parse(JSON.stringify(rec.homeworkItems)) : []
+  form.homeworkItems = rec.homeworkItems ? JSON.parse(JSON.stringify(rec.homeworkItems)).map(h => ({
+    subject: h.subject || '', homeworkContent: h.homeworkContent || '', totalCount: h.totalCount || 0, submittedCount: h.submittedCount || h.count || 0,
+    submittedNames: h.submittedNames || '', missingNames: h.missingNames || h.studentNames || '',
+    missingCount: h.missingCount || 0,
+    showSubmitted: h.showSubmitted !== undefined ? h.showSubmitted : true, showMissing: h.showMissing !== undefined ? h.showMissing : true,
+    hasLateSubmission: h.hasLateSubmission || false, lateCount: h.lateCount || 0, lateNames: h.lateNames || '', lateContent: h.lateContent || '', lateReason: h.lateReason || '',
+    location: h.location || '', graded: h.graded || false, notes: h.notes || ''
+  })) : []
   form.meetingNotes = rec.meetingNotes ? JSON.parse(JSON.stringify(rec.meetingNotes)) : { hasMeeting: false, title: '', content: '', recordingUrl: '', transcription: '' }
   form.studentSituations = rec.studentSituations ? JSON.parse(JSON.stringify(rec.studentSituations)) : []
   form.phoneManagement = rec.phoneManagement ? JSON.parse(JSON.stringify(rec.phoneManagement)) : { enabled: false, totalPhones: 0, receivedPhones: 0, unreceivedReason: '' }
@@ -863,6 +947,107 @@ onUnmounted(() => { if (recInt) clearInterval(recInt); if (cdTimer) clearInterva
   color: var(--admin-text-muted);
   display: block;
   margin-bottom: 4px
+}
+
+/* ==================== 作业收集 ==================== */
+.hw-card {
+  background: var(--admin-surface, #161E2E);
+  border: 1px solid var(--admin-border, #1E2D4A);
+  border-radius: 10px; margin-bottom: 8px; overflow: hidden;
+}
+.hw-card.folded { opacity: 0.85; }
+
+/* 顶栏 */
+.hw-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; cursor: pointer; user-select: none;
+}
+.hw-bar-icon {
+  width: 30px; height: 30px; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; flex-shrink: 0;
+  background: rgba(99,102,241,0.1);
+}
+.hw-bar-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+.hw-bar-name { font-size: 13px; font-weight: 600; color: var(--admin-text); white-space: nowrap; }
+.hw-bar-desc {
+  font-size: 11px; color: var(--admin-text-muted); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 180px;
+}
+.hw-bar-arrow { font-size: 12px; color: var(--admin-text-muted); width: 16px; text-align: center; }
+.hw-bar-del {
+  width: 26px; height: 26px; border: none; border-radius: 6px;
+  background: transparent; color: var(--admin-text-muted);
+  cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
+}
+.hw-bar-del:hover { background: rgba(239,68,68,0.12); color: #f87171; }
+
+/* 展开体 */
+.hw-body { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px; }
+
+/* 统计数字 — 双击编辑 */
+.hw-stats {
+  display: flex; border: 1px solid var(--admin-border); border-radius: 8px; overflow: hidden;
+}
+.hw-stat {
+  flex: 1; text-align: center; padding: 10px 4px;
+  background: var(--admin-bg); user-select: none;
+}
+.hw-stat + .hw-stat { border-left: 1px solid var(--admin-border); }
+.hw-stat-num {
+  display: block; font-size: 22px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace; color: var(--admin-text-secondary);
+  line-height: 1.2; cursor: default;
+}
+.hw-stat.ok .hw-stat-num { color: #4ade80; }
+.hw-stat.bad .hw-stat-num { color: #f87171; }
+.hw-stat-lbl { font-size: 10px; color: var(--admin-text-muted); display: block; margin-top: 3px; }
+.hw-stat-input {
+  width: 100%; text-align: center; font-size: 20px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  background: transparent; border: none; outline: none;
+  color: var(--admin-text); padding: 2px 0;
+}
+.hw-stat.ok .hw-stat-input { color: #4ade80; }
+.hw-stat.bad .hw-stat-input { color: #f87171; }
+
+/* 名单 */
+.hw-names { display: flex; flex-direction: column; gap: 6px; }
+.hw-name-row { display: flex; align-items: center; gap: 8px; }
+.hw-name-tag {
+  font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px;
+  white-space: nowrap; letter-spacing: 0.3px;
+}
+.hw-name-tag.ok { background: rgba(34,197,94,0.1); color: #4ade80; }
+.hw-name-tag.bad { background: rgba(239,68,68,0.1); color: #f87171; }
+
+/* 补交 */
+.hw-late { border: 1px solid var(--admin-border); border-radius: 8px; }
+.hw-late.on { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.03); }
+.hw-late-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; margin: 0; }
+.hw-late-bar span { font-size: 12px; color: var(--admin-text-muted); }
+.hw-late.on .hw-late-bar span { color: #fbbf24; }
+.hw-late-form { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 6px; }
+.hw-late-row { display: flex; gap: 8px; }
+
+/* 底部 */
+.hw-foot { display: flex; gap: 8px; }
+
+/* Light mode */
+.admin-layout[data-theme="light"] .hw-card { background: #fff; border-color: #e2e8f0; }
+.admin-layout[data-theme="light"] .hw-bar-name { color: #1e1b4b; }
+.admin-layout[data-theme="light"] .hw-bar-desc { color: #94a3b8; }
+.admin-layout[data-theme="light"] .hw-stats { border-color: #e2e8f0; }
+.admin-layout[data-theme="light"] .hw-stat { background: #f8fafc; }
+.admin-layout[data-theme="light"] .hw-stat + .hw-stat { border-left-color: #e2e8f0; }
+.admin-layout[data-theme="light"] .hw-stat-num { color: #475569; }
+.admin-layout[data-theme="light"] .hw-stat-input { color: #0f172a; }
+.admin-layout[data-theme="light"] .hw-late { border-color: #e2e8f0; }
+.admin-layout[data-theme="light"] .hw-late.on { background: #fffbeb; border-color: #fde68a; }
+
+@media (max-width: 768px) {
+  .hw-foot { flex-direction: column; }
+  .hw-late-row { flex-wrap: wrap; }
 }
 
 @media (max-width:900px) {

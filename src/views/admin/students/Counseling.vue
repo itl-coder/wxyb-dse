@@ -149,7 +149,7 @@
     </div>
 
     <!-- ===== View Record Dialog (read-only) ===== -->
-    <el-dialog v-model="viewVisible" title="📋 咨询记录详情" width="700px" top="3vh">
+    <el-dialog v-model="viewVisible" title="咨询记录详情" width="700px" top="3vh" :append-to-body="true">
       <div v-if="viewRecordData" class="counsel-detail">
         <div class="counsel-detail-header">
           <div class="counsel-detail-student">
@@ -225,7 +225,7 @@
     </el-dialog>
 
     <!-- ===== Add/Edit Dialog ===== -->
-    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑咨询记录' : '新增心理咨询记录'" width="800px" top="2vh" :close-on-click-modal="false" @close="closeDialog">
+    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑咨询记录' : '新增心理咨询记录'" width="800px" top="2vh" :close-on-click-modal="false" :append-to-body="true" @close="closeDialog">
       <div class="counsel-form-banner" v-if="form.studentId">
         <span>{{ getStudentName(form.studentId) }}</span>
         <span v-if="editingId" style="font-size:10px;color:var(--admin-text-muted);margin-left:8px">编辑已有记录，修改后将保存</span>
@@ -291,39 +291,27 @@
       </div>
 
       <!-- Recording Section -->
-      <div class="recording-section">
-        <div class="recording-header">
-          <span class="recording-title">🎙️ 语音记录</span>
-          <div style="display:flex;align-items:center;gap:12px">
-            <span v-if="recordingState === 'idle'" style="font-size:10px;color:var(--admin-text-muted)">点击按钮开始录音</span>
-            <span v-else-if="recordingState === 'recording'" class="recording-status-live">● 录音中 {{ formatTime(recordingTime) }}</span>
-            <span v-else-if="recordingState === 'stopped'" style="font-size:10px;color:var(--admin-success)">✓ 录音完成 ({{ formatTime(recordingTime) }})</span>
-            <span v-if="!editingId || recordingState !== 'idle'" style="font-size:9px;color:var(--admin-text-muted)">{{ editingId && recordingState === 'idle' ? '编辑模式保留已有数据 · 重新录音将覆盖' : '' }}</span>
-          </div>
+      <div class="rec-section">
+        <div class="rec-bar">
+          <span class="rec-label">语音记录</span>
+          <span v-if="recordingState === 'recording'" class="rec-dot live">●</span>
+          <span v-else-if="recordingState === 'stopped'" class="rec-dot done">✓</span>
+          <span class="rec-status">{{ recordingState === 'idle' ? '就绪' : recordingState === 'recording' ? '录音中 ' + formatTime(recordingTime) : '完成 ' + formatTime(recordingTime) }}</span>
         </div>
-        <div class="recording-controls">
-          <el-button v-if="recordingState === 'idle'" size="small" @click="startRecording">🎙️ 开始录音</el-button>
-          <el-button v-if="recordingState === 'recording'" size="small" type="danger" @click="stopRecording">⏹ 停止录音</el-button>
-          <el-button v-if="recordingState === 'stopped' && audioBlobUrl" size="small" @click="togglePlayback">{{ isPlaying ? '⏸ 暂停' : '▶️ 播放录音' }}</el-button>
-          <el-button v-if="recordingState === 'stopped'" size="small" @click="resetRecording">↺ 重新录制</el-button>
-          <span v-if="editingId && recordingState === 'idle' && form.recordingDuration" style="font-size:10px;color:var(--admin-text-muted)">
-            已存录音：{{ form.recordingDuration }}
-          </span>
+        <div class="rec-actions">
+          <button v-if="recordingState === 'idle'" class="rec-btn rec-start" @click="startRecording">开始录音</button>
+          <button v-if="recordingState === 'recording'" class="rec-btn rec-stop" @click="stopRecording">停止</button>
+          <button v-if="recordingState === 'stopped' && audioBlobUrl" class="rec-btn rec-play" @click="togglePlayback">{{ isPlaying ? '暂停' : '播放' }}</button>
+          <button v-if="recordingState === 'stopped'" class="rec-btn rec-retry" @click="resetRecording">重录</button>
+          <span v-if="editingId && recordingState === 'idle' && form.recordingDuration" class="rec-saved">已存 {{ form.recordingDuration }}</span>
         </div>
-        <div v-if="recordingState !== 'idle'" class="recording-visual">
-          <div class="waveform-bar" v-for="(h, i) in waveHeights" :key="i" :style="{height: h+'px'}"></div>
-        </div>
-        <div class="transcription-area" v-if="recordingState === 'stopped'">
-          <div class="transcription-header">
-            <span>📝 语音转文本</span>
-            <el-button size="small" text @click="startTranscription" :disabled="isTranscribing || !audioBlobUrl">
-              {{ isTranscribing ? '转写中...' : (transcribedText ? '重新转写' : '🤖 AI转写') }}
-            </el-button>
+        <div v-if="recordingState === 'stopped'" class="rec-trans">
+          <div class="rec-trans-bar">
+            <span>语音转文本</span>
+            <button class="rec-btn rec-ai" @click="startTranscription" :disabled="isTranscribing || !audioBlobUrl">{{ isTranscribing ? '转写中...' : transcribedText ? '重新转写' : 'AI 转写' }}</button>
           </div>
-          <el-input v-model="transcribedText" type="textarea" rows="4" placeholder="点击「AI转写」将录音转换为文字..." />
-          <div v-if="transcribedText" style="display:flex;justify-content:flex-end;margin-top:6px">
-            <el-button size="small" text @click="copyToContent">📋 复制到学生主诉</el-button>
-          </div>
+          <el-input v-model="transcribedText" type="textarea" rows="4" placeholder="点击「AI 转写」将录音转换为文字..." />
+          <button v-if="transcribedText" class="rec-btn rec-copy" @click="copyToContent">复制到学生主诉</button>
         </div>
         <audio ref="audioPlayer" @ended="isPlaying=false" style="display:none"></audio>
       </div>
@@ -724,20 +712,28 @@ async function handleDelete(c) {
 .mood-card-bottom { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--admin-border); }
 
 /* === Recording Section === */
-.recording-section {
-  background: var(--admin-bg);
-  border: 1px solid var(--admin-border);
-  border-radius: 12px;
-  padding: 18px;
-  margin-bottom: 14px;
-}
-.recording-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.recording-title { font-size: 13px; font-weight: 700; color: var(--admin-text); }
-.recording-status-live { font-size: 11px; color: var(--admin-danger); animation: pulse 1.5s ease infinite; }
-@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
-.recording-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
-.recording-visual { display: flex; align-items: flex-end; gap: 3px; height: 52px; padding: 4px 0; margin-bottom: 14px; justify-content: center; }
-.waveform-bar { width: 5px; background: var(--admin-accent); border-radius: 3px; transition: height 0.12s ease; min-width: 5px; }
+.rec-section { border: 1px solid var(--admin-border); border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; }
+.rec-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.rec-label { font-size: 13px; font-weight: 700; color: var(--admin-text); }
+.rec-dot { font-size: 10px; }
+.rec-dot.live { color: #ef4444; animation: recPulse 1.2s ease infinite; }
+.rec-dot.done { color: #22c55e; }
+@keyframes recPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.rec-status { font-size: 11px; color: var(--admin-text-muted); }
+.rec-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.rec-btn { font-size: 12px; padding: 5px 14px; border-radius: 6px; border: 1px solid var(--admin-border); background: var(--admin-bg); color: var(--admin-text-secondary); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.rec-btn:hover { border-color: var(--admin-accent); color: var(--admin-text); }
+.rec-start { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.3); color: #818cf8; }
+.rec-start:hover { background: rgba(99,102,241,0.16); }
+.rec-stop { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #f87171; }
+.rec-play { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.25); color: #4ade80; }
+.rec-retry { font-size: 11px; padding: 5px 10px; }
+.rec-ai { font-size: 11px; padding: 3px 10px; }
+.rec-copy { font-size: 11px; margin-top: 6px; }
+.rec-saved { font-size: 10px; color: var(--admin-text-muted); margin-left: auto; }
+.rec-trans { margin-top: 8px; }
+.rec-trans-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.rec-trans-bar span { font-size: 12px; font-weight: 600; color: var(--admin-text-secondary); }
 .transcription-area { border-top: 1px solid var(--admin-border); padding-top: 14px; }
 .transcription-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--admin-text-secondary); }
 

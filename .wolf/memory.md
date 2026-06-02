@@ -89,3 +89,158 @@
 | 20:21 | Edited src/main.js | expanded (+9 lines) | ~273 |
 | 20:23 | 后端登录分析+axios封装+API接口+auth store重构+Login页面改造 | .env, src/request/request.js, src/api/auth.js, src/api/menu.js, src/stores/app.js, src/views/admin/auth/Login.vue, src/main.js | 构建通过 | ~8000 tok |
 | 20:23 | Session end: 6 writes across 6 files (request.js, auth.js, menu.js, app.js, Login.vue) | 15 reads | ~6512 tok |
+| 20:27 | Session end: 6 writes across 6 files (request.js, auth.js, menu.js, app.js, Login.vue) | 15 reads | ~6512 tok |
+| 20:30 | Edited vite.config.js | expanded (+7 lines) | ~61 |
+| 20:31 | Session end: 7 writes across 7 files (request.js, auth.js, menu.js, app.js, Login.vue) | 17 reads | ~6655 tok |
+| 20:59 | Edited src/stores/app.js | added 5 condition(s) | ~1040 |
+| 21:01 | Edited src/stores/app.js | modified extract() | ~899 |
+| 21:03 | Edited src/stores/app.js | added 2 condition(s) | ~1146 |
+| 21:05 | Session end: 10 writes across 7 files (request.js, auth.js, menu.js, app.js, Login.vue) | 18 reads | ~14354 tok |
+| 21:08 | Session end: 10 writes across 7 files (request.js, auth.js, menu.js, app.js, Login.vue) | 18 reads | ~14354 tok |
+| 21:12 | Session end: 10 writes across 7 files (request.js, auth.js, menu.js, app.js, Login.vue) | 18 reads | ~14354 tok |
+| 21:13 | Session end: 10 writes across 7 files (request.js, auth.js, menu.js, app.js, Login.vue) | 18 reads | ~14602 tok |
+| 21:21 | Created src/stores/app.js | — | ~4387 |
+| 21:22 | Edited src/layouts/AdminLayout.vue | added 5 condition(s) | ~983 |
+| 21:22 | Edited src/layouts/AdminLayout.vue | reduced (-6 lines) | ~29 |
+| 21:22 | Edited src/layouts/AdminLayout.vue | inline fix | ~33 |
+| 21:23 | Edited src/layouts/AdminLayout.vue | 6→6 lines | ~88 |
+| 21:23 | Edited src/layouts/AdminLayout.vue | 6→6 lines | ~81 |
+| 21:23 | Edited src/layouts/AdminLayout.vue | inline fix | ~13 |
+| 21:23 | Edited src/router/index.js | modified if() | ~112 |
+| 21:24 | Session end: 18 writes across 9 files (request.js, auth.js, menu.js, app.js, Login.vue) | 18 reads | ~20415 tok |
+| 21:34 | Created src/stores/app.js | — | ~3676 |
+| 21:35 | Session end: 19 writes across 9 files (request.js, auth.js, menu.js, app.js, Login.vue) | 18 reads | ~23616 tok |
+| 13:44 | Session end: 19 writes across 9 files (request.js, auth.js, menu.js, app.js, Login.vue) | 18 reads | ~26863 tok |
+| 13:48 | Created src/layouts/AdminLayout.vue | — | ~3931 |
+| 13:50 | Edited src/layouts/AdminLayout.vue | inline fix | ~27 |
+| 13:50 | Edited src/layouts/AdminLayout.vue | 9→8 lines | ~67 |
+| 13:52 | Session end: 22 writes across 9 files (request.js, auth.js, menu.js, app.js, Login.vue) | 19 reads | ~31175 tok |
+| 13:59 | Created src/stores/menu.js | — | ~1625 |
+| 14:00 | Created src/stores/app.js | — | ~2007 |
+| 14:00 | Edited src/layouts/AdminLayout.vue | added 1 import(s) | ~403 |
+| 14:00 | Edited src/layouts/AdminLayout.vue | 3→3 lines | ~46 |
+| 14:01 | Edited src/stores/menu.js | removed 23 lines | ~42 |
+| 14:01 | Edited src/layouts/AdminLayout.vue | 3→3 lines | ~46 |
+| 14:01 | Edited src/layouts/AdminLayout.vue | inline fix | ~8 |
+| 14:01 | Edited src/layouts/AdminLayout.vue | 2→3 lines | ~66 |
+| 14:02 | Edited src/router/index.js | modified if() | ~31 |
+| 14:02 | Edited src/router/index.js | added 1 import(s) | ~25 |
+| 14:02 | Edited src/router/index.js | modified if() | ~28 |
+| 14:02 | Edited src/router/index.js | inline fix | ~17 |
+| 14:03 | Edited src/layouts/AdminLayout.vue | 8→8 lines | ~113 |
+| 14:03 | Edited src/layouts/AdminLayout.vue | 3→3 lines | ~15 |
+| 14:05 | Edited src/layouts/AdminLayout.vue | 36→39 lines | ~567 |
+| 14:05 | Edited src/layouts/AdminLayout.vue | expanded (+9 lines) | ~109 |
+| 14:07 | Edited src/layouts/AdminLayout.vue | added optional chaining | ~49 |
+| 14:08 | Edited src/layouts/AdminLayout.vue | modified deep() | ~394 |
+| 14:10 | Created docs/menu-data-flow.md | — | ~1629 |
+| 14:10 | Edited src/stores/app.js | modified hasPermission() | ~203 |
+| 14:11 | Session end: 42 writes across 10 files (request.js, auth.js, menu.js, app.js, Login.vue) | 19 reads | ~41820 tok |
+| 14:12 | Created src/stores/menu.js | — | ~1232 |
+| 14:13 | Edited src/layouts/AdminLayout.vue | added optional chaining | ~571 |
+| 14:13 | Edited src/layouts/AdminLayout.vue | added optional chaining | ~93 |
+| 14:14 | Edited src/layouts/AdminLayout.vue | modified deep() | ~675 |
+| 14:15 | Edited docs/menu-data-flow.md | reduced (-18 lines) | ~151 |
+| 14:16 | Session end: 47 writes across 10 files (request.js, auth.js, menu.js, app.js, Login.vue) | 20 reads | ~46419 tok |
+| 14:17 | Edited src/layouts/AdminLayout.vue | inline fix | ~13 |
+| 14:17 | Edited src/layouts/AdminLayout.vue | inline fix | ~16 |
+| 14:17 | Edited src/layouts/AdminLayout.vue | inline fix | ~11 |
+| 14:18 | Edited src/styles/tokens.css | 12→12 lines | ~114 |
+| 14:18 | Edited src/layouts/AdminLayout.vue | inline fix | ~14 |
+| 14:18 | Edited src/layouts/AdminLayout.vue | inline fix | ~16 |
+| 14:18 | Edited src/layouts/AdminLayout.vue | inline fix | ~14 |
+| 14:20 | Edited src/layouts/AdminLayout.vue | charAt() → getMenuIcon() | ~738 |
+| 14:20 | Edited src/layouts/AdminLayout.vue | modified getMenuIcon() | ~248 |
+| 14:20 | Edited src/layouts/AdminLayout.vue | CSS: margin-right, margin-right | ~93 |
+| 14:20 | Edited src/layouts/AdminLayout.vue | inline fix | ~19 |
+| 14:21 | Session end: 58 writes across 11 files (request.js, auth.js, menu.js, app.js, Login.vue) | 20 reads | ~48318 tok |
+| 14:24 | Edited src/stores/menu.js | 1→2 lines | ~36 |
+| 14:25 | Edited src/stores/menu.js | modified if() | ~38 |
+| 14:26 | Session end: 60 writes across 11 files (request.js, auth.js, menu.js, app.js, Login.vue) | 20 reads | ~48290 tok |
+| 14:32 | Edited src/views/admin/handover/ShiftHandover.vue | expanded (+69 lines) | ~1512 |
+| 14:33 | Edited src/views/admin/handover/ShiftHandover.vue | modified getSubjectIcon() | ~211 |
+| 14:33 | Edited src/views/admin/handover/ShiftHandover.vue | expanded (+6 lines) | ~183 |
+| 14:33 | Edited src/views/admin/handover/ShiftHandover.vue | modified child() | ~1240 |
+| 14:34 | Edited src/views/admin/handover/ShiftHandover.vue | 7→8 lines | ~150 |
+| 14:35 | Session end: 65 writes across 12 files (request.js, auth.js, menu.js, app.js, Login.vue) | 21 reads | ~61859 tok |
+| 14:37 | Edited src/views/admin/handover/ShiftHandover.vue | CSS: on | ~1205 |
+| 14:38 | Edited src/views/admin/handover/ShiftHandover.vue | modified missingCount() | ~74 |
+| 14:38 | Edited src/views/admin/handover/ShiftHandover.vue | modified media() | ~1086 |
+| 14:39 | Session end: 68 writes across 12 files (request.js, auth.js, menu.js, app.js, Login.vue) | 21 reads | ~65662 tok |
+| 14:43 | Edited src/views/admin/handover/ShiftHandover.vue | 8→9 lines | ~195 |
+| 14:43 | Edited src/views/admin/handover/ShiftHandover.vue | ", lateReason: " → ", lateContent: " | ~25 |
+| 14:43 | Edited src/views/admin/handover/ShiftHandover.vue | ", lateReason: h.lateReaso" → ", lateContent: h.lateCont" | ~48 |
+| 14:43 | Edited src/views/ShiftHandoverPublic.vue | expanded (+35 lines) | ~838 |
+| 14:44 | Edited src/views/ShiftHandoverPublic.vue | modified goHome() | ~106 |
+| 14:44 | Edited src/views/ShiftHandoverPublic.vue | reduced (-9 lines) | ~928 |
+| 14:46 | Session end: 74 writes across 13 files (request.js, auth.js, menu.js, app.js, Login.vue) | 22 reads | ~75117 tok |
+| 14:47 | Edited src/views/ShiftHandoverPublic.vue | expanded (+14 lines) | ~996 |
+| 14:48 | Edited src/views/ShiftHandoverPublic.vue | modified media() | ~1369 |
+| 14:49 | Session end: 76 writes across 13 files (request.js, auth.js, menu.js, app.js, Login.vue) | 22 reads | ~78311 tok |
+| 14:51 | Edited src/views/admin/handover/ShiftHandover.vue | CSS: width, width, width | ~237 |
+| 14:51 | Edited src/views/admin/handover/ShiftHandover.vue | CSS: missingCount | ~30 |
+| 14:51 | Edited src/views/admin/handover/ShiftHandover.vue | CSS: missingCount | ~37 |
+| 14:52 | Edited src/views/ShiftHandoverPublic.vue | CSS: width, width, width | ~900 |
+| 14:53 | Edited src/views/ShiftHandoverPublic.vue | modified deep() | ~1418 |
+| 14:53 | Edited src/views/admin/handover/ShiftHandover.vue | modified deep() | ~177 |
+| 14:54 | Edited src/views/ShiftHandoverPublic.vue | reduced (-15 lines) | ~703 |
+| 14:55 | Edited src/views/ShiftHandoverPublic.vue | modified media() | ~1256 |
+| 14:55 | Edited src/views/admin/handover/ShiftHandover.vue | CSS: homeworkContent | ~47 |
+| 14:55 | Edited src/views/admin/handover/ShiftHandover.vue | CSS: margin-bottom | ~66 |
+| 14:55 | Edited src/views/admin/handover/ShiftHandover.vue | inline fix | ~41 |
+| 14:56 | Session end: 87 writes across 13 files (request.js, auth.js, menu.js, app.js, Login.vue) | 22 reads | ~83319 tok |
+| 14:59 | Edited src/views/admin/handover/ShiftHandover.vue | CSS: folded | ~1460 |
+| 14:59 | Edited src/views/admin/handover/ShiftHandover.vue | modified isCollapsed() | ~159 |
+| 15:00 | Edited src/views/admin/handover/ShiftHandover.vue | modified media() | ~1314 |
+| 15:01 | Edited src/views/ShiftHandoverPublic.vue | 4→4 lines | ~64 |
+| 15:01 | Edited src/views/ShiftHandoverPublic.vue | expanded (+6 lines) | ~74 |
+| 15:01 | Edited src/views/ShiftHandoverPublic.vue | inline fix | ~27 |
+| 15:08 | Session end: 93 writes across 13 files (request.js, auth.js, menu.js, app.js, Login.vue) | 22 reads | ~87035 tok |
+| 15:09 | Edited src/views/admin/handover/ShiftHandover.vue | reduced (-12 lines) | ~1312 |
+| 15:11 | Session end: 94 writes across 13 files (request.js, auth.js, menu.js, app.js, Login.vue) | 22 reads | ~88909 tok |
+| 15:12 | Edited src/views/ShiftHandoverPublic.vue | CSS: ok, warn | ~672 |
+| 15:14 | Session end: 95 writes across 13 files (request.js, auth.js, menu.js, app.js, Login.vue) | 22 reads | ~89629 tok |
+| 15:17 | Edited src/views/ShiftHandoverPublic.vue | inline fix | ~27 |
+| 15:17 | Edited src/views/ShiftHandoverPublic.vue | modified media() | ~565 |
+| 15:18 | Session end: 97 writes across 13 files (request.js, auth.js, menu.js, app.js, Login.vue) | 22 reads | ~90148 tok |
+| 15:20 | Edited src/views/admin/homework/Homework.vue | CSS: active, active, active | ~989 |
+| 15:20 | Edited src/views/admin/homework/Homework.vue | added 2 condition(s) | ~265 |
+| 15:20 | Edited src/views/admin/homework/Homework.vue | inline fix | ~31 |
+| 15:20 | Edited src/views/admin/homework/Homework.vue | added 5 condition(s) | ~261 |
+| 15:21 | Edited src/views/admin/homework/Homework.vue | modified child() | ~441 |
+| 15:22 | Edited src/views/admin/students/StudentManagement.vue | 3→2 lines | ~16 |
+| 15:23 | Edited src/views/admin/students/StudentManagement.vue | 6→7 lines | ~146 |
+| 15:23 | Edited src/views/admin/students/StudentManagement.vue | modified clearSelection() | ~8 |
+| 15:23 | Edited src/views/admin/students/StudentManagement.vue | modified deep() | ~243 |
+| 15:25 | Session end: 106 writes across 15 files (request.js, auth.js, menu.js, app.js, Login.vue) | 24 reads | ~97395 tok |
+| 15:34 | Edited src/views/admin/homework/Homework.vue | removed 18 lines | ~43 |
+| 15:34 | Edited src/views/admin/homework/Homework.vue | removed 4 lines | ~5 |
+| 15:35 | Edited src/views/admin/homework/Homework.vue | removed 19 lines | ~5 |
+| 15:35 | Edited src/views/admin/homework/Homework.vue | — | ~0 |
+| 15:36 | Edited src/views/admin/students/Counseling.vue | inline fix | ~25 |
+| 15:36 | Edited src/views/admin/students/Counseling.vue | inline fix | ~27 |
+| 15:36 | Edited src/views/admin/students/Counseling.vue | inline fix | ~48 |
+| 15:36 | Edited src/views/admin/students/Counseling.vue | modified formatTime() | ~478 |
+| 15:38 | Edited src/views/admin/students/Counseling.vue | 3→2 lines | ~13 |
+| 15:39 | Edited src/views/admin/homework/Homework.vue | "homework.assign" → "homework:view" | ~19 |
+| 15:40 | Session end: 116 writes across 16 files (request.js, auth.js, menu.js, app.js, Login.vue) | 25 reads | ~119049 tok |
+| 15:41 | Edited src/views/admin/homework/Homework.vue | 11→8 lines | ~161 |
+| 15:41 | Edited src/views/admin/homework/Homework.vue | inline fix | ~20 |
+| 15:42 | Edited src/views/admin/homework/Homework.vue | 3→1 lines | ~14 |
+| 15:42 | Edited src/views/admin/homework/Homework.vue | "small" → "hw-status-text" | ~28 |
+| 15:43 | Edited src/views/admin/homework/Homework.vue | modified media() | ~138 |
+| 15:44 | Session end: 121 writes across 16 files (request.js, auth.js, menu.js, app.js, Login.vue) | 25 reads | ~119102 tok |
+| 15:45 | Edited src/views/admin/homework/Homework.vue | removed 4 lines | ~5 |
+| 15:45 | Edited src/views/admin/homework/Homework.vue | 20→24 lines | ~337 |
+| 15:45 | Edited src/views/admin/homework/Homework.vue | 2→2 lines | ~12 |
+| 15:45 | Edited src/views/admin/homework/Homework.vue | — | ~0 |
+| 15:47 | Edited src/views/admin/homework/Homework.vue | 8→8 lines | ~135 |
+| 15:47 | Edited src/views/admin/homework/Homework.vue | 10→10 lines | ~151 |
+| 15:47 | Edited src/views/admin/homework/Homework.vue | CSS: font-size, color | ~142 |
+| 15:47 | Edited src/views/admin/homework/Homework.vue | CSS: title, title | ~248 |
+| 15:48 | Session end: 129 writes across 16 files (request.js, auth.js, menu.js, app.js, Login.vue) | 25 reads | ~119715 tok |
+| 15:49 | Session end: 129 writes across 16 files (request.js, auth.js, menu.js, app.js, Login.vue) | 25 reads | ~119715 tok |
+| 16:06 | Session end: 129 writes across 16 files (request.js, auth.js, menu.js, app.js, Login.vue) | 25 reads | ~119800 tok |
+| 16:10 | Edited src/views/admin/homework/Homework.vue | 3→7 lines | ~98 |
+| 16:10 | Edited src/views/admin/homework/Homework.vue | 1→3 lines | ~65 |
+| 16:12 | Session end: 131 writes across 16 files (request.js, auth.js, menu.js, app.js, Login.vue) | 25 reads | ~119974 tok |

@@ -15,8 +15,10 @@
                   <stop offset="100%" stop-color="#06b6d4" />
                 </linearGradient>
               </defs>
-              <path d="M16 2L4 8v10c0 7.18 5.12 13.88 12 15.46 6.88-1.58 12-8.28 12-15.46V8L16 2z" stroke="url(#logoGrad)" stroke-width="1.6" stroke-linejoin="round"/>
-              <path d="M12 16l3 3 6-6" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16 2L4 8v10c0 7.18 5.12 13.88 12 15.46 6.88-1.58 12-8.28 12-15.46V8L16 2z"
+                stroke="url(#logoGrad)" stroke-width="1.6" stroke-linejoin="round" />
+              <path d="M12 16l3 3 6-6" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
             </svg>
           </div>
           <h1>DSE 学情指挥中心</h1>
@@ -100,53 +102,46 @@
               </div>
 
               <div class="al-tabs">
-                <button class="al-tab" :class="{ on: loginType === 'password' }" @click="loginType = 'password'; clearErrors()">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+                <button class="al-tab" :class="{ on: loginType === 'password' }"
+                  @click="loginType = 'password'; clearErrors()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    <circle cx="12" cy="16" r="1" />
+                  </svg>
                   <span>密码登录</span>
                 </button>
                 <button class="al-tab" :class="{ on: loginType === 'qr' }" @click="loginType = 'qr'; clearErrors()">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v3M14 21h3M21 21v-3"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                    <path d="M14 14h3v3M21 14v3M14 21h3M21 21v-3" />
+                  </svg>
                   <span>扫码登录</span>
                 </button>
               </div>
 
               <form v-if="loginType === 'password'" class="al-form" @submit.prevent="handleLogin" autocomplete="off">
-                <FloatingInput
-                  v-model="form.account"
-                  placeholder="管理员账号"
-                  icon="👤"
-                  :error="errors.account"
-                  autocomplete="off"
-                  @update:model-value="errors.account = ''"
-                />
+                <FloatingInput v-model="form.account" placeholder="管理员账号" icon="👤" :error="errors.account"
+                  autocomplete="off" @update:model-value="errors.account = ''" />
 
-                <FloatingInput
-                  v-model="form.password"
-                  placeholder="管理员密码"
-                  type="password"
-                  icon="🔑"
-                  :error="errors.password"
-                  autocomplete="off"
-                  @update:model-value="errors.password = ''"
-                />
+                <FloatingInput v-model="form.password" placeholder="管理员密码" type="password" icon="🔑"
+                  :error="errors.password" autocomplete="off" @update:model-value="errors.password = ''" />
 
                 <div class="al-captcha-row">
                   <div class="al-captcha-field">
-                    <FloatingInput
-                      v-model="form.captcha"
-                      placeholder="验证码"
-                      icon="🔐"
-                      :error="errors.captcha"
-                      maxlength="4"
-                      autocomplete="off"
-                      @update:model-value="errors.captcha = ''"
-                    />
+                    <FloatingInput v-model="form.captcha" placeholder="验证码" icon="🔐" :error="errors.captcha"
+                      maxlength="4" autocomplete="off" @update:model-value="errors.captcha = ''" />
                   </div>
                   <button type="button" class="al-captcha-box" @click="genCaptcha">{{ captchaText }}</button>
                 </div>
 
                 <div class="al-roles">
-                  <button type="button" v-for="r in roles" :key="r.value" class="al-role" :class="{ picked: form.role === r.value }" @click="form.role = r.value">
+                  <button type="button" v-for="r in roles" :key="r.value" class="al-role"
+                    :class="{ picked: form.role === r.value }" @click="form.role = r.value">
                     <span class="al-role-dot"></span>
                     {{ r.label }}
                   </button>
@@ -154,10 +149,14 @@
 
                 <div v-if="errors.form" class="al-alert">{{ errors.form }}</div>
 
-                <GlowButton type="submit" :disabled="!form.account || !form.password || !form.captcha" :loading="loading" accent="#6366f1" accentEnd="#06b6d4">
+                <GlowButton type="submit" :disabled="!form.account || !form.password || !form.captcha"
+                  :loading="loading" accent="#6366f1" accentEnd="#06b6d4">
                   <span v-if="!loading">
                     <span>授 权 登 录</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:6px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                      stroke-linecap="round" stroke-linejoin="round" style="margin-left:6px">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
                   </span>
                 </GlowButton>
 
@@ -170,13 +169,18 @@
 
               <div v-else class="al-qr">
                 <div class="al-qr-box">
-                  <svg width="110" height="110" viewBox="0 0 25 25" fill="none" stroke="currentColor" stroke-width="0.4">
-                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="15" y="3" width="7" height="7" rx="1"/>
-                    <rect x="3" y="15" width="7" height="7" rx="1"/>
-                    <rect x="14.5" y="14.5" width="3" height="3" rx="0.5"/><rect x="20" y="14.5" width="2" height="2" rx="0.5"/>
-                    <rect x="14.5" y="20" width="3" height="2" rx="0.5"/><rect x="19.5" y="19" width="2.5" height="3" rx="0.5"/>
-                    <rect x="4" y="4" width="2" height="2" rx="0.3"/><rect x="16" y="4" width="2" height="2" rx="0.3"/>
-                    <rect x="4" y="16" width="2" height="2" rx="0.3"/>
+                  <svg width="110" height="110" viewBox="0 0 25 25" fill="none" stroke="currentColor"
+                    stroke-width="0.4">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="15" y="3" width="7" height="7" rx="1" />
+                    <rect x="3" y="15" width="7" height="7" rx="1" />
+                    <rect x="14.5" y="14.5" width="3" height="3" rx="0.5" />
+                    <rect x="20" y="14.5" width="2" height="2" rx="0.5" />
+                    <rect x="14.5" y="20" width="3" height="2" rx="0.5" />
+                    <rect x="19.5" y="19" width="2.5" height="3" rx="0.5" />
+                    <rect x="4" y="4" width="2" height="2" rx="0.3" />
+                    <rect x="16" y="4" width="2" height="2" rx="0.3" />
+                    <rect x="4" y="16" width="2" height="2" rx="0.3" />
                   </svg>
                   <p>微信扫码登录</p>
                 </div>
@@ -247,6 +251,7 @@ onMounted(() => {
   genCaptcha()
 })
 
+// TODO: 登陆接口处理
 async function handleLogin() {
   clearErrors()
   if (!form.account.trim()) { errors.account = '请输入账号'; return }
@@ -262,6 +267,7 @@ async function handleLogin() {
   loading.value = true
   try {
     const result = await store.login(form.account.trim(), form.password)
+    console.log('Login result:', result)
     if (!result.success) {
       errors.form = result.error || '账号或密码错误'
       genCaptcha()
@@ -269,6 +275,7 @@ async function handleLogin() {
       loading.value = false
       return
     }
+    // 手动跳转到 默认后台 首页
     router.push(route.query.redirect || '/admin')
   } catch (e) {
     errors.form = '网络异常，请稍后重试'
@@ -314,8 +321,15 @@ async function handleLogin() {
 }
 
 @keyframes heroIn {
-  from { opacity: 0; transform: translateX(-40px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Brand */
@@ -325,7 +339,8 @@ async function handleLogin() {
 }
 
 .al-logo {
-  width: 60px; height: 60px;
+  width: 60px;
+  height: 60px;
   margin: 0 auto 16px;
   border-radius: 16px;
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%);
@@ -411,18 +426,35 @@ async function handleLogin() {
 .ald-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 12px; right: 12px;
+  top: 0;
+  left: 12px;
+  right: 12px;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.12), transparent);
 }
 
-.ald-card:nth-child(1) { animation-delay: 0.1s; }
-.ald-card:nth-child(2) { animation-delay: 0.2s; }
-.ald-card:nth-child(3) { animation-delay: 0.3s; }
+.ald-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.ald-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.ald-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
 
 @keyframes cardFade {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .ald-card-top {
@@ -433,7 +465,8 @@ async function handleLogin() {
 }
 
 .ald-card-icon {
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -442,9 +475,20 @@ async function handleLogin() {
   flex-shrink: 0;
 }
 
-.ald-card-icon.trend { background: rgba(99, 102, 241, 0.12); }
-.ald-card-icon.risk { background: rgba(239, 68, 68, 0.1); }
-.ald-card-icon.sys { background: rgba(34, 197, 94, 0.1); color: #4ade80; font-weight: 700; font-size: 18px; }
+.ald-card-icon.trend {
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.ald-card-icon.risk {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.ald-card-icon.sys {
+  background: rgba(34, 197, 94, 0.1);
+  color: #4ade80;
+  font-weight: 700;
+  font-size: 18px;
+}
 
 .ald-card-hd {
   flex: 1;
@@ -477,7 +521,10 @@ async function handleLogin() {
   font-family: 'Cascadia Code', 'SF Mono', monospace;
 }
 
-.ald-badge.up { background: rgba(34, 197, 94, 0.12); color: #4ade80; }
+.ald-badge.up {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+}
 
 .ald-status-tag {
   font-size: 9px;
@@ -515,7 +562,9 @@ async function handleLogin() {
   min-height: 4px;
 }
 
-.ald-bar:hover { opacity: 1; }
+.ald-bar:hover {
+  opacity: 1;
+}
 
 .ald-foot-row {
   display: flex;
@@ -523,7 +572,10 @@ async function handleLogin() {
   align-items: baseline;
 }
 
-.ald-foot-label { font-size: 10px; color: rgba(148, 163, 184, 0.4); }
+.ald-foot-label {
+  font-size: 10px;
+  color: rgba(148, 163, 184, 0.4);
+}
 
 .ald-foot-val {
   font-size: 16px;
@@ -548,7 +600,8 @@ async function handleLogin() {
 }
 
 .ald-warn-dot {
-  width: 5px; height: 5px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -587,8 +640,15 @@ async function handleLogin() {
 }
 
 @keyframes cardIn {
-  from { opacity: 0; transform: translateX(30px) scale(0.98); }
-  to { opacity: 1; transform: translateX(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateX(30px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
 .al-card {
@@ -610,7 +670,9 @@ async function handleLogin() {
 /* Top accent line */
 .al-card-accent {
   position: absolute;
-  top: 0; left: 20px; right: 20px;
+  top: 0;
+  left: 20px;
+  right: 20px;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4) 20%, rgba(6, 182, 212, 0.3) 80%, transparent);
   z-index: 2;
@@ -620,16 +682,27 @@ async function handleLogin() {
 .al-card-accent::after {
   content: '';
   position: absolute;
-  top: 0; left: 50%;
+  top: 0;
+  left: 50%;
   transform: translateX(-50%);
-  width: 60px; height: 1px;
+  width: 60px;
+  height: 1px;
   background: rgba(129, 140, 248, 0.6);
   animation: accentPulse 3s ease-in-out infinite;
 }
 
 @keyframes accentPulse {
-  0%, 100% { opacity: 0.3; width: 40px; }
-  50% { opacity: 1; width: 80px; }
+
+  0%,
+  100% {
+    opacity: 0.3;
+    width: 40px;
+  }
+
+  50% {
+    opacity: 1;
+    width: 80px;
+  }
 }
 
 /* System status pill */
@@ -648,7 +721,8 @@ async function handleLogin() {
 }
 
 .al-status-dot {
-  width: 5px; height: 5px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: #4ade80;
   box-shadow: 0 0 6px rgba(74, 222, 128, 0.4);
@@ -656,8 +730,15 @@ async function handleLogin() {
 }
 
 @keyframes statusGlow {
-  0%, 100% { box-shadow: 0 0 4px rgba(74, 222, 128, 0.3); }
-  50% { box-shadow: 0 0 8px rgba(74, 222, 128, 0.7); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(74, 222, 128, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.7);
+  }
 }
 
 .al-status-ver {
@@ -695,16 +776,30 @@ async function handleLogin() {
   gap: 6px;
 }
 
-.al-tab svg { flex-shrink: 0; opacity: 0.5; transition: opacity 0.25s; }
-.al-tab:hover { color: rgba(203, 213, 225, 0.65); }
-.al-tab:hover svg { opacity: 0.75; }
+.al-tab svg {
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity 0.25s;
+}
+
+.al-tab:hover {
+  color: rgba(203, 213, 225, 0.65);
+}
+
+.al-tab:hover svg {
+  opacity: 0.75;
+}
+
 .al-tab.on {
   background: rgba(99, 102, 241, 0.12);
   color: #a5b4fc;
   font-weight: 600;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
-.al-tab.on svg { opacity: 1; }
+
+.al-tab.on svg {
+  opacity: 1;
+}
 
 /* === Form === */
 .al-form {
@@ -729,7 +824,8 @@ async function handleLogin() {
 }
 
 .al-captcha-box {
-  width: 80px; height: 44px;
+  width: 80px;
+  height: 44px;
   border-radius: 10px;
   border: 1px solid rgba(99, 102, 241, 0.2);
   background: rgba(99, 102, 241, 0.06);
@@ -786,7 +882,11 @@ async function handleLogin() {
   gap: 5px;
 }
 
-.al-role:hover { border-color: rgba(99, 102, 241, 0.2); color: #cbd5e1; }
+.al-role:hover {
+  border-color: rgba(99, 102, 241, 0.2);
+  color: #cbd5e1;
+}
+
 .al-role.picked {
   border-color: rgba(99, 102, 241, 0.5);
   background: rgba(99, 102, 241, 0.1);
@@ -796,14 +896,19 @@ async function handleLogin() {
 }
 
 .al-role-dot {
-  width: 5px; height: 5px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: currentColor;
   opacity: 0.3;
   transition: all 0.2s;
 }
 
-.al-role.picked .al-role-dot { opacity: 1; background: #818cf8; box-shadow: 0 0 4px rgba(129, 140, 248, 0.5); }
+.al-role.picked .al-role-dot {
+  opacity: 1;
+  background: #818cf8;
+  box-shadow: 0 0 4px rgba(129, 140, 248, 0.5);
+}
 
 /* Alert */
 .al-alert {
@@ -832,8 +937,13 @@ async function handleLogin() {
   transition: color 0.2s;
 }
 
-.al-links a:hover { color: rgba(148, 163, 184, 0.45); }
-.al-link-sep { color: rgba(148, 163, 184, 0.1); }
+.al-links a:hover {
+  color: rgba(148, 163, 184, 0.45);
+}
+
+.al-link-sep {
+  color: rgba(148, 163, 184, 0.1);
+}
 
 /* === QR === */
 .al-qr {
@@ -849,7 +959,8 @@ async function handleLogin() {
 }
 
 .al-qr-box {
-  width: 185px; height: 200px;
+  width: 185px;
+  height: 200px;
   border: 1px solid rgba(99, 102, 241, 0.1);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.012);
@@ -880,7 +991,9 @@ async function handleLogin() {
   transition: color 0.2s;
 }
 
-.al-qr-refresh:hover { color: rgba(99, 102, 241, 0.65); }
+.al-qr-refresh:hover {
+  color: rgba(99, 102, 241, 0.65);
+}
 
 /* === Footer === */
 .al-foot {
@@ -899,8 +1012,13 @@ async function handleLogin() {
   transition: color 0.2s;
 }
 
-.al-foot a:hover { color: rgba(148, 163, 184, 0.45); }
-.al-foot-sep { color: rgba(148, 163, 184, 0.1); }
+.al-foot a:hover {
+  color: rgba(148, 163, 184, 0.45);
+}
+
+.al-foot-sep {
+  color: rgba(148, 163, 184, 0.1);
+}
 
 /* === Responsive === */
 @media (max-width: 900px) {
@@ -910,18 +1028,50 @@ async function handleLogin() {
     align-items: center;
   }
 
-  .al-hero { max-width: 390px; width: 100%; }
-  .al-brand h1 { font-size: 18px; letter-spacing: 2px; }
-  .al-brand p { font-size: 9px; letter-spacing: 2px; }
-  .al-card-col { width: 100%; max-width: 390px; }
+  .al-hero {
+    max-width: 390px;
+    width: 100%;
+  }
+
+  .al-brand h1 {
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
+
+  .al-brand p {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+
+  .al-card-col {
+    width: 100%;
+    max-width: 390px;
+  }
 }
 
 @media (max-width: 480px) {
-  .al-card-inner { padding: 24px 18px 18px; }
-  .al-brand h1 { font-size: 16px; }
-  .al-dash { gap: 6px; }
-  .ald-card { padding: 12px 14px; }
-  .ald-sys-grid { gap: 4px; }
-  .ald-sys-num { font-size: 13px; }
+  .al-card-inner {
+    padding: 24px 18px 18px;
+  }
+
+  .al-brand h1 {
+    font-size: 16px;
+  }
+
+  .al-dash {
+    gap: 6px;
+  }
+
+  .ald-card {
+    padding: 12px 14px;
+  }
+
+  .ald-sys-grid {
+    gap: 4px;
+  }
+
+  .ald-sys-num {
+    font-size: 13px;
+  }
 }
 </style>
