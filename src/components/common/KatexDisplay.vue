@@ -43,7 +43,7 @@ defineProps({
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 0.9em;
-  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-family: 'Fira Code', 'Segoe UI Mono', 'Consolas', monospace;
 }
 .katex-display :deep(pre code) { background: none; padding: 0; }
 .katex-display :deep(.katex-error) { color: #ef4444; }

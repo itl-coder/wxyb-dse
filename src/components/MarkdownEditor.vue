@@ -139,7 +139,7 @@ function insertList() {
   border: none;
   outline: none;
   resize: vertical;
-  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-family: 'Fira Code', 'Segoe UI Mono', 'Consolas', monospace;
   font-size: 12px;
   line-height: 1.7;
   padding: 10px 12px;
@@ -199,7 +199,7 @@ function insertList() {
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 11px;
-  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-family: 'Fira Code', 'Segoe UI Mono', 'Consolas', monospace;
 }
 .md-preview :deep(pre code) { background: none; padding: 0; }
 .md-preview :deep(.katex-error) { color: #ef4444; text-decoration: underline wavy rgba(239,68,68,0.4); }

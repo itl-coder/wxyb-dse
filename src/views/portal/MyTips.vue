@@ -457,7 +457,7 @@ function renderedContent(content) {
 }
 
 .tpc-detail-body :deep(code) {
-  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  font-family: 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', 'Consolas', monospace;
   font-size: 0.9em;
   background: rgba(139, 105, 20, 0.06);
   padding: 2px 5px;

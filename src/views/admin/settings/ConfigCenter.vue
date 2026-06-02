@@ -474,7 +474,7 @@ async function resetCollection() {
   border-radius: 8px;
   padding: 14px;
   font-size: 11px;
-  font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Segoe UI Mono', 'Consolas', monospace;
   line-height: 1.5;
   color: var(--admin-text-secondary);
   max-height: 360px;

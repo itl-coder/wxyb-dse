@@ -1538,7 +1538,7 @@ onMounted(() => {
   color: #999;
   letter-spacing: 1px;
   margin-bottom: 4px;
-  font-family: 'Consolas', 'Courier New', monospace;
+  font-family: 'Consolas', 'Segoe UI Mono', 'Segoe UI Mono', 'Consolas', monospace;
 }
 .pp-doc-type {
   font-size: 13px;
@@ -1715,7 +1715,7 @@ onMounted(() => {
   padding: 2px 7px;
   border-radius: 3px;
   font-size: 0.9em;
-  font-family: 'Consolas', 'Courier New', monospace;
+  font-family: 'Consolas', 'Segoe UI Mono', 'Segoe UI Mono', 'Consolas', monospace;
 }
 .pp-md-body :deep(pre) {
   background: #f5f2eb;

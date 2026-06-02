@@ -90,6 +90,7 @@ const routes = [
       { path: 'config', name: 'ConfigCenter', component: () => import('@/views/admin/settings/ConfigCenter.vue') },
       { path: 'users', name: 'UserManagement', component: () => import('@/views/admin/system/UserManagement.vue') },
       { path: 'roles', name: 'RoleManagement', component: () => import('@/views/admin/system/RoleManagement.vue') },
+      { path: 'menus', name: 'MenuManagement', component: () => import('@/views/admin/system/MenuManagement.vue') },
       { path: 'ai-skills', name: 'AISkills', component: () => import('@/views/admin/ai-data/AISkills.vue'), meta: { menuKey: 'ai-skills', permission: 'aiData.skills.view' } },
       { path: 'ai-excel', name: 'AIFunctions', component: () => import('@/views/admin/ai-data/AIFunctions.vue'), meta: { menuKey: 'ai-excel', permission: 'aiData.excel.view' } },
       { path: 'ai-tools', name: 'AITools', component: () => import('@/views/admin/ai-data/AITools.vue'), meta: { menuKey: 'ai-tools', permission: 'aiData.tools.view' } },

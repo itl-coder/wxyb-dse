@@ -185,11 +185,18 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { handoverService, shiftConfigService, portalConfigService } from '@/services/dataService'
+import { dseApi } from '@/api/dse'
+import { shiftConfigService, portalConfigService } from '@/services/dataService'
 import html2canvas from 'html2canvas'
 import { drawWatermarkOnCanvas } from '@/composables/useWatermark'
 
 const router = useRouter()
+const handoverApi = dseApi('handover')
+const handoverRecords = ref([])
+
+async function loadHandoverRecords() { try { const r = await handoverApi.getAll(); handoverRecords.value = r.data || [] } catch { handoverRecords.value = [] } }
+function hasForDate(ds) { return handoverRecords.value.some(r => r.date === ds) }
+function getByDate(ds) { return handoverRecords.value.filter(r => r.date === ds) }
 
 // ===== 开关 =====
 const enabled = ref(true)
@@ -230,12 +237,12 @@ function goToday() { weekStart.value = getMonday(new Date()) }
 
 const weekDays = computed(() => dayKeys.map((k, i) => {
   const d = new Date(weekStart.value); d.setDate(d.getDate() + i); const ds = d.toISOString().split('T')[0]
-  return { key: k, label: dayLabels[i], dateStr: fmtDateShort(d), shift: shiftConfig.value[k] || '', isToday: d.toDateString() === new Date().toDateString(), hasRecord: handoverService.hasForDate(ds) }
+  return { key: k, label: dayLabels[i], dateStr: fmtDateShort(d), shift: shiftConfig.value[k] || '', isToday: d.toDateString() === new Date().toDateString(), hasRecord: hasForDate(ds) }
 }))
 
 const weekDaysWithRecords = computed(() => weekDays.value.map(d => {
   const ds = dateKeyToISO(d.key, weekStart.value)
-  const allRecords = handoverService.getByDate(ds)
+  const allRecords = getByDate(ds)
   const cls = activeClass.value
   const record = allRecords.find(r => r.shift === d.shift && r.className === cls) || allRecords.find(r => r.className === cls) || null
   return { ...d, record }
@@ -270,7 +277,7 @@ async function exportImage() {
   }
 }
 
-onMounted(() => { checkEnabled(); if (!enabled.value) startCd() })
+onMounted(async () => { checkEnabled(); await loadHandoverRecords(); if (!enabled.value) startCd() })
 onUnmounted(() => { if (cdTimer) clearInterval(cdTimer) })
 </script>
 

@@ -24,7 +24,7 @@
         <el-menu-item-group v-if="recentItems.length > 0 && !store.sidebarCollapsed" title="🕐 最近访问">
           <el-menu-item v-for="item in recentItems" :key="'recent-' + item.menuKey" :index="item.route"
             @click="closeSidebar">
-            <span class="menu-icon-badge">{{ getMenuIcon(item.icon) }}</span>
+            <i class="menu-icon-badge">{{ getMenuIcon(item.icon) }}</i>
             <span class="menu-full-label">{{ item.label }}</span>
           </el-menu-item>
         </el-menu-item-group>
@@ -33,31 +33,47 @@
         <template v-for="node in menuStore.serverMenuTree" :key="node.menuId">
           <el-sub-menu v-if="node.menuType === 'M' && node.visible === '0' && node.children?.length" :index="String(node.menuId)">
             <template #title>
-              <span class="menu-icon-badge">{{ getMenuIcon(node.icon) }}</span>
+              <i class="menu-icon-badge">{{ getMenuIcon(node.icon) }}</i>
               <span>{{ node.menuName }}</span>
             </template>
             <template v-for="child in node.children" :key="child.menuId">
               <template v-if="child.visible === '0'">
+                <!-- 嵌套目录 -->
                 <el-sub-menu v-if="child.menuType === 'M' && child.children?.length" :index="String(child.menuId)">
                   <template #title>
-                    <span class="menu-icon-badge">{{ getMenuIcon(child.icon) }}</span>
+                    <i class="menu-icon-badge">{{ getMenuIcon(child.icon) }}</i>
                     <span>{{ child.menuName }}</span>
                   </template>
-                  <el-menu-item v-for="sub in child.children" :key="sub.menuId" :index="sub.path"
-                    v-if="sub.menuType === 'C' && sub.visible === '0'" @click="closeSidebar">
-                    <span class="menu-icon-badge">{{ getMenuIcon(sub.icon) }}</span>
-                    <span class="menu-full-label">{{ sub.menuName }}</span>
-                  </el-menu-item>
+                  <template v-for="sub in child.children" :key="sub.menuId">
+                    <el-menu-item v-if="sub.menuType === 'C' && sub.visible === '0'" :index="sub.path" @click="closeSidebar">
+                      <i class="menu-icon-badge">{{ getMenuIcon(sub.icon) }}</i>
+                      <span class="menu-full-label">{{ sub.menuName }}</span>
+                    </el-menu-item>
+                    <!-- C 下的 F 按钮 -->
+                    <template v-if="sub.menuType === 'C' && sub.children">
+                      <el-menu-item v-for="btn in sub.children.filter(f=>f.menuType==='F'&&f.visible==='0')"
+                        :key="btn.menuId" class="menu-btn-item" @click="closeSidebar">
+                        <span class="menu-full-label">{{ btn.menuName }}</span>
+                      </el-menu-item>
+                    </template>
+                  </template>
                 </el-sub-menu>
-                <el-menu-item v-else-if="child.menuType === 'C'" :index="child.path" @click="closeSidebar">
-                  <span class="menu-icon-badge">{{ getMenuIcon(child.icon) }}</span>
-                  <span class="menu-full-label">{{ child.menuName }}</span>
-                </el-menu-item>
+                <!-- C 菜单项 + 其 F 按钮 -->
+                <template v-else-if="child.menuType === 'C'">
+                  <el-menu-item :index="child.path" @click="closeSidebar">
+                    <i class="menu-icon-badge">{{ getMenuIcon(child.icon) }}</i>
+                    <span class="menu-full-label">{{ child.menuName }}</span>
+                  </el-menu-item>
+                  <el-menu-item v-for="btn in (child.children||[]).filter(f=>f.menuType==='F'&&f.visible==='0')"
+                    :key="btn.menuId" class="menu-btn-item" @click="closeSidebar">
+                    <span class="menu-full-label">{{ btn.menuName }}</span>
+                  </el-menu-item>
+                </template>
               </template>
             </template>
           </el-sub-menu>
           <el-menu-item v-else-if="node.menuType === 'C' && node.visible === '0'" :index="node.path" @click="closeSidebar">
-            <span class="menu-icon-badge">{{ getMenuIcon(node.icon) }}</span>
+            <i class="menu-icon-badge">{{ getMenuIcon(node.icon) }}</i>
             <span class="menu-full-label">{{ node.menuName }}</span>
           </el-menu-item>
         </template>
@@ -374,12 +390,12 @@ function handleLogout() {
 .admin-layout[data-theme="light"] .admin-sidebar-toggle { color: #78788e; }
 .admin-layout[data-theme="light"] .admin-sidebar-toggle:hover { background: rgba(99,102,241,0.06); color: #4f46e5; }
 
-/* 菜单图标：展开/折叠均可见，后端 icon 字段驱动 */
-.menu-icon-badge {
+/* 菜单图标：始终可见 */
+i.menu-icon-badge {
   display: inline-flex;
   width: 28px; height: 28px;
   align-items: center; justify-content: center;
-  font-size: 14px;
+  font-size: 14px; font-style: normal;
   border-radius: 6px;
   flex-shrink: 0;
   margin-right: 10px;
@@ -621,4 +637,15 @@ function handleLogout() {
     display: none;
   }
 }
+</style>
+
+<style>
+.el-menu--collapse i.menu-icon-badge { display: inline-flex !important; visibility: visible !important; margin: 0 auto !important; }
+.el-menu--collapse .menu-full-label { display: none !important; }
+/* 折叠时菜单项居中 */
+.el-menu--collapse .el-menu-item,
+.el-menu--collapse .el-sub-menu__title { justify-content: center !important; padding: 0 !important; }
+/* F 按钮项 */
+.menu-btn-item { height: 32px !important; line-height: 32px !important; font-size: 12px !important; padding-left: 56px !important; opacity: 0.75; }
+.menu-btn-item:hover { opacity: 1; }
 </style>

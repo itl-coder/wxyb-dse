@@ -294,7 +294,7 @@ async function handleLogin() {
   justify-content: center;
   background: #030510;
   padding: 24px;
-  padding-top: 80px;
+  padding-top: 120px;
   position: relative;
   overflow: hidden;
 }
@@ -389,7 +389,7 @@ async function handleLogin() {
   color: rgba(148, 163, 184, 0.35);
   letter-spacing: 3px;
   margin: 0;
-  font-family: 'Cascadia Code', 'SF Mono', 'Consolas', monospace;
+  font-family: 'Segoe UI Mono', 'Consolas', monospace;
 }
 
 .al-brand-line {
@@ -518,7 +518,7 @@ async function handleLogin() {
   padding: 2px 7px;
   border-radius: 6px;
   font-weight: 600;
-  font-family: 'Cascadia Code', 'SF Mono', monospace;
+  font-family: 'Segoe UI Mono', 'Consolas', monospace;
 }
 
 .ald-badge.up {
@@ -534,7 +534,7 @@ async function handleLogin() {
   color: #4ade80;
   font-weight: 700;
   letter-spacing: 1px;
-  font-family: 'Cascadia Code', 'SF Mono', monospace;
+  font-family: 'Segoe UI Mono', 'Consolas', monospace;
 }
 
 /* Chart */
@@ -581,7 +581,7 @@ async function handleLogin() {
   font-size: 16px;
   font-weight: 700;
   color: #4ade80;
-  font-family: 'Cascadia Code', 'SF Mono', monospace;
+  font-family: 'Segoe UI Mono', 'Consolas', monospace;
 }
 
 /* Warnings */
@@ -623,7 +623,7 @@ async function handleLogin() {
   font-size: 15px;
   font-weight: 700;
   color: rgba(203, 213, 236, 0.85);
-  font-family: 'Cascadia Code', 'SF Mono', monospace;
+  font-family: 'Segoe UI Mono', 'Consolas', monospace;
 }
 
 .ald-sys-label {
@@ -715,7 +715,7 @@ async function handleLogin() {
   gap: 6px;
   margin-bottom: 16px;
   font-size: 9px;
-  font-family: 'Cascadia Code', 'SF Mono', monospace;
+  font-family: 'Segoe UI Mono', 'Consolas', monospace;
   color: rgba(148, 163, 184, 0.3);
   letter-spacing: 2px;
 }
@@ -832,7 +832,7 @@ async function handleLogin() {
   color: #a5b4fc;
   font-size: 15px;
   font-weight: 700;
-  font-family: 'Cascadia Code', 'SF Mono', monospace;
+  font-family: 'Segoe UI Mono', 'Consolas', monospace;
   cursor: pointer;
   letter-spacing: 4px;
   transition: all 0.2s;

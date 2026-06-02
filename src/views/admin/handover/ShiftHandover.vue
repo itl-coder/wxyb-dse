@@ -328,7 +328,19 @@
  */
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { handoverService, shiftConfigService } from '@/services/dataService'
+import { dseApi } from '@/api/dse'
+import { shiftConfigService } from '@/services/dataService'
+
+const handoverApi = dseApi('handover')
+
+// 缓存所有交接记录
+let allHandoverRecords = []
+
+async function loadAllRecords() {
+  try { const r = await handoverApi.getAll(); allHandoverRecords = r.data || [] } catch { allHandoverRecords = [] }
+}
+function hasForDate(ds) { return allHandoverRecords.some(r => r.date === ds) }
+function getByDate(ds) { return allHandoverRecords.filter(r => r.date === ds) }
 
 // ===== 班次 =====
 const shiftConfig = ref(shiftConfigService.get())
@@ -352,7 +364,7 @@ function fmtDateShort(d) { const dd = new Date(d); return `${dd.getMonth() + 1}/
 
 const weekDays = computed(() => dayKeys.map((k, i) => {
   const d = new Date(weekStart.value); d.setDate(d.getDate() + i); const ds = d.toISOString().split('T')[0]
-  return { key: k, label: dayLabels[i], dateStr: fmtDateShort(d), shift: shiftConfig.value[k] || '', isToday: d.toDateString() === new Date().toDateString(), hasRecord: handoverService.hasForDate(ds) }
+  return { key: k, label: dayLabels[i], dateStr: fmtDateShort(d), shift: shiftConfig.value[k] || '', isToday: d.toDateString() === new Date().toDateString(), hasRecord: hasForDate(ds) }
 }))
 
 // ===== 选中天 =====
@@ -413,9 +425,10 @@ function addLeaveRecord() { form.leaveRecords.push({ studentName: '', reason: ''
 
 function switchDay(dk) { if (activeDay.value === dk) return; activeDay.value = dk; loadDay() }
 function switchClass(cls) { if (activeClass.value === cls) return; activeClass.value = cls; loadDay() }
-function loadDay() {
+async function loadDay() {
+  await loadAllRecords()
   const ds = dateKeyToISO(activeDay.value, weekStart.value)
-  const records = handoverService.getByDate(ds)
+  const records = getByDate(ds)
   const shift = activeShift.value
   const cls = activeClass.value
   if (records.length > 0) { const m = records.find(r => r.shift === shift && r.className === cls) || records.find(r => r.className === cls) || null; if (m) loadRecord(m); else { resetForm(); form.date = ds; form.shift = shift; form.className = cls } }
@@ -445,7 +458,7 @@ async function saveCurrentDay() {
   saving.value = true
   try {
     const data = { date: form.date, shift: form.shift, className: form.className, sections: JSON.parse(JSON.stringify(form.sections)), homeworkItems: JSON.parse(JSON.stringify(form.homeworkItems.filter(h => h.subject))), meetingNotes: JSON.parse(JSON.stringify(form.meetingNotes)), studentSituations: JSON.parse(JSON.stringify(form.studentSituations.filter(s => s.studentName))), phoneManagement: JSON.parse(JSON.stringify(form.phoneManagement)), leaveRecords: JSON.parse(JSON.stringify(form.leaveRecords.filter(l => l.studentName))), generalNotes: form.generalNotes }
-    if (editingId.value) handoverService.update(editingId.value, data); else { const c = handoverService.create(data); editingId.value = c.id }
+    if (editingId.value) { await handoverApi.update(editingId.value, data) } else { const c = await handoverApi.create(data); editingId.value = c.data?.id || c.id }
     ElMessage.success('已保存')
   } catch { ElMessage.error('保存失败') }
   finally { saving.value = false }

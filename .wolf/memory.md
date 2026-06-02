@@ -244,3 +244,130 @@
 | 16:10 | Edited src/views/admin/homework/Homework.vue | 3→7 lines | ~98 |
 | 16:10 | Edited src/views/admin/homework/Homework.vue | 1→3 lines | ~65 |
 | 16:12 | Session end: 131 writes across 16 files (request.js, auth.js, menu.js, app.js, Login.vue) | 25 reads | ~119974 tok |
+| 16:17 | Session end: 131 writes across 16 files (request.js, auth.js, menu.js, app.js, Login.vue) | 25 reads | ~119974 tok |
+| 16:32 | Edited src/views/admin/students/StudentManagement.vue | 7→7 lines | ~100 |
+| 16:33 | Session end: 132 writes across 16 files (request.js, auth.js, menu.js, app.js, Login.vue) | 25 reads | ~115404 tok |
+| 16:36 | Edited src/views/admin/system/UserManagement.vue | reduced (-8 lines) | ~559 |
+| 16:36 | Edited src/views/admin/system/UserManagement.vue | added 1 condition(s) | ~27 |
+| 16:36 | Edited src/router/index.js | 2→3 lines | ~74 |
+| 16:37 | Created src/views/admin/system/MenuManagement.vue | — | ~1401 |
+| 16:37 | Edited src/views/admin/system/RoleManagement.vue | added 1 import(s) | ~59 |
+| 16:38 | Edited src/views/admin/system/RoleManagement.vue | CSS: perms | ~479 |
+| 16:38 | Edited src/views/admin/system/RoleManagement.vue | reduced (-9 lines) | ~31 |
+| 16:38 | Edited src/views/admin/system/RoleManagement.vue | added optional chaining | ~143 |
+| 16:39 | Edited src/views/admin/system/RoleManagement.vue | removed 17 lines | ~14 |
+| 16:40 | Session end: 141 writes across 19 files (request.js, auth.js, menu.js, app.js, Login.vue) | 27 reads | ~122749 tok |
+| 16:50 | Edited src/views/admin/system/MenuManagement.vue | 3→3 lines | ~36 |
+| 16:50 | Edited src/views/admin/system/MenuManagement.vue | getMenuListHandler() → getAllMenuTreeHandler() | ~40 |
+| 16:50 | Edited src/views/admin/system/MenuManagement.vue | added 1 condition(s) | ~112 |
+| 16:50 | Edited src/views/admin/system/MenuManagement.vue | inline fix | ~85 |
+| 16:52 | Session end: 145 writes across 19 files (request.js, auth.js, menu.js, app.js, Login.vue) | 28 reads | ~124442 tok |
+| 16:54 | Created src/views/admin/system/MenuManagement.vue | — | ~2335 |
+| 16:54 | Edited src/views/admin/system/MenuManagement.vue | modified addDepth() | ~223 |
+| 16:55 | Created src/api/student.js | — | ~311 |
+| 16:56 | Edited src/views/admin/students/StudentManagement.vue | added error handling | ~729 |
+| 16:56 | Edited src/views/admin/students/StudentManagement.vue | added error handling | ~112 |
+| 16:57 | Edited src/views/admin/students/StudentManagement.vue | delete() → deleteStudentHandler() | ~72 |
+| 16:57 | Created src/views/admin/system/MenuManagement.vue | — | ~2318 |
+| 16:59 | Edited src/styles/tokens.css | 3→3 lines | ~97 |
+| 16:59 | Edited src/layouts/AdminLayout.vue | CSS: overflow, el-menu--collapse, el-menu--collapse | ~152 |
+| 17:01 | Session end: 154 writes across 20 files (request.js, auth.js, menu.js, app.js, Login.vue) | 29 reads | ~131219 tok |
+| 17:02 | Edited src/layouts/AdminLayout.vue | modified deep() | ~180 |
+| 17:02 | Edited src/layouts/AdminLayout.vue | reduced (-8 lines) | ~88 |
+| 17:02 | Edited src/layouts/AdminLayout.vue | 2→7 lines | ~61 |
+| 17:05 | Session end: 157 writes across 20 files (request.js, auth.js, menu.js, app.js, Login.vue) | 29 reads | ~136946 tok |
+| 17:11 | Edited src/layouts/AdminLayout.vue | inline fix | ~7 |
+| 17:11 | Edited src/layouts/AdminLayout.vue | 2→2 lines | ~8 |
+| 17:12 | Edited src/layouts/AdminLayout.vue | 2→2 lines | ~34 |
+| 17:12 | Edited src/layouts/AdminLayout.vue | 2→2 lines | ~31 |
+| 17:12 | Edited src/layouts/AdminLayout.vue | 2→2 lines | ~36 |
+| 17:12 | Edited src/layouts/AdminLayout.vue | 2→2 lines | ~37 |
+| 17:12 | Edited src/layouts/AdminLayout.vue | 2→2 lines | ~35 |
+| 17:14 | Edited src/layouts/AdminLayout.vue | 4→4 lines | ~58 |
+| 17:14 | Edited src/layouts/AdminLayout.vue | CSS: font-style | ~60 |
+| 17:16 | Session end: 166 writes across 20 files (request.js, auth.js, menu.js, app.js, Login.vue) | 29 reads | ~136093 tok |
+| 17:18 | Edited src/views/admin/system/MenuManagement.vue | modified loadMenus() | ~112 |
+| 17:18 | Edited src/views/admin/system/MenuManagement.vue | modified if() | ~120 |
+| 17:19 | Edited src/views/admin/system/MenuManagement.vue | modified handleDelete() | ~92 |
+| 17:20 | Session end: 169 writes across 20 files (request.js, auth.js, menu.js, app.js, Login.vue) | 30 reads | ~137415 tok |
+| 17:26 | Session end: 169 writes across 20 files (request.js, auth.js, menu.js, app.js, Login.vue) | 30 reads | ~137415 tok |
+| 17:30 | Created src/api/role.js | — | ~280 |
+| 17:31 | Created src/views/admin/system/RoleManagement.vue | — | ~2716 |
+| 17:33 | Session end: 171 writes across 21 files (request.js, auth.js, menu.js, app.js, Login.vue) | 32 reads | ~140440 tok |
+| 17:34 | Edited src/views/admin/system/RoleManagement.vue | CSS: font-size | ~202 |
+| 17:34 | Edited src/views/admin/system/RoleManagement.vue | added optional chaining | ~239 |
+| 17:34 | Edited src/views/admin/system/RoleManagement.vue | modified expandAll() | ~83 |
+| 17:35 | Edited src/views/admin/system/RoleManagement.vue | modified media() | ~158 |
+| 17:35 | Session end: 175 writes across 21 files (request.js, auth.js, menu.js, app.js, Login.vue) | 32 reads | ~136692 tok |
+| 17:37 | Edited ../dse-springboot/wxyb-dse-springboot/wxyb-dse-system/src/main/java/com/wxyb/dse/system/service/impl/DataInitServiceImpl.java | added 1 condition(s) | ~834 |
+| 17:38 | Created src/views/admin/system/RoleManagement.vue | — | ~3638 |
+| 17:38 | Session end: 177 writes across 22 files (request.js, auth.js, menu.js, app.js, Login.vue) | 33 reads | ~141484 tok |
+| 17:39 | Created src/api/dse.js | — | ~235 |
+| 17:39 | Edited src/views/admin/handover/ShiftHandover.vue | added error handling | ~135 |
+| 17:40 | Edited src/views/admin/handover/ShiftHandover.vue | inline fix | ~50 |
+| 17:40 | Edited src/views/admin/handover/ShiftHandover.vue | modified loadDay() | ~39 |
+| 17:40 | Edited src/views/admin/handover/ShiftHandover.vue | added optional chaining | ~44 |
+| 17:41 | Edited src/views/ShiftHandoverPublic.vue | added error handling | ~178 |
+| 17:41 | Edited src/views/ShiftHandoverPublic.vue | inline fix | ~3 |
+| 17:41 | Edited src/views/ShiftHandoverPublic.vue | inline fix | ~27 |
+| 17:41 | Edited src/views/ShiftHandoverPublic.vue | inline fix | ~10 |
+| 17:43 | Session end: 186 writes across 23 files (request.js, auth.js, menu.js, app.js, Login.vue) | 34 reads | ~122611 tok |
+| 17:44 | Created src/views/admin/system/RoleManagement.vue | — | ~3446 |
+| 17:46 | Created src/views/admin/system/RoleManagement.vue | — | ~3462 |
+| 17:47 | Created src/views/admin/system/RoleManagement.vue | — | ~2674 |
+| 17:49 | Session end: 189 writes across 23 files (request.js, auth.js, menu.js, app.js, Login.vue) | 34 reads | ~133799 tok |
+| 17:51 | Created src/views/admin/system/RoleManagement.vue | — | ~3588 |
+| 17:52 | Session end: 190 writes across 23 files (request.js, auth.js, menu.js, app.js, Login.vue) | 34 reads | ~137643 tok |
+| 17:59 | Created src/views/admin/system/RoleManagement.vue | — | ~2028 |
+| 17:59 | Edited src/views/admin/system/RoleManagement.vue | 2→2 lines | ~59 |
+| 17:59 | Edited src/views/admin/system/RoleManagement.vue | inline fix | ~4 |
+| 18:01 | Session end: 193 writes across 23 files (request.js, auth.js, menu.js, app.js, Login.vue) | 34 reads | ~139883 tok |
+| 18:01 | Session end: 193 writes across 23 files (request.js, auth.js, menu.js, app.js, Login.vue) | 34 reads | ~139883 tok |
+| 18:10 | Created src/views/admin/system/RoleManagement.vue | — | ~3660 |
+| 18:11 | Session end: 194 writes across 23 files (request.js, auth.js, menu.js, app.js, Login.vue) | 34 reads | ~143805 tok |
+| 18:16 | Created src/views/admin/system/RoleManagement.vue | — | ~2071 |
+| 18:17 | Session end: 195 writes across 23 files (request.js, auth.js, menu.js, app.js, Login.vue) | 34 reads | ~146007 tok |
+| 18:19 | Edited src/layouts/AdminLayout.vue | CSS: el-menu-item | ~573 |
+| 18:19 | Edited src/layouts/AdminLayout.vue | 2→5 lines | ~75 |
+| 18:20 | Session end: 197 writes across 23 files (request.js, auth.js, menu.js, app.js, Login.vue) | 34 reads | ~146703 tok |
+| 18:24 | Created src/views/admin/system/RoleManagement.vue | — | ~2146 |
+| 18:25 | Session end: 198 writes across 23 files (request.js, auth.js, menu.js, app.js, Login.vue) | 34 reads | ~149002 tok |
+| 18:26 | Edited src/views/admin/system/RoleManagement.vue | CSS: color, color | ~634 |
+| 18:26 | Edited src/views/admin/system/RoleManagement.vue | 4→4 lines | ~94 |
+| 18:27 | Edited src/views/admin/system/RoleManagement.vue | added optional chaining | ~232 |
+| 18:27 | Edited src/views/admin/system/RoleManagement.vue | 2→2 lines | ~12 |
+| 18:27 | Edited src/views/admin/system/RoleManagement.vue | modified deep() | ~175 |
+| 18:28 | Session end: 203 writes across 23 files (request.js, auth.js, menu.js, app.js, Login.vue) | 34 reads | ~148738 tok |
+| 18:30 | Edited src/views/admin/system/CourseManagement.vue | removed 18 lines | ~6 |
+| 18:31 | Session end: 204 writes across 24 files (request.js, auth.js, menu.js, app.js, Login.vue) | 35 reads | ~148744 tok |
+| 18:33 | Created docs/BUGLOG.md | — | ~455 |
+| 18:34 | Created README.md | — | ~332 |
+| 18:34 | Session end: 206 writes across 26 files (request.js, auth.js, menu.js, app.js, Login.vue) | 36 reads | ~152616 tok |
+| 18:36 | Created src/api/user.js | — | ~241 |
+| 18:37 | Edited src/views/admin/system/UserManagement.vue | 2→6 lines | ~75 |
+| 18:37 | Edited src/views/admin/system/UserManagement.vue | added error handling | ~148 |
+| 18:43 | Session end: 209 writes across 27 files (request.js, auth.js, menu.js, app.js, Login.vue) | 37 reads | ~156418 tok |
+| 18:44 | Edited src/views/admin/auth/Login.vue | inline fix | ~6 |
+| 18:46 | Session end: 210 writes across 27 files (request.js, auth.js, menu.js, app.js, Login.vue) | 37 reads | ~156736 tok |
+| 18:53 | Created src/views/admin/system/UserManagement.vue | — | ~1718 |
+| 18:54 | Session end: 211 writes across 27 files (request.js, auth.js, menu.js, app.js, Login.vue) | 37 reads | ~158577 tok |
+| 18:56 | Edited src/styles/tokens.css | 3→3 lines | ~74 |
+| 18:58 | Edited src/styles/tokens.css | 3→3 lines | ~75 |
+| 18:59 | Edited src/styles/tokens.css | inline fix | ~17 |
+| 18:59 | Session end: 214 writes across 27 files (request.js, auth.js, menu.js, app.js, Login.vue) | 37 reads | ~162345 tok |
+| 19:00 | Created src/views/admin/system/MenuManagement.vue | — | ~1956 |
+| 19:01 | Session end: 215 writes across 27 files (request.js, auth.js, menu.js, app.js, Login.vue) | 37 reads | ~164469 tok |
+| 19:02 | Created src/views/admin/system/MenuManagement.vue | — | ~2163 |
+| 19:03 | Session end: 216 writes across 27 files (request.js, auth.js, menu.js, app.js, Login.vue) | 37 reads | ~166787 tok |
+| 19:03 | Edited src/layouts/AdminLayout.vue | CSS: margin, justify-content, padding | ~151 |
+| 19:05 | Session end: 217 writes across 27 files (request.js, auth.js, menu.js, app.js, Login.vue) | 37 reads | ~166948 tok |
+
+## Session: 2026-06-02 19:12
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-02 19:12
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

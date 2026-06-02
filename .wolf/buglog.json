@@ -811,6 +811,486 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-02T08:10:50.751Z"
+    },
+    {
+      "id": "bug-051",
+      "timestamp": "2026-06-02T08:32:26.678Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/views/admin/students/StudentManagement.vue",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 7→7 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:32:26.678Z"
+    },
+    {
+      "id": "bug-052",
+      "timestamp": "2026-06-02T08:36:51.810Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/router/index.js",
+      "root_cause": "Had 'ai-skills'",
+      "fix": "Changed to 'menus'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:36:51.810Z"
+    },
+    {
+      "id": "bug-053",
+      "timestamp": "2026-06-02T08:38:30.247Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/views/admin/system/RoleManagement.vue",
+      "root_cause": "10 lines replaced/restructured",
+      "fix": "Rewrote 13→4 lines (10 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:38:30.247Z"
+    },
+    {
+      "id": "bug-054",
+      "timestamp": "2026-06-02T08:38:49.112Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/views/admin/system/RoleManagement.vue",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:38:49.112Z"
+    },
+    {
+      "id": "bug-055",
+      "timestamp": "2026-06-02T08:50:10.339Z",
+      "error_message": "Wrong reference: getMenuListHandler should be getAllMenuTreeHandler",
+      "file": "src/views/admin/system/MenuManagement.vue",
+      "root_cause": "Used \"getMenuListHandler\" instead of \"getAllMenuTreeHandler\"",
+      "fix": "Changed getMenuListHandler → getAllMenuTreeHandler",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:50:10.339Z"
+    },
+    {
+      "id": "bug-056",
+      "timestamp": "2026-06-02T08:50:35.293Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/views/admin/system/MenuManagement.vue",
+      "root_cause": "Had \" :value=\"",
+      "fix": "Changed to '└ '",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:50:35.293Z"
+    },
+    {
+      "id": "bug-057",
+      "timestamp": "2026-06-02T08:56:37.234Z",
+      "error_message": "Missing error handling in mapStudent",
+      "file": "src/views/admin/students/StudentManagement.vue",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block | Also: async function handleSave() {; try {",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-02T08:56:54.989Z"
+    },
+    {
+      "id": "bug-058",
+      "timestamp": "2026-06-02T08:59:12.654Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/styles/tokens.css",
+      "root_cause": "Had 'Noto Sans SC'",
+      "fix": "Changed to 'Inter'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:59:12.654Z"
+    },
+    {
+      "id": "bug-059",
+      "timestamp": "2026-06-02T08:59:38.396Z",
+      "error_message": "CSS fix: display",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "display: none → inline-flex !important",
+      "fix": "Changed display: none → inline-flex !important",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-02T09:02:21.945Z"
+    },
+    {
+      "id": "bug-060",
+      "timestamp": "2026-06-02T09:11:33.512Z",
+      "error_message": "Wrong reference: span should be i",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "Used \"span\" instead of \"i\"",
+      "fix": "Changed span → i",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 7,
+      "last_seen": "2026-06-02T09:12:42.219Z"
+    },
+    {
+      "id": "bug-061",
+      "timestamp": "2026-06-02T09:18:47.726Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/views/admin/system/MenuManagement.vue",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→12 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:18:47.726Z"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-06-02T09:34:29.499Z",
+      "error_message": "CSS fix: overflow",
+      "file": "src/views/admin/system/RoleManagement.vue",
+      "root_cause": "overflow: auto\" /> → auto",
+      "fix": "Changed overflow: auto\" /> → auto",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:34:29.499Z"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-06-02T09:34:43.910Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/views/admin/system/RoleManagement.vue",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:34:43.910Z"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-06-02T09:34:53.380Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/views/admin/system/RoleManagement.vue",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 10→5 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:34:53.380Z"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-06-02T09:39:58.443Z",
+      "error_message": "Missing error handling in function",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:39:58.443Z"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-06-02T09:40:05.979Z",
+      "error_message": "Wrong return value",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "Was returning: { key: k, label: dayLabels[i], dateStr: fmtDateSho",
+      "fix": "Now returns: { key: k, label: dayLabels[i], dateStr: fmtDateSho",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:40:05.979Z"
+    },
+    {
+      "id": "bug-067",
+      "timestamp": "2026-06-02T09:40:15.216Z",
+      "error_message": "Missing await",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:40:15.216Z"
+    },
+    {
+      "id": "bug-068",
+      "timestamp": "2026-06-02T09:40:23.758Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/views/admin/handover/ShiftHandover.vue",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:40:23.758Z"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-06-02T09:41:25.100Z",
+      "error_message": "Missing error handling in function",
+      "file": "src/views/ShiftHandoverPublic.vue",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:41:25.100Z"
+    },
+    {
+      "id": "bug-070",
+      "timestamp": "2026-06-02T09:41:31.096Z",
+      "error_message": "Wrong reference: handoverService should be hasForDate",
+      "file": "src/views/ShiftHandoverPublic.vue",
+      "root_cause": "Used \"handoverService\" instead of \"hasForDate\"",
+      "fix": "Changed handoverService → hasForDate",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:41:31.096Z"
+    },
+    {
+      "id": "bug-071",
+      "timestamp": "2026-06-02T09:41:42.724Z",
+      "error_message": "Missing await",
+      "file": "src/views/ShiftHandoverPublic.vue",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:41:42.724Z"
+    },
+    {
+      "id": "bug-072",
+      "timestamp": "2026-06-02T09:59:38.193Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/views/admin/system/RoleManagement.vue",
+      "root_cause": "Had \"count = $refs.tree?.getCheckedKeys().length || 0\"",
+      "fix": "Changed to \"count = treeRef?.getCheckedKeys().length || 0\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:59:38.193Z"
+    },
+    {
+      "id": "bug-073",
+      "timestamp": "2026-06-02T09:59:44.801Z",
+      "error_message": "Wrong reference: tree should be treeRef",
+      "file": "src/views/admin/system/RoleManagement.vue",
+      "root_cause": "Used \"tree\" instead of \"treeRef\"",
+      "fix": "Changed tree → treeRef",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:59:44.801Z"
+    },
+    {
+      "id": "bug-074",
+      "timestamp": "2026-06-02T10:19:48.784Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 19→35 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T10:19:48.784Z"
+    },
+    {
+      "id": "bug-075",
+      "timestamp": "2026-06-02T10:26:41.294Z",
+      "error_message": "CSS fix: width",
+      "file": "src/views/admin/system/RoleManagement.vue",
+      "root_cause": "width: 100% → 100%\" /></div><div class=\"admin-form-group\"><label>状态</label><el-radio-group v-model=\"form.status\" size=\"small\"><el-radio-button value=\"0\">启用</el-radio-button><el-radio-button value=\"1\">停用</el-radio-button></el-radio-group></div></div>",
+      "fix": "Changed width: 100% → 100%\" /></div><div class=\"admin-form-group\"><label>状态</label><el-radio-group v-model=\"form.status\" size=\"small\"><el-radio-button value=\"0\">启用</el-radio-button><el-radio-button value=\"1\">停用</el-radio-button></el-radio-group></div></div>",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-02T10:27:25.683Z"
+    },
+    {
+      "id": "bug-076",
+      "timestamp": "2026-06-02T10:27:02.597Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/views/admin/system/RoleManagement.vue",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T10:27:02.597Z"
+    },
+    {
+      "id": "bug-077",
+      "timestamp": "2026-06-02T10:37:19.844Z",
+      "error_message": "Missing error handling in function",
+      "file": "src/views/admin/system/UserManagement.vue",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T10:37:19.844Z"
+    },
+    {
+      "id": "bug-078",
+      "timestamp": "2026-06-02T10:44:02.409Z",
+      "error_message": "Wrong reference: 80px should be 120px",
+      "file": "src/views/admin/auth/Login.vue",
+      "root_cause": "Used \"80px\" instead of \"120px\"",
+      "fix": "Changed 80px → 120px",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T10:44:02.409Z"
+    },
+    {
+      "id": "bug-079",
+      "timestamp": "2026-06-02T10:56:54.586Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/styles/tokens.css",
+      "root_cause": "Had 'Inter'",
+      "fix": "Changed to 'PingFang SC'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-06-02T10:59:22.972Z"
+    },
+    {
+      "id": "bug-080",
+      "timestamp": "2026-06-02T11:03:42.423Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/layouts/AdminLayout.vue",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 7→10 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "vue"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T11:03:42.423Z"
     }
   ]
 }

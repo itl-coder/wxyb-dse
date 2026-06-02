@@ -1,14 +1,15 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-02T08:10:57.207Z
-> Files: 20 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-02T11:03:42.382Z
+> Files: 18 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../dse-springboot/wxyb-dse-springboot/wxyb-dse-system/src/main/java/com/wxyb/dse/system/service/impl/
+
+- `DataInitServiceImpl.java` — 初始化菜单树（目录 M → 页面 C → 按钮 F） (~8420 tok)
 
 ## ./
 
-- `.env` — API 基础地址环境变量 (~2 tok)
-- `index.html` — DSE 智能学习系统入口 HTML (~150 tok)
-- `package.json` — Node.js package manifest (~200 tok)
-- `vite.config.js` (~134 tok)
+- `README.md` — Project documentation (~311 tok)
 
 ## .claude/
 
@@ -30,16 +31,17 @@
 
 ## docs/
 
-- `menu-data-flow.md` — 动态菜单数据流 (~1389 tok)
+- `BUGLOG.md` — Bug 跟踪文档 (~427 tok)
 
 ## src/
 
-- `main.js` — 应用入口 — 初始化顺序： (~344 tok)
 
 ## src/api/
 
-- `auth.js` — 认证相关 API — 登录 / 注册 / 用户信息 / 短信 / 微信 (~619 tok)
-- `menu.js` — 菜单权限相关 API (~424 tok)
+- `dse.js` — DSE 业务通用 API — 后端 DseBaseController 统一 CRUD 模式 (~235 tok)
+- `role.js` — 角色管理 API (~280 tok)
+- `student.js` — 学生管理 API (~311 tok)
+- `user.js` — Exports getUserListHandler, getUserByIdHandler, createUserHandler, updateUserHandler + 3 more (~241 tok)
 
 ## src/components/
 
@@ -73,41 +75,38 @@
 
 ## src/layouts/
 
-- `AdminLayout.vue` — AdminLayout — 管理后台布局 (~5213 tok)
+- `AdminLayout.vue` — AdminLayout — 管理后台布局 (~5781 tok)
 
 ## src/request/
 
-- `request.js` — Axios 请求封装 — 统一请求/响应拦截 (~515 tok)
 
 ## src/router/
 
-- `index.js` — 路由配置 — 全部路由定义 + 权限守卫 (~2994 tok)
+- `index.js` — 路由配置 — 全部路由定义 + 权限守卫 (~3028 tok)
 
 ## src/services/
 
 
 ## src/stores/
 
-- `app.js` — 应用 Store — 主题 / 侧边栏 / 学校设置 / 用户认证 / 学生上下文 (~2080 tok)
-- `menu.js` — 菜单 Store — 后端树直接渲染，不做前端转换 (~1270 tok)
 
 ## src/styles/
 
-- `tokens.css` — Styles: 2 rules, 265 vars (~3588 tok)
+- `tokens.css` — Styles: 2 rules, 265 vars (~3580 tok)
 
 ## src/utils/
 
 
 ## src/views/
 
-- `ShiftHandoverPublic.vue` — Vue: setup (~8588 tok)
+- `ShiftHandoverPublic.vue` — Vue: setup (~8701 tok)
 
 ## src/views/admin/
 
 
 ## src/views/admin/auth/
 
-- `Login.vue` — 页面：管理员登录 (~6811 tok)
+- `Login.vue` — 页面：管理员登录 (~6980 tok)
 
 ## src/views/admin/exams/exam-seat2/
 
@@ -123,11 +122,10 @@
 
 ## src/views/admin/handover/
 
-- `ShiftHandover.vue` — Vue component (~11583 tok)
+- `ShiftHandover.vue` — Vue component (~11527 tok)
 
 ## src/views/admin/homework/
 
-- `Homework.vue` — Vue component (~10386 tok)
 
 ## src/views/admin/homework/components/
 
@@ -137,8 +135,14 @@
 
 ## src/views/admin/students/
 
-- `Counseling.vue` — Vue component (~10144 tok)
-- `StudentManagement.vue` — 页面：学生信息管理 (~4916 tok)
+- `StudentManagement.vue` — 页面：学生信息管理 (~4963 tok)
+
+## src/views/admin/system/
+
+- `CourseManagement.vue` — 页面：DSE课程维护 (~2240 tok)
+- `MenuManagement.vue` — Vue: setup (~2163 tok)
+- `RoleManagement.vue` — Vue: setup (~2079 tok)
+- `UserManagement.vue` — Vue: setup (~1718 tok)
 
 ## src/views/admin/teaching/phone/
 

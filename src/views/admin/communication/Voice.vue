@@ -506,7 +506,7 @@ onUnmounted(() => {
 .recorder-inner { font-size: 36px; }
 .pulse-icon { animation: pulse 1s ease-in-out infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-.recorder-timer { font-size: 32px; font-weight: 700; color: var(--admin-text); font-family: 'Cascadia Code', monospace; margin-bottom: 4px; }
+.recorder-timer { font-size: 32px; font-weight: 700; color: var(--admin-text); font-family: monospace; margin-bottom: 4px; }
 .recorder-status { font-size: 13px; color: var(--admin-text-secondary); margin-bottom: 6px; }
 .recorder-info { display: flex; gap: 16px; justify-content: center; font-size: 11px; color: var(--admin-text-muted); }
 

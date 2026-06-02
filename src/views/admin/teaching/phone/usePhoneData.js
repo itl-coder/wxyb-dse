@@ -14,7 +14,7 @@ export function usePhoneData() {
   const selectedStudentId = ref(null)
 
   function loadAll() {
-    students.value = studentService.getAll()
+    students.value = []
     registrations.value = phoneRegistrationService.getAll()
     records.value = phoneRecordService.getAll()
   }

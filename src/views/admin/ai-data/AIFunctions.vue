@@ -72,7 +72,7 @@
             <el-table-column prop="id" label="ID" width="60" sortable />
             <el-table-column prop="functionName" label="函数名" width="140" sortable>
               <template #default="{ row }">
-                <span style="font-family:'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;font-size:13px;font-weight:600;color:var(--admin-accent-cyan)">{{ row.functionName }}</span>
+                <span style="font-family:'Fira Code', monospace;font-size:13px;font-weight:600;color:var(--admin-accent-cyan)">{{ row.functionName }}</span>
               </template>
             </el-table-column>
             <el-table-column label="公式" min-width="220">

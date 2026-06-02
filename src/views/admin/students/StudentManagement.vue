@@ -61,9 +61,9 @@
         <el-table-column prop="elective3" label="选修3" width="90" />
         <el-table-column label="操作" fixed="right" width="120">
           <template #default="{ row }">
-            <span v-if="store.hasPermission('student.edit')" class="stu-action-link" @click.stop="openDialog(row)">编辑</span>
-            <span class="stu-action-sep" v-if="store.hasPermission('student.edit') && store.hasPermission('student.delete')">|</span>
-            <span v-if="store.hasPermission('student.delete')" class="stu-action-link danger" @click.stop="handleDelete(row)">删除</span>
+            <span class="stu-action-link" @click.stop="openDialog(row)">编辑</span>
+            <span class="stu-action-sep">|</span>
+            <span class="stu-action-link danger" @click.stop="handleDelete(row)">删除</span>
           </template>
         </el-table-column>
       </el-table>
@@ -183,13 +183,11 @@
  */
 import { ref, computed, onMounted } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { studentService, courseService } from '@/services/dataService'
-import { settingsService } from '@/services/dataService'
+import { getAllStudentsHandler, getClassListHandler, getCampusListHandler, createStudentHandler, updateStudentHandler, deleteStudentHandler } from '@/api/student'
+import { courseService } from '@/services/dataService'
 import { useAppStore } from '@/stores/app'
-import { useScopedData } from '@/composables/useScopedData'
 
 const store = useAppStore()
-const { filterByScope } = useScopedData()
 
 const students = ref([])
 const dialogVisible = ref(false)
@@ -201,16 +199,26 @@ const selectedIds = ref([])
 const currentPage = ref(1)
 const pageSize = ref(15)
 const studentTableRef = ref(null)
+const classList = ref([])
+const campusList = ref([])
 
 const groupedCourses = computed(() => {
   const courses = courseService.getEnabled().filter(c => c.category === 'elective' && !c.parentId)
-  return [
-    { label: '选修科目', options: courses }
-  ]
+  return [{ label: '选修科目', options: courses }]
 })
 
-const classList = computed(() => studentService.getClasses())
-const campusList = computed(() => studentService.getCampuses())
+// 后端字段 → 前端字段映射
+function mapStudent(s) {
+  return {
+    id: s.studentId, name: s.studentName || s.name, gender: s.gender,
+    campus: s.campusName || s.campus, class: s.className || s.class,
+    boarding: s.boarding, targetUniversity: s.targetUniversity,
+    identity: s.identity, cc: s.cc, sa: s.sa,
+    studyAbroadPlanning: s.studyAbroadPlanning,
+    elective1: s.elective1, elective2: s.elective2, elective3: s.elective3,
+    phone: s.phone, email: s.email
+  }
+}
 
 const filteredStudents = computed(() => {
   let list = students.value.filter(s => {
@@ -232,18 +240,28 @@ const totalFiltered = computed(() => {
 
 function getDefaultForm() {
   return {
-    name: '', gender: '男', campus: '九龙塘总校', class: '5D',
-    boarding: false, targetUniversity: '', school: '威学一百',
-    identity: '港籍永居', cc: '张老师', sa: '李老师',
+    name: '', gender: '男', campus: '', class: '',
+    boarding: false, targetUniversity: '',
+    identity: '港籍永居', cc: '', sa: '',
     studyAbroadPlanning: false, elective1: '', elective2: '', elective3: ''
   }
 }
 
-onMounted(() => { loadStudents() })
+onMounted(() => { loadStudents(); loadMeta() })
 
-function loadStudents() {
-  const raw = studentService.getAll()
-  students.value = filterByScope(raw, store.currentRole?.dataScope)
+async function loadStudents() {
+  try {
+    const r = await getAllStudentsHandler()
+    students.value = (r.data || []).map(mapStudent)
+  } catch { ElMessage.error('加载学生失败') }
+}
+
+async function loadMeta() {
+  try {
+    const [cls, camp] = await Promise.all([getClassListHandler(), getCampusListHandler()])
+    classList.value = cls.data || []
+    campusList.value = camp.data || []
+  } catch { /* 静默失败 */ }
 }
 
 function openDialog(student) {
@@ -262,20 +280,19 @@ function resetForm() {
   form.value = getDefaultForm()
 }
 
-function handleSave() {
+async function handleSave() {
   if (!form.value.name) { ElMessage.warning('请输入学生姓名'); return }
-  const electives = [form.value.elective1, form.value.elective2, form.value.elective3].filter(Boolean)
-  if (electives.length === 0) { ElMessage.warning('请至少选择一门选修课'); return }
-  if (new Set(electives).size !== electives.length) { ElMessage.warning('选修课不能重复选择'); return }
-  if (editingId.value) {
-    studentService.update(editingId.value, form.value)
-    ElMessage.success('学生信息已更新')
-  } else {
-    studentService.create({ ...form.value, createdAt: new Date().toISOString().split('T')[0] })
-    ElMessage.success('学生已添加')
-  }
-  dialogVisible.value = false
-  loadStudents()
+  try {
+    if (editingId.value) {
+      await updateStudentHandler(editingId.value, form.value)
+      ElMessage.success('学生信息已更新')
+    } else {
+      await createStudentHandler(form.value)
+      ElMessage.success('学生已添加')
+    }
+    dialogVisible.value = false
+    await loadStudents()
+  } catch { ElMessage.error('保存失败') }
 }
 
 function printPreview() {
@@ -330,12 +347,10 @@ function printPreview() {
 
 async function handleDelete(student) {
   try {
-    await ElMessageBox.confirm(`确定删除学生「${student.name}」吗？此操作不可恢复。`, '确认删除', {
-      confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning'
-    })
-    studentService.delete(student.id)
+    await ElMessageBox.confirm(`确定删除学生「${student.name}」吗？`, '确认删除', { type: 'warning' })
+    await deleteStudentHandler(student.id)
     ElMessage.success('学生已删除')
-    loadStudents()
+    await loadStudents()
     clearSelection()
   } catch {}
 }
